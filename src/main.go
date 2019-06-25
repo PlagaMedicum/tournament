@@ -24,14 +24,6 @@ type Tournament struct {
 	Winner  string   `json:"winner"`
 }
 
-type UserChanger struct {
-	Points int `json:"points"`
-}
-
-type TournamentChanger struct {
-	UserID string `json:"userId"`
-}
-
 var (
 	userList       []User
 	tournamentList []Tournament
@@ -82,7 +74,7 @@ func takePoints(response http.ResponseWriter, request *http.Request) {
 	id := request.URL.Path[len("/user/") : len("/user/")+6]
 	for index := range userList {
 		if userList[index].ID == id {
-			var uc UserChanger
+			var uc struct{ Points int `json:"points"` }
 			handleError(json.NewDecoder(request.Body).Decode(&uc))
 			userList[index].Balance -= uc.Points
 			response.WriteHeader(200)
@@ -95,7 +87,7 @@ func givePoints(response http.ResponseWriter, request *http.Request) {
 	id := request.URL.Path[len("/user/") : len("/user/")+6]
 	for index := range userList {
 		if userList[index].ID == id {
-			var uc UserChanger
+			var uc struct{ Points int `json:"points"` }
 			handleError(json.NewDecoder(request.Body).Decode(&uc))
 			userList[index].Balance += uc.Points
 			response.WriteHeader(200)
@@ -144,7 +136,7 @@ func joinTournament(response http.ResponseWriter, request *http.Request) {
 	tournamentId := request.URL.Path[len("/tournament/") : len("/tournament/")+6]
 	for tindex := range tournamentList {
 		if tournamentList[tindex].ID == tournamentId {
-			var tc TournamentChanger
+			var tc struct { UserID string `json:"userId"` }
 			handleError(json.NewDecoder(request.Body).Decode(&tc))
 			for uindex := range userList {
 				if userList[uindex].ID == tc.UserID {

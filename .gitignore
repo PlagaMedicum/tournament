@@ -1,7 +1,7 @@
 *.exe
-*go_build_main_go
-*.DS_Store
-*.idea
-*.vscode
+go_build_main_go
+.DS_Store
+.idea
+.vscode
 *.iml
-*/.go/
+.go/
