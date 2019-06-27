@@ -2,194 +2,125 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
-	"math/rand"
+	uuid "github.com/satori/go.uuid"
 	"net/http"
-	"strconv"
-	"tournament/src/myHandler"
+	"tournament/src/database"
+	"tournament/src/errproc"
+	"tournament/src/mhandler"
 )
-
-type User struct {
-	ID      string `json:"id"`
-	Name    string `json:"name"`
-	Balance int    `json:"balance"`
-}
-
-type Tournament struct {
-	ID      string   `json:"id"`
-	Name    string   `json:"name"`
-	Deposit int      `json:"deposit"`
-	Prize   int      `json:"prize"`
-	Users   []string `json:"users"`
-	Winner  string   `json:"winner"`
-}
 
 var (
-	userList       []User
-	tournamentList []Tournament
+	db database.DB
 )
 
-func handleError(err error) {
-	if err != nil {
-		fmt.Println(err)
-	}
-}
-
 func createUser(response http.ResponseWriter, request *http.Request) {
-	var user User
-	handleError(json.NewDecoder(request.Body).Decode(&user))
-	user.ID = strconv.Itoa(rand.Intn(1000000))
+	var user database.User
+	errproc.HandleJSONErr(json.NewDecoder(request.Body).Decode(&user))
 	user.Balance = 700
-	userList = append(userList, user)
-
+	db.CreateUser(&user)
 	response.WriteHeader(201)
-	handleError(json.NewEncoder(response).Encode(user.ID))
+	errproc.HandleJSONErr(json.NewEncoder(response).Encode(user.Id))
 }
 
 func getUser(response http.ResponseWriter, request *http.Request) {
-	id := request.URL.Path[len("/user/"):]
-	for _, user := range userList {
-		if user.ID == id {
-			response.WriteHeader(200)
-			handleError(json.NewEncoder(response).Encode(user))
-			return
-		}
-	}
+	var id database.ID
+	id.FromString(request.URL.Path[len("/user/"):])
+	user := db.GetUser(id.Get())
 	response.WriteHeader(200)
-	handleError(json.NewEncoder(response).Encode(&User{}))
+	errproc.HandleJSONErr(json.NewEncoder(response).Encode(user))
 }
 
 func deleteUser(response http.ResponseWriter, request *http.Request) {
-	id := request.URL.Path[len("/user/"):]
-	for index := range userList {
-		if userList[index].ID == id {
-			userList = append(userList[:index], userList[index+1:]...)
-			response.WriteHeader(200)
-			break
-		}
-	}
+	var id database.ID
+	id.FromString(request.URL.Path[len("/user/"):])
+	db.DeleteUser(id.Get())
+	response.WriteHeader(200)
 }
 
 func takePoints(response http.ResponseWriter, request *http.Request) {
-	id := request.URL.Path[len("/user/") : len("/user/")+6]
-	for index := range userList {
-		if userList[index].ID == id {
-			var uc struct{ Points int `json:"points"` }
-			handleError(json.NewDecoder(request.Body).Decode(&uc))
-			userList[index].Balance -= uc.Points
-			response.WriteHeader(200)
-			break
-		}
-	}
+	var id database.ID
+	id.FromString(request.URL.Path[len("/user/") : len("/user/") + 36])
+	var st struct{ Points int `json:"points"` }
+	errproc.HandleJSONErr(json.NewDecoder(request.Body).Decode(&st))
+	db.FundUser(id.Get(), -st.Points)
+	response.WriteHeader(200)
+
 }
 
 func givePoints(response http.ResponseWriter, request *http.Request) {
-	id := request.URL.Path[len("/user/") : len("/user/")+6]
-	for index := range userList {
-		if userList[index].ID == id {
-			var uc struct{ Points int `json:"points"` }
-			handleError(json.NewDecoder(request.Body).Decode(&uc))
-			userList[index].Balance += uc.Points
-			response.WriteHeader(200)
-			break
-		}
-	}
+	var id database.ID
+	id.FromString(request.URL.Path[len("/user/") : len("/user/") + 36])
+	var st struct{ Points int `json:"points"` }
+	errproc.HandleJSONErr(json.NewDecoder(request.Body).Decode(&st))
+	db.FundUser(id.Get(), st.Points)
+	response.WriteHeader(200)
 }
 
 func createTournament(response http.ResponseWriter, request *http.Request) {
-	var tournament Tournament
-	handleError(json.NewDecoder(request.Body).Decode(&tournament))
-	tournament.ID = strconv.Itoa(rand.Intn(1000000))
+	var tournament database.Tournament
+	errproc.HandleJSONErr(json.NewDecoder(request.Body).Decode(&tournament))
 	tournament.Prize = 4000
-	tournament.Winner = "0"
-	tournamentList = append(tournamentList, tournament)
+	tournament.Winner.FromString("00000000-0000-0000-0000-000000000000")
+
+	db.CreateTournament(&tournament)
 
 	response.WriteHeader(201)
-	handleError(json.NewEncoder(response).Encode(tournament.ID))
+	errproc.HandleJSONErr(json.NewEncoder(response).Encode(tournament.Id))
 }
 
 func getTournament(response http.ResponseWriter, request *http.Request) {
-	id := request.URL.Path[len("/tournament/"):]
-	for _, tournament := range tournamentList {
-		if tournament.ID == id {
-			response.WriteHeader(200)
-			handleError(json.NewEncoder(response).Encode(tournament))
-			return
-		}
-	}
+	var id database.ID
+	id.FromString(request.URL.Path[len("/tournament/"):])
+	tournament := db.GetTournament(id)
 	response.WriteHeader(200)
-	handleError(json.NewEncoder(response).Encode(&Tournament{}))
+	errproc.HandleJSONErr(json.NewEncoder(response).Encode(tournament))
 }
 
 func deleteTournament(response http.ResponseWriter, request *http.Request) {
-	id := request.URL.Path[len("/tournament/"):]
-	for index := range tournamentList {
-		if tournamentList[index].ID == id {
-			tournamentList = append(tournamentList[:index], tournamentList[index+1:]...)
-			response.WriteHeader(200)
-			break
-		}
-	}
+	var id database.ID
+	id.FromString(request.URL.Path[len("/tournament/"):])
+	db.DeleteTournament(id.Get())
+	response.WriteHeader(200)
 }
 
 func joinTournament(response http.ResponseWriter, request *http.Request) {
-	tournamentId := request.URL.Path[len("/tournament/") : len("/tournament/")+6]
-	for tindex := range tournamentList {
-		if tournamentList[tindex].ID == tournamentId {
-			var tc struct { UserID string `json:"userId"` }
-			handleError(json.NewDecoder(request.Body).Decode(&tc))
-			for uindex := range userList {
-				if userList[uindex].ID == tc.UserID {
-					if userList[uindex].Balance >= tournamentList[tindex].Deposit {
-						userList[uindex].Balance -= tournamentList[tindex].Deposit
-						tournamentList[tindex].Users = append(tournamentList[tindex].Users[:], tc.UserID)
-						response.WriteHeader(200)
-					}
-					break
-				}
-			}
-			break
-		}
-	}
+	var id database.ID
+	id.FromString(request.URL.Path[len("/tournament/") : len("/tournament/") + 36])
+	var st struct{ ID uuid.UUID `json:"userId"` }
+	errproc.HandleJSONErr(json.NewDecoder(request.Body).Decode(&st))
+	db.JoinTournament(id.Get(), st.ID)
+	response.WriteHeader(200)
 }
 
 func finishTournament(response http.ResponseWriter, request *http.Request) {
-	tournamentId := request.URL.Path[len("/tournament/") : len("/tournament/")+6]
-	for tindex := range tournamentList {
-		if tournamentList[tindex].ID == tournamentId {
-			if tournamentList[tindex].Winner == "0" {
-				maxBalance := -999999
-				for _, userId := range tournamentList[tindex].Users {
-					for uindex, user := range userList {
-						if user.ID == userId {
-							if user.Balance > maxBalance {
-								maxBalance = user.Balance
-								tournamentList[tindex].Winner = user.ID
-								userList[uindex].Balance += tournamentList[tindex].Prize
-								response.WriteHeader(200)
-							}
-							break
-						}
-					}
-				}
-			}
-			break
-		}
-	}
+	var id database.ID
+	id.FromString(request.URL.Path[len("/tournament/") : len("/tournament/") + 36])
+	db.FinishTournament(id.Get())
+	response.WriteHeader(200)
 }
 
 func main() {
-	var myHandler myHandler.MyHandler
-	myHandler.HandleFunc("/user", createUser, "POST")
-	myHandler.HandleFunc("/user/([0-9]+)", getUser, "GET")
-	myHandler.HandleFunc("/user/([0-9]+)", deleteUser, "DELETE")
-	myHandler.HandleFunc("/user/([0-9]+)/take", takePoints, "POST")
-	myHandler.HandleFunc("/user/([0-9]+)/fund", givePoints, "POST")
-	myHandler.HandleFunc("/tournament", createTournament, "POST")
-	myHandler.HandleFunc("/tournament/([0-9]+)", getTournament, "GET")
-	myHandler.HandleFunc("/tournament/([0-9]+)", deleteTournament, "DELETE")
-	myHandler.HandleFunc("/tournament/([0-9]+)/join", joinTournament, "POST")
-	myHandler.HandleFunc("/tournament/([0-9]+)/finish", finishTournament, "POST")
+	db.Connect("tournament-app")
+	db.InitTables()
 
-	handleError(http.ListenAndServe(":9090", &myHandler))
+	var handler mhandler.Handler
+	handler.HandleFunc("/user", createUser, "POST")
+	handler.HandleFunc("/user/([0-9]+)", getUser, "GET")
+	handler.HandleFunc("/user/([0-9]+)", deleteUser, "DELETE")
+	handler.HandleFunc("/user/([0-9]+)/take", takePoints, "POST")
+	handler.HandleFunc("/user/([0-9]+)/fund", givePoints, "POST")
+	handler.HandleFunc("/tournament", createTournament, "POST")
+	handler.HandleFunc("/tournament/([0-9]+)", getTournament, "GET")
+	handler.HandleFunc("/tournament/([0-9]+)", deleteTournament, "DELETE")
+	handler.HandleFunc("/tournament/([0-9]+)/join", joinTournament, "POST")
+	handler.HandleFunc("/tournament/([0-9]+)/finish", finishTournament, "POST")
+
+	server := &http.Server{
+		Addr:    ":9090",
+		Handler: &handler,
+	}
+
+	err := server.ListenAndServe()
+	errproc.FprintErr("Unexpected http server error: %v\n", err)
+	defer db.Close()
 }
