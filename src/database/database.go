@@ -62,11 +62,6 @@ func (db DB) Connect(applicationName string) {
 	db.Conn = conn
 }
 
-func (db DB) Close() {
-	err := db.Conn.Close()
-	errproc.FprintErr("Unexpected error trying to close DB connection: %v\n", err)
-}
-
 func (db DB) InitTables() {
 	_, err := db.Conn.Exec(`
 		drop table if exists Users;
@@ -89,6 +84,11 @@ func (db DB) InitTables() {
 		errproc.FprintErr("Unable to initialise tables: %v\n", err)
 		os.Exit(1)
 	}
+}
+
+func (db DB) Close() {
+	err := db.Conn.Close()
+	errproc.FprintErr("Unexpected error trying to close DB connection: %v\n", err)
 }
 
 func (db DB) CreateUser(user *User) {
