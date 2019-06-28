@@ -9,6 +9,10 @@ import (
 	"tournament/src/mhandler"
 )
 
+const (
+	UUIDRegex = "[0-9+a-z]{8}-[0-9+a-z]{4}-[0-9+a-z]{4}-[0-9+a-z]{4}-[0-9+a-z]{12}"
+)
+
 var (
 	db database.DB
 )
@@ -61,9 +65,7 @@ func createTournament(response http.ResponseWriter, request *http.Request) {
 	errproc.HandleJSONErr(json.NewDecoder(request.Body).Decode(&tournament))
 	tournament.Prize = 4000
 	tournament.Winner.FromString("00000000-0000-0000-0000-000000000000")
-
 	db.CreateTournament(&tournament)
-
 	response.WriteHeader(201)
 	errproc.HandleJSONErr(json.NewEncoder(response).Encode(tournament.Id))
 }
@@ -71,7 +73,7 @@ func createTournament(response http.ResponseWriter, request *http.Request) {
 func getTournament(response http.ResponseWriter, request *http.Request) {
 	var id database.ID
 	id.FromString(request.URL.Path[len("/tournament/"):])
-	tournament := db.GetTournament(id)
+	tournament := db.GetTournament(id.Get())
 	response.WriteHeader(200)
 	errproc.HandleJSONErr(json.NewEncoder(response).Encode(tournament))
 }
@@ -95,8 +97,8 @@ func joinTournament(response http.ResponseWriter, request *http.Request) {
 func finishTournament(response http.ResponseWriter, request *http.Request) {
 	var id database.ID
 	id.FromString(request.URL.Path[len("/tournament/") : len("/tournament/") + 36])
-	db.FinishTournament(id.Get())
-	response.WriteHeader(200)
+	code := db.FinishTournament(id.Get())
+	response.WriteHeader(code)
 }
 
 func main() {
@@ -104,16 +106,16 @@ func main() {
 	db.InitTables()
 
 	var handler mhandler.Handler
-	handler.HandleFunc("/user", createUser, "POST")
-	handler.HandleFunc("/user/([0-9]+)", getUser, "GET")
-	handler.HandleFunc("/user/([0-9]+)", deleteUser, "DELETE")
-	handler.HandleFunc("/user/([0-9]+)/take", takePoints, "POST")
-	handler.HandleFunc("/user/([0-9]+)/fund", givePoints, "POST")
-	handler.HandleFunc("/tournament", createTournament, "POST")
-	handler.HandleFunc("/tournament/([0-9]+)", getTournament, "GET")
-	handler.HandleFunc("/tournament/([0-9]+)", deleteTournament, "DELETE")
-	handler.HandleFunc("/tournament/([0-9]+)/join", joinTournament, "POST")
-	handler.HandleFunc("/tournament/([0-9]+)/finish", finishTournament, "POST")
+	handler.HandleFunc("^/user$", createUser, "POST")
+	handler.HandleFunc("^/user/" +UUIDRegex+ "$", getUser, "GET")
+	handler.HandleFunc("^/user/" +UUIDRegex+ "$", deleteUser, "DELETE")
+	handler.HandleFunc("^/user/" +UUIDRegex+ "/take$", takePoints, "POST")
+	handler.HandleFunc("^/user/" +UUIDRegex+ "/fund$", givePoints, "POST")
+	handler.HandleFunc("^/tournament$", createTournament, "POST")
+	handler.HandleFunc("^/tournament/" +UUIDRegex+ "$", getTournament, "GET")
+	handler.HandleFunc("^/tournament/" +UUIDRegex+ "$", deleteTournament, "DELETE")
+	handler.HandleFunc("^/tournament/" +UUIDRegex+ "/join$", joinTournament, "POST")
+	handler.HandleFunc("^/tournament/" +UUIDRegex+ "/finish$", finishTournament, "POST")
 
 	server := &http.Server{
 		Addr:    ":9090",

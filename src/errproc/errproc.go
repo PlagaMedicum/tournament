@@ -6,14 +6,13 @@ import (
 	"os"
 )
 
-func FprintErr(message string, a ...interface{}) (n int) {
-	if a != nil {
-		var err error
-		n, err = fmt.Fprintf(os.Stderr, message, a)
-		if err != nil {
+func FprintErr(message string, err error) int {
+	if err != nil {
+		n, e := fmt.Fprintf(os.Stderr, message, err)
+		if e != nil {
 			fmt.Printf("Unexpected error trying to write an error: %v\n", err)
 		}
-		return
+		return n
 	}
 	return 0
 }
@@ -24,8 +23,11 @@ func HandleJSONErr(err error) {
 
 func HandleSQLErr(action string, err error) {
 	if pgerr, ok := err.(pgx.PgError); ok {
-		FprintErr("Unexpected postgresql error trying to %s: %v\n", action, pgerr)
+		_, e := fmt.Fprintf(os.Stderr, "Unexpected postgresql error trying to " + action + ": %v\n", pgerr)
+		if e != nil {
+			fmt.Printf("Unexpected error trying to write an error: %v\n", e)
+		}
 	} else {
-		FprintErr("Unexpected error trying to %s: %v\n", action, err)
+		FprintErr("Unexpected error trying to " + action + ": %v\n", err)
 	}
 }
