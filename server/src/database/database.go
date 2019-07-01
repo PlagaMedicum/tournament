@@ -70,6 +70,7 @@ func (db *DB) Connect(applicationName string) {
 
 func (db *DB) InitTables() {
 	_, err := db.Conn.Exec(`
+			create extension if not exists "uuid-ossp";
 			drop table if exists users;
 			drop table if exists tournaments;
 			drop table if exists participants;

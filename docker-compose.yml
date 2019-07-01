@@ -1,16 +1,22 @@
 version: "3.3"
 services:
   server:
+    container_name: "tournament_server"
+    network_mode: "host"
+    restart: always
     build: server/
     command: go run /server/src/main.go
     ports: 
-      - "9090:9090"
-    links:
-      - postgres
+      - "8080:8080"
     depends_on:
       - database
   database:
+    container_name: "tournament_db"
     restart: unless-stopped
     build: database/
     ports:
       - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: tournament

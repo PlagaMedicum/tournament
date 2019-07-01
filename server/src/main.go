@@ -117,7 +117,7 @@ func main() {
 	handler.HandleFunc("^/tournament/" +UUIDRegex+ "/finish$", finishTournament, "POST")
 
 	server := &http.Server{
-		Addr:    ":9090",
+		Addr:    ":8080",
 		Handler: &handler,
 	}
 
