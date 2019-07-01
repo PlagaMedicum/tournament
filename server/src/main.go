@@ -64,7 +64,6 @@ func createTournament(response http.ResponseWriter, request *http.Request) {
 	var tournament database.Tournament
 	errproc.HandleJSONErr(json.NewDecoder(request.Body).Decode(&tournament))
 	tournament.Prize = 4000
-	tournament.Winner.FromString("00000000-0000-0000-0000-000000000000")
 	db.CreateTournament(&tournament)
 	response.WriteHeader(201)
 	errproc.HandleJSONErr(json.NewEncoder(response).Encode(tournament.Id))

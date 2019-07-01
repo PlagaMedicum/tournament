@@ -1,0 +1,16 @@
+version: "3.3"
+services:
+  server:
+    build: server/
+    command: go run /server/src/main.go
+    ports: 
+      - "9090:9090"
+    links:
+      - postgres
+    depends_on:
+      - database
+  database:
+    restart: unless-stopped
+    build: database/
+    ports:
+      - "5432:5432"

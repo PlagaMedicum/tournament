@@ -2,7 +2,6 @@ package database
 
 import (
 	"github.com/jackc/pgx"
-	"github.com/jackc/pgx/pgtype"
 	uuid "github.com/satori/go.uuid"
 	"os"
 	"tournament/src/errproc"
@@ -14,16 +13,16 @@ type (
 	}
 	User struct {
 		ID
-		Name    string 				`json:"name"`
-		Balance int    				`json:"balance"`
+		Name    string 			`json:"name"`
+		Balance int    			`json:"balance"`
 	}
 	Tournament struct {
 		ID
-		Name    string   			`json:"name"`
-		Deposit int      			`json:"deposit"`
-		Prize   int      			`json:"prize"`
-		Users   []uuid.UUID			`json:"users"`
-		Winner  ID 					`json:"winner"`
+		Name     string        	`json:"name"`
+		Deposit  int           	`json:"deposit"`
+		Prize    int           	`json:"prize"`
+		Users    []uuid.UUID   	`json:"users"`
+		WinnerId uuid.UUID 		`json:"winner"`
 	}
 	DB struct {
 		Conn *pgx.Conn
@@ -85,15 +84,16 @@ func (db *DB) InitTables() {
 				deposit int not null,
 				prize int not null,
 				users uuid,
-				winner text not null
+				winner uuid
 			);
 			create table participants(
 				id uuid constraint participant_pk primary key default uuid_generate_v4() not null,
-				tournamentid uuid not null,
 				userid uuid not null
 			);
 			insert into users (id, name, balance) values 
 				('bef80618-779e-4cbd-b776-cbd27386a902', 'Samuel Plaunik', 1200);
+			insert into tournaments (id, name, deposit, prize) values
+				('6bfccaa8-9e88-4401-a12e-6559e709ee17', 'tour_1', 1000, 4000);
 		`)
 	if err != nil {
 		errproc.FprintErr("Unable to initialise tables: %v\n", err)
@@ -116,7 +116,7 @@ func (db *DB) CreateUser(user *User) {
 
 func (db *DB) GetUsers() (userList []User) {
 	rows, err := db.Conn.Query(`
-			select * from Users
+			select * from users;
 		`)
 	errproc.HandleSQLErr("get rows from users", err)
 	for rows.Next() {
@@ -145,7 +145,8 @@ func (db *DB) DeleteUser(id uuid.UUID) {
 	for index := range userList {
 		if userList[index].Id == id {
 			_, err := db.Conn.Exec(`
-					delete from users where id = $1;
+					delete from users
+						where id = $1;
 				`, id)
 			errproc.HandleSQLErr("delete user", err)
 			break
@@ -159,7 +160,8 @@ func (db *DB) FundUser(id uuid.UUID, points int) {
 		if userList[index].Id == id {
 			userList[index].Balance += points
 			_, err := db.Conn.Exec(`
-					update users set balance = $1 where id = $2;
+					update users set balance = $1
+						where id = $2;
 				`, userList[index].Balance, id)
 			errproc.HandleSQLErr("fund user", err)
 			break
@@ -169,35 +171,41 @@ func (db *DB) FundUser(id uuid.UUID, points int) {
 
 func (db *DB) CreateTournament(tournament *Tournament) {
 	err := db.Conn.QueryRow(`
-			insert into tournaments (name, deposit, prize, winner) values
-				($1, $2, $3, $4) returning id;
-		`, tournament.Name, tournament.Deposit, tournament.Prize, tournament.Winner.Id).Scan(&tournament.Id)
+			insert into tournaments (name, deposit, prize) values
+				($1, $2, $3) returning id;
+		`, tournament.Name, tournament.Deposit, tournament.Prize).Scan(&tournament.Id)
 	errproc.HandleSQLErr("create tournament", err)
 }
 
 func (db *DB) GetTournaments() (tournamentList []Tournament) {
 	rows, err := db.Conn.Query(`
-			select * from tournaments
+			select * from tournaments;
 		`)
 	errproc.HandleSQLErr("get rows from tournaments", err)
 	for  rows.Next() {
-		var (
-			tournament Tournament
-			id pgtype.UUID
-		)
-		err := rows.Scan(&tournament.Id, &tournament.Name, &tournament.Deposit, &tournament.Prize, &id, &tournament.Winner.Id)
-		if err != nil {
-			errproc.FprintErr("Unexpected error trying to scan tournament: %v\n", err)
+		var tournament Tournament
+		var id uuid.NullUUID
+		var wid uuid.NullUUID
+		err := rows.Scan(&tournament.Id, &tournament.Name, &tournament.Deposit, &tournament.Prize, &id, &wid)
+		if wid.Valid {
+			tournament.WinnerId = wid.UUID
 		}
-		r, err := db.Conn.Query(`
-				select userid from participants where id = $1
-			`, id)
-		errproc.HandleSQLErr("get rows from participants", err)
-		for i := 0; r.Next(); i++ {
-			err := rows.Scan(&tournament.Users[i])
-			if err != nil {
+		errproc.FprintErr("Unexpected error trying to scan tournament: %v\n", err)
+		if id.Valid {
+			var d DB
+			d.Connect("tournament-app")
+			r, err := d.Conn.Query(`
+				select userid from participants
+					where id = $1;
+			`, id.UUID)
+			errproc.HandleSQLErr("get rows from participants", err)
+			for i := 0; r.Next(); i++ {
+				var u uuid.UUID
+				err := r.Scan(&u)
 				errproc.FprintErr("Unexpected error trying to scan participant: %v\n", err)
+				tournament.Users = append(tournament.Users, u)
 			}
+			d.Close()
 		}
 		tournamentList = append(tournamentList, tournament)
 	}
@@ -219,9 +227,11 @@ func (db *DB) DeleteTournament(id uuid.UUID) {
 	for _, tournament := range tournamentList {
 		if tournament.Id == id {
 			_, err := db.Conn.Exec(`
-				delete from tournaments where id = $1;
-				delete from participants where tournamentid = $1;
-			`, id)
+				delete from participants using tournaments 
+					where tournament.id = $1 and participants.id = tournaments.users;
+				delete from tournaments
+					where id = $1;
+			`, tournament.Id)
 			errproc.HandleSQLErr("delete tournament", err)
 			break
 		}
@@ -237,19 +247,40 @@ func (db *DB) JoinTournament(id uuid.UUID, userID uuid.UUID) {
 				if user.Id == userID {
 					if user.Balance >= tournament.Deposit {
 						user.Balance -= tournament.Deposit
-						var pid pgtype.UUID
-						rows, err := db.Conn.Query(`
-								select id from participants where tournamentid = $1
-							`, )
-						errproc.HandleSQLErr("get participants id", err)
-						err = rows.Scan(&pid)
-						errproc.FprintErr("Unexpected error trying to scan participants id: %v\n", err)
-						_, err = db.Conn.Exec(`
-								insert into participants (id, userid, tournamentid) values
-									($1, $2, $3);
-								update users set balance = $4 where id = $2;
-							`, pid, user.Id, tournament.Id, user.Balance)
-						errproc.HandleSQLErr("join tournament", err)
+						var pid uuid.NullUUID
+						err := db.Conn.QueryRow(`
+								select users from tournaments
+									where id = $1;
+							`, tournament.Id).Scan(&pid)
+						errproc.HandleSQLErr("scan participants", err)
+						if pid.Valid {
+							_, err = db.Conn.Exec(`
+									insert into participants (id, userid) values
+										($1, $2);
+								`, pid, user.Id)
+							errproc.HandleSQLErr("insert participant", err)
+							_, err = db.Conn.Exec(`
+									update users set balance = $2
+										where id = $1;
+								`, user.Id, user.Balance)
+							errproc.HandleSQLErr("update user's balance", err)
+						} else {
+							_, err = db.Conn.Exec(`
+									insert into participants (userid) values
+										($1);
+								`, user.Id)
+							errproc.HandleSQLErr("insert participant with nil pid", err)
+							_, err = db.Conn.Exec(`
+									update tournaments set users = participants.id from participants 
+										where participants.userid = $1;
+								`, user.Id)
+							errproc.HandleSQLErr("update tournament's users with nil pid", err)
+							_, err = db.Conn.Exec(`
+									update users set balance = $2
+										where id = $1;
+								`, user.Id, user.Balance)
+							errproc.HandleSQLErr("update user's balance", err)
+						}
 					}
 					break
 				}
@@ -264,11 +295,8 @@ func (db *DB) FinishTournament(id uuid.UUID) int {
 	userList := db.GetUsers()
 	for _, tournament := range tournamentList {
 		if tournament.Id == id {
-			var b ID
-			b.FromString("00000000-0000-0000-0000-000000000000")
-			if tournament.Winner.Id == b.Id {
+			if tournament.WinnerId.String() == "00000000-0000-0000-0000-000000000000" {
 				var winner User
-				winner.Balance = -99999
 				for _, userId := range tournament.Users {
 					for _, user := range userList {
 						if user.Id == userId {
@@ -279,11 +307,17 @@ func (db *DB) FinishTournament(id uuid.UUID) int {
 						}
 					}
 				}
+				winner.Balance += tournament.Prize
 				_, err := db.Conn.Exec(`
-						update tournaments set winner = $1 where id = $2;
-						update users set balance = $3 where id = $4;
-					`, winner.Id, id, winner.Balance, winner.Id)
-				errproc.HandleSQLErr("finish tournament", err)
+						update tournaments set winner = $1
+							where id = $2;
+					`, winner.Id, id)
+				errproc.HandleSQLErr("set tournament's winner", err)
+				_, err = db.Conn.Exec(`
+						update users set balance = $2
+							where id = $1;
+					`, winner.Id, winner.Balance)
+				errproc.HandleSQLErr("update user's balance", err)
 				return 200
 			}
 			break
