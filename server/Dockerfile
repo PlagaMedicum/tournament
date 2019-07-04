@@ -1,5 +1,6 @@
 FROM golang
 ADD go.mod /server/
 ADD go.sum /server/
-ADD ./src /server/src/
+ADD migrations /server/migrations/
+ADD pkg /server/pkg/
 WORKDIR /server/

@@ -5,7 +5,7 @@ services:
     network_mode: "host"
     restart: always
     build: server/
-    command: go run /server/src/main.go
+    command: go run /server/pkg/main.go
     ports: 
       - "8080:8080"
     depends_on:

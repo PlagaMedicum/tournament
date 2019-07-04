@@ -4,6 +4,7 @@ go 1.12
 
 require (
 	github.com/cockroachdb/apd v1.1.0 // indirect
+	github.com/golang-migrate/migrate v3.5.4+incompatible // indirect
 	github.com/jackc/fake v0.0.0-20150926172116-812a484cc733 // indirect
 	github.com/jackc/pgx v3.4.0+incompatible
 	github.com/kr/pretty v0.1.0 // indirect
