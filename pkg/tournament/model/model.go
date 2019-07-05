@@ -6,12 +6,12 @@ import (
 )
 
 type Tournament struct {
-	mid.ID
-	Name     string        	`json:"name"`
-	Deposit  int           	`json:"deposit"`
-	Prize    int           	`json:"prize"`
-	Users    []uuid.UUID   	`json:"users"`
-	WinnerId uuid.UUID 		`json:"winner"`
+	mid.MID
+	Name     string      `json:"name"`
+	Deposit  int         `json:"deposit"`
+	Prize    int         `json:"prize"`
+	Users    []uuid.UUID `json:"users"`
+	WinnerId uuid.UUID   `json:"winner"`
 }
 
 func (t *Tournament) GetUsers() (users []uuid.UUID) {

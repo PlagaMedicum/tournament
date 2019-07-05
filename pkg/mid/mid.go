@@ -5,15 +5,15 @@ import (
 	"tournament/pkg/errproc"
 )
 
-type ID struct {
-	Id 		uuid.UUID 		`json:"id"`
+type MID struct {
+	ID uuid.UUID `json:"id"`
 }
 
-func (id *ID) Get() uuid.UUID {
-	return id.Id
+func (id *MID) Get() uuid.UUID {
+	return id.ID
 }
 
-func (id *ID) FromString(s string) {
-	err := id.Id.Scan(s)
+func (id *MID) FromString(s string) {
+	err := id.ID.Scan(s)
 	errproc.FprintErr("Error trying to convert string in uuid: %v\n", err)
 }

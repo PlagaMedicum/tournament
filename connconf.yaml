@@ -1,0 +1,8 @@
+User: "postgres"
+Password: "postgres"
+Host: "localhost"
+Port: 5432
+Database: "tournament"
+UseFallbackTLS: false
+RuntimeParams:
+  "application_name": "tournament-app"

@@ -15,27 +15,27 @@ func CreateUser(response http.ResponseWriter, request *http.Request) {
 	u.Balance = 700
 	usecases.CreateUser(&u)
 	response.WriteHeader(201)
-	errproc.HandleJSONErr(json.NewEncoder(response).Encode(u.Id))
+	errproc.HandleJSONErr(json.NewEncoder(response).Encode(u.ID))
 }
 
 func GetUser(response http.ResponseWriter, request *http.Request) {
-	var id mid.ID
-	id.FromString(request.URL.Path[len("/u/"):])
+	var id mid.MID
+	id.FromString(request.URL.Path[len("/user/"):])
 	u := usecases.GetUser(id.Get())
 	response.WriteHeader(200)
 	errproc.HandleJSONErr(json.NewEncoder(response).Encode(u))
 }
 
 func DeleteUser(response http.ResponseWriter, request *http.Request) {
-	var id mid.ID
+	var id mid.MID
 	id.FromString(request.URL.Path[len("/user/"):])
 	usecases.DeleteUser(id.Get())
 	response.WriteHeader(200)
 }
 
 func TakePoints(response http.ResponseWriter, request *http.Request) {
-	var id mid.ID
-	id.FromString(request.URL.Path[len("/user/") : len("/user/") + 36])
+	var id mid.MID
+	id.FromString(request.URL.Path[len("/user/") : len("/user/")+36])
 	var st struct{ Points int `json:"points"` }
 	errproc.HandleJSONErr(json.NewDecoder(request.Body).Decode(&st))
 	usecases.FundUser(id.Get(), -st.Points)
@@ -44,8 +44,8 @@ func TakePoints(response http.ResponseWriter, request *http.Request) {
 }
 
 func GivePoints(response http.ResponseWriter, request *http.Request) {
-	var id mid.ID
-	id.FromString(request.URL.Path[len("/user/") : len("/user/") + 36])
+	var id mid.MID
+	id.FromString(request.URL.Path[len("/user/") : len("/user/")+36])
 	var st struct{ Points int `json:"points"` }
 	errproc.HandleJSONErr(json.NewDecoder(request.Body).Decode(&st))
 	usecases.FundUser(id.Get(), st.Points)

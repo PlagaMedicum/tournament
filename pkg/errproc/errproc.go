@@ -23,11 +23,11 @@ func HandleJSONErr(err error) {
 
 func HandleSQLErr(action string, err error) {
 	if pgerr, ok := err.(pgx.PgError); ok {
-		_, e := fmt.Fprintf(os.Stderr, "Unexpected postgresql error trying to " + action + ": %v\n", pgerr)
+		_, e := fmt.Fprintf(os.Stderr, "Unexpected postgresql error trying to "+action+": %v\n", pgerr)
 		if e != nil {
 			fmt.Printf("Unexpected error trying to write an error: %v\n", e)
 		}
 	} else {
-		FprintErr("Unexpected error trying to " + action + ": %v\n", err)
+		FprintErr("Unexpected error trying to "+action+": %v\n", err)
 	}
 }

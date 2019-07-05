@@ -16,27 +16,27 @@ func CreateTournament(response http.ResponseWriter, request *http.Request) {
 	t.Prize = 4000
 	usecases.CreateTournament(&t)
 	response.WriteHeader(201)
-	errproc.HandleJSONErr(json.NewEncoder(response).Encode(t.Id))
+	errproc.HandleJSONErr(json.NewEncoder(response).Encode(t.ID))
 }
 
 func GetTournament(response http.ResponseWriter, request *http.Request) {
-	var id mid.ID
-	id.FromString(request.URL.Path[len("/t/"):])
+	var id mid.MID
+	id.FromString(request.URL.Path[len("/tournament/"):])
 	t := usecases.GetTournament(id.Get())
 	response.WriteHeader(200)
 	errproc.HandleJSONErr(json.NewEncoder(response).Encode(t))
 }
 
 func DeleteTournament(response http.ResponseWriter, request *http.Request) {
-	var id mid.ID
+	var id mid.MID
 	id.FromString(request.URL.Path[len("/tournament/"):])
 	usecases.DeleteTournament(id.Get())
 	response.WriteHeader(200)
 }
 
 func JoinTournament(response http.ResponseWriter, request *http.Request) {
-	var id mid.ID
-	id.FromString(request.URL.Path[len("/tournament/") : len("/tournament/") + 36])
+	var id mid.MID
+	id.FromString(request.URL.Path[len("/tournament/") : len("/tournament/")+36])
 	var st struct{ ID uuid.UUID `json:"userId"` }
 	errproc.HandleJSONErr(json.NewDecoder(request.Body).Decode(&st))
 	usecases.JoinTournament(id.Get(), st.ID)
@@ -44,8 +44,8 @@ func JoinTournament(response http.ResponseWriter, request *http.Request) {
 }
 
 func FinishTournament(response http.ResponseWriter, request *http.Request) {
-	var id mid.ID
-	id.FromString(request.URL.Path[len("/tournament/") : len("/tournament/") + 36])
+	var id mid.MID
+	id.FromString(request.URL.Path[len("/tournament/") : len("/tournament/")+36])
 	code := usecases.FinishTournament(id.Get())
 	response.WriteHeader(code)
 }

@@ -3,17 +3,16 @@ services:
   server:
     container_name: "tournament_server"
     network_mode: "host"
-    restart: always
-    build: server/
-    command: go run /server/pkg/main.go
+    build: .
+    command: go run ./main.go
     ports: 
       - "8080:8080"
     depends_on:
       - database
   database:
+    image: postgres
     container_name: "tournament_db"
     restart: unless-stopped
-    build: database/
     ports:
       - "5432:5432"
     environment:

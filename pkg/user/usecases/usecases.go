@@ -2,7 +2,7 @@ package usecases
 
 import (
 	uuid "github.com/satori/go.uuid"
-	app "tournament/pkg/boot"
+	app "tournament/pkg"
 	"tournament/pkg/errproc"
 	"tournament/pkg/user/model"
 )
@@ -10,8 +10,8 @@ import (
 func CreateUser(user *model.User) {
 	err := app.DB.Conn.QueryRow(`
 			insert into users (name, balance) values 
-				($1, $2) returning ID;
-		`, user.Name, user.Balance).Scan(&user.Id)
+				($1, $2) returning id;
+		`, user.Name, user.Balance).Scan(&user.ID)
 	errproc.HandleSQLErr("create user", err)
 }
 
@@ -22,7 +22,7 @@ func GetUsers() (userList []model.User) {
 	errproc.HandleSQLErr("get rows from users", err)
 	for rows.Next() {
 		var user model.User
-		err := rows.Scan(&user.Id, &user.Name, &user.Balance)
+		err := rows.Scan(&user.ID, &user.Name, &user.Balance)
 		if err != nil {
 			errproc.FprintErr("Unexpected error trying to scan user: %v\n", err)
 		}
@@ -34,7 +34,7 @@ func GetUsers() (userList []model.User) {
 func GetUser(id uuid.UUID) (user model.User) {
 	userList := GetUsers()
 	for _, user = range userList {
-		if user.Id == id {
+		if user.ID == id {
 			return
 		}
 	}
@@ -44,7 +44,7 @@ func GetUser(id uuid.UUID) (user model.User) {
 func DeleteUser(id uuid.UUID) {
 	userList := GetUsers()
 	for index := range userList {
-		if userList[index].Id == id {
+		if userList[index].ID == id {
 			_, err := app.DB.Conn.Exec(`
 					delete from users
 						where id = $1;
@@ -58,7 +58,7 @@ func DeleteUser(id uuid.UUID) {
 func FundUser(id uuid.UUID, points int) {
 	userList := GetUsers()
 	for index := range userList {
-		if userList[index].Id == id {
+		if userList[index].ID == id {
 			userList[index].Balance += points
 			_, err := app.DB.Conn.Exec(`
 					update users set balance = $1
