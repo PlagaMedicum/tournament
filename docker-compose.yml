@@ -9,7 +9,7 @@ services:
     depends_on:
       - database
     volumes:
-      - ./:/go/src/tournament/
+      - ./vendor:/go/src/tournament/vendor
     command: ./run.sh
   database:
     image: postgres
@@ -23,6 +23,3 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: tournament
     restart: unless-stopped
-
-volumes:
-  db-data:
