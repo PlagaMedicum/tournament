@@ -1,13 +1,10 @@
 create extension if not exists "uuid-ossp";
-drop table if exists users;
-drop table if exists tournaments;
-drop table if exists participants;
-create table users(
+create table if not exists users(
     id uuid constraint user_pk primary key default uuid_generate_v4() not null,
     name text not null,
     balance int not null
 );
-create table tournaments(
+create table if not exists tournaments(
     id uuid constraint tournament_pk primary key default uuid_generate_v4() not null,
     name text not null,
     deposit int not null,
@@ -15,7 +12,7 @@ create table tournaments(
     users uuid,
     winner uuid
 );
-create table participants(
+create table if not exists participants(
      id uuid constraint participant_pk primary key default uuid_generate_v4() not null,
      userid uuid not null
 );

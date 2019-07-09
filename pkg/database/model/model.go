@@ -19,7 +19,7 @@ type DB struct {
 }
 
 func (db *DB) Connect() {
-	file, err := ioutil.ReadFile("/go/src/tournament/connconf.yaml")
+	file, err := ioutil.ReadFile("connconf.yaml")
 	errproc.FprintErr("Unable to read yaml file: %v\n", err)
 	err = yaml.Unmarshal(file, &db)
 	errproc.FprintErr("Unable to unmarshal yaml data: %v\n", err)

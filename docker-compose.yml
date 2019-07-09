@@ -4,7 +4,7 @@ services:
     container_name: "tournament_server"
     network_mode: "host"
     build: .
-    ports: 
+    ports:
       - "8080:8080"
     depends_on:
       - database
