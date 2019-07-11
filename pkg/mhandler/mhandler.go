@@ -23,13 +23,13 @@ func (mHandler *Handler) HandleFunc(pattern string, handler func(http.ResponseWr
 	mHandler.routes = append(mHandler.routes, &route{pattern, http.HandlerFunc(handler), method})
 }
 
-func (mHandler *Handler) ServeHTTP(response http.ResponseWriter, request *http.Request) {
+func (mHandler *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	for _, route := range mHandler.routes {
-		if b, _ := regexp.MatchString(route.pattern, request.URL.Path); b && request.Method == route.method {
-			response.Header().Set("Content-Type", "application/json")
-			route.handler.ServeHTTP(response, request)
+		if b, _ := regexp.MatchString(route.pattern, r.URL.Path); b && r.Method == route.method {
+			w.Header().Set("Content-Type", "application/json")
+			route.handler.ServeHTTP(w, r)
 			return
 		}
 	}
-	http.NotFound(response, request)
+	http.NotFound(w, r)
 }

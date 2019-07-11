@@ -2,7 +2,7 @@ package mid
 
 import (
 	uuid "github.com/satori/go.uuid"
-	"tournament/pkg/errproc"
+	"log"
 )
 
 type MID struct {
@@ -15,5 +15,7 @@ func (id *MID) Get() uuid.UUID {
 
 func (id *MID) FromString(s string) {
 	err := id.ID.Scan(s)
-	errproc.FprintErr("Error trying to convert string in uuid: %v\n", err)
+	if err != nil {
+		log.Printf("Error trying to convert string in uuid: "+err.Error())
+	}
 }

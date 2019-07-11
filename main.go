@@ -1,9 +1,9 @@
 package main
 
 import (
+	"log"
 	"net/http"
 	app "tournament/pkg"
-	"tournament/pkg/errproc"
 	"tournament/pkg/mhandler"
 	tournament "tournament/pkg/tournament/handlers"
 	user "tournament/pkg/user/handlers"
@@ -33,5 +33,7 @@ func main() {
 		Handler: &h,
 	}
 	err := server.ListenAndServe()
-	errproc.FprintErr("Unexpected http server error: %v\n", err)
+	if err != nil {
+		log.Printf("Unexpected http server error: "+err.Error())
+	}
 }

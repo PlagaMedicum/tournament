@@ -29,9 +29,9 @@ func getTournamentParticipants(id uuid.NullUUID) ([]uuid.UUID, error) {
 			select userid from participants
 				where id = $1;
 		`, id.UUID)
-
-	errproc.HandleSQLErr("get rows from participants", err)
-
+	if err != nil {
+		return nil, err
+	}
 	var plist []uuid.UUID
 	for i := 0; r.Next(); i++ {
 		var u uuid.UUID
@@ -48,7 +48,9 @@ func getTournaments() ([]model.Tournament, error) {
 	rows, err := app.DB.Conn.Query(`
 			select * from tournaments;
 		`)
-	errproc.HandleSQLErr("get rows from tournaments", err)
+	if err != nil {
+		return nil, err
+	}
 	var tournamentList []model.Tournament
 	for rows.Next() {
 		var tournament model.Tournament
@@ -198,9 +200,12 @@ func findWinner(pIDList []uuid.UUID)  (userm.User, error) {
 func setWinner(w userm.User, t model.Tournament) error {
 	w.Balance += t.Prize
 	_, err := app.DB.Conn.Exec(`
-			update tournaments set w = $1
+			update tournaments set winner = $1
 				where id = $2;
 		`, w.ID, t.ID)
+	if err != nil {
+		return err
+	}
 	_, err = app.DB.Conn.Exec(`
 			update users set balance = $2
 				where id = $1;

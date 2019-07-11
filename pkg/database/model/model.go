@@ -6,8 +6,8 @@ import (
 	"github.com/jackc/pgx"
 	"github.com/jackc/pgx/stdlib"
 	"io/ioutil"
+	"log"
 	"strconv"
-	"tournament/pkg/errproc"
 )
 
 type DB struct {
@@ -21,10 +21,13 @@ type DB struct {
 
 func (db *DB) Connect() *sql.DB{
 	file, err := ioutil.ReadFile("connconf.yaml")
-	errproc.FprintErr("Unable to read yaml file: %v\n", err)
+	if err != nil {
+		log.Printf("Unable to read yaml file: "+err.Error())
+	}
 	err = yaml.Unmarshal(file, &db)
-	errproc.FprintErr("Unable to unmarshal yaml data: %v\n", err)
-
+	if err != nil {
+		log.Printf("Unable to unmarshal yaml data: "+err.Error())
+	}
 	db1, err := sql.Open("pgx",
 		"user="+db.User+
 		" password="+db.Password+
@@ -32,13 +35,17 @@ func (db *DB) Connect() *sql.DB{
 		" port="+strconv.FormatUint(db.Port, 10)+
 		" database="+db.Database+
 		" sslmode=disable")
-	errproc.FprintErr("Unable to open connection: %v\n", err)
-
+	if err != nil {
+		log.Printf("Unable to open connection: "+err.Error())
+	}
 	err = db1.Ping()
-	errproc.FprintErr("Ping error: %v\n", err)
-
+	if err != nil {
+		log.Printf("Ping error: "+err.Error())
+	}
 	conn, err := stdlib.AcquireConn(db1)
-	errproc.FprintErr("Unable to establish connection: %v\n", err)
+	if err != nil {
+		log.Printf("Unable to establish connection: "+err.Error())
+	}
 	db.Conn = conn
 	return db1
 }
