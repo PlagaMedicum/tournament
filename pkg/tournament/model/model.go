@@ -11,12 +11,10 @@ type Tournament struct {
 	Deposit  int         `json:"deposit"`
 	Prize    int         `json:"prize"`
 	Users    []uuid.UUID `json:"users"`
-	WinnerId uuid.UUID   `json:"winner"`
+	WinnerID uuid.UUID   `json:"winner"`
 }
 
 func (t *Tournament) GetUsers() (users []uuid.UUID) {
-	for _, user := range t.Users {
-		users = append(users, user)
-	}
+	users = append(users, t.Users...)
 	return
 }

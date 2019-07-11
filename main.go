@@ -14,7 +14,7 @@ const (
 )
 
 func main() {
-	app.Load()
+	app.Init()
 
 	var h mhandler.Handler
 	h.HandleFunc("^/user$", user.CreateUser, "POST")
