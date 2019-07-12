@@ -28,7 +28,7 @@ func (db *DB) Connect() *sql.DB{
 	if err != nil {
 		log.Printf("Unable to unmarshal yaml data: "+err.Error())
 	}
-	db1, err := sql.Open("pgx",
+	sqldb, err := sql.Open("pgx",
 		"user="+db.User+
 		" password="+db.Password+
 		" host="+db.Host+
@@ -38,14 +38,14 @@ func (db *DB) Connect() *sql.DB{
 	if err != nil {
 		log.Printf("Unable to open connection: "+err.Error())
 	}
-	err = db1.Ping()
+	err = sqldb.Ping()
 	if err != nil {
-		log.Printf("Ping error: "+err.Error())
+		log.Printf("Postgresql ping: "+err.Error())
 	}
-	conn, err := stdlib.AcquireConn(db1)
+	conn, err := stdlib.AcquireConn(sqldb)
 	if err != nil {
 		log.Printf("Unable to establish connection: "+err.Error())
 	}
 	db.Conn = conn
-	return db1
+	return sqldb
 }
