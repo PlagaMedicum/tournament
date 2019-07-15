@@ -56,4 +56,3 @@ func Init(h mhandler.Handler) {
 		log.Printf("Unexpected http server error: "+err.Error())
 	}
 }
-
