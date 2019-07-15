@@ -20,7 +20,7 @@ type DB struct {
 }
 
 func (db *DB) Connect() *sql.DB{
-	file, err := ioutil.ReadFile("connconf.yaml")
+	file, err := ioutil.ReadFile("./database/connconf.yaml")
 	if err != nil {
 		log.Printf("Unable to read yaml file: "+err.Error())
 	}

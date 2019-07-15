@@ -15,7 +15,7 @@ var(
 )
 
 func HandleJSONErr(err error, w http.ResponseWriter) {
-	w.WriteHeader(400)
+	w.WriteHeader(http.StatusBadRequest)
 	err = json.NewEncoder(w).Encode("Unexpected json sending error: "+err.Error())
 	if err != nil {
 		log.Printf("Unable to encode and send error in json.")
@@ -30,23 +30,23 @@ func encodeErrInJSON(err error, w http.ResponseWriter) {
 }
 
 func writePSQLErr(err error, w http.ResponseWriter) {
-	w.WriteHeader(400)
+	w.WriteHeader(http.StatusBadRequest)
 	encodeErrInJSON(errors.New("Unexpected postgresql error: "+err.Error()), w)
 }
 
 func writeNotAcceptable(err error, w http.ResponseWriter) {
-	w.WriteHeader(406)
+	w.WriteHeader(http.StatusNotAcceptable)
 	encodeErrInJSON(err, w)
 
 }
 
 func writeNotFound(err error, w http.ResponseWriter) {
-	w.WriteHeader(404)
+	w.WriteHeader(http.StatusNotFound)
 	encodeErrInJSON(err, w)
 }
 
 func writeBadRequest(err error, w http.ResponseWriter) {
-	w.WriteHeader(400)
+	w.WriteHeader(http.StatusBadRequest)
 	encodeErrInJSON(err, w)
 }
 

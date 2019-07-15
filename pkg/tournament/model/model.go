@@ -2,7 +2,7 @@ package model
 
 import (
 	uuid "github.com/satori/go.uuid"
-	"tournament/pkg/mid"
+	"tournament/env/mid"
 )
 
 type Tournament struct {

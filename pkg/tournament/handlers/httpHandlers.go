@@ -4,31 +4,32 @@ import (
 	"encoding/json"
 	uuid "github.com/satori/go.uuid"
 	"net/http"
-	"tournament/pkg/errproc"
-	"tournament/pkg/mid"
-	tournament "tournament/pkg/tournament/model"
+	"tournament/env/errproc"
+	"tournament/env/mid"
+	"tournament/pkg/tournament/model"
 	"tournament/pkg/tournament/usecases"
 )
 
 func CreateTournament(w http.ResponseWriter, r *http.Request) {
-	var t tournament.Tournament
+	var t model.Tournament
 	err := json.NewDecoder(r.Body).Decode(&t)
 	if err != nil {
 		errproc.HandleJSONErr(err, w)
 		return
 	}
-	t.Prize = 4000
+
 	err = usecases.CreateTournament(t)
 	if err != nil {
 		errproc.HandleErr(err, w)
 		return
 	}
+
 	err = json.NewEncoder(w).Encode(t.ID)
 	if err != nil {
 		errproc.HandleJSONErr(err, w)
 		return
 	}
-	w.WriteHeader(201)
+	w.WriteHeader(http.StatusCreated)
 }
 
 func GetTournament(w http.ResponseWriter, r *http.Request) {
@@ -44,7 +45,7 @@ func GetTournament(w http.ResponseWriter, r *http.Request) {
 		errproc.HandleJSONErr(err, w)
 		return
 	}
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 }
 
 func DeleteTournament(w http.ResponseWriter, r *http.Request) {
@@ -55,7 +56,7 @@ func DeleteTournament(w http.ResponseWriter, r *http.Request) {
 		errproc.HandleErr(err, w)
 		return
 	}
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 }
 
 func JoinTournament(w http.ResponseWriter, r *http.Request) {
@@ -72,7 +73,7 @@ func JoinTournament(w http.ResponseWriter, r *http.Request) {
 		errproc.HandleErr(err, w)
 		return
 	}
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 }
 
 func FinishTournament(w http.ResponseWriter, r *http.Request) {
@@ -83,5 +84,5 @@ func FinishTournament(w http.ResponseWriter, r *http.Request) {
 		errproc.HandleErr(err, w)
 		return
 	}
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 }

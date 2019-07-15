@@ -3,8 +3,8 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"tournament/pkg/errproc"
-	"tournament/pkg/mid"
+	"tournament/env/errproc"
+	"tournament/env/mid"
 	"tournament/pkg/user/model"
 	"tournament/pkg/user/usecases"
 )
@@ -27,7 +27,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		errproc.HandleJSONErr(err, w)
 		return
 	}
-	w.WriteHeader(201)
+	w.WriteHeader(http.StatusCreated)
 }
 
 func GetUser(w http.ResponseWriter, r *http.Request) {
@@ -43,7 +43,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 		errproc.HandleJSONErr(err, w)
 		return
 	}
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 }
 
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
@@ -54,7 +54,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		errproc.HandleErr(err, w)
 		return
 	}
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 }
 
 func TakePoints(w http.ResponseWriter, r *http.Request) {
@@ -71,7 +71,7 @@ func TakePoints(w http.ResponseWriter, r *http.Request) {
 		errproc.HandleErr(err, w)
 		return
 	}
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 
 }
 
@@ -89,5 +89,5 @@ func GivePoints(w http.ResponseWriter, r *http.Request) {
 		errproc.HandleErr(err, w)
 		return
 	}
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 }

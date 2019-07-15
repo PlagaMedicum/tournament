@@ -1,6 +1,6 @@
 package model
 
-import "tournament/pkg/mid"
+import "tournament/env/mid"
 
 type User struct {
 	mid.MID

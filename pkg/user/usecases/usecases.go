@@ -2,8 +2,8 @@ package usecases
 
 import (
 	uuid "github.com/satori/go.uuid"
+	"tournament/env/errproc"
 	app "tournament/pkg"
-	"tournament/pkg/errproc"
 	"tournament/pkg/user/model"
 )
 

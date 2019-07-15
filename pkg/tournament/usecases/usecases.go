@@ -2,9 +2,9 @@ package usecases
 
 import (
 	uuid "github.com/satori/go.uuid"
+	database "tournament/database/model"
+	"tournament/env/errproc"
 	app "tournament/pkg"
-	database "tournament/pkg/database/model"
-	"tournament/pkg/errproc"
 	"tournament/pkg/tournament/model"
 	userm "tournament/pkg/user/model"
 	user "tournament/pkg/user/usecases"
@@ -14,11 +14,12 @@ const (
 	nulluuid = "00000000-0000-0000-0000-000000000000"
 )
 
-func CreateTournament(tournament model.Tournament) error {
+func CreateTournament(t model.Tournament) error {
+	t.Prize = 4000
 	err := app.DB.Conn.QueryRow(`
 			insert into tournaments (name, deposit, prize) values
 				($1, $2, $3) returning id;
-		`, tournament.Name, tournament.Deposit, tournament.Prize).Scan(&tournament.ID)
+		`, t.Name, t.Deposit, t.Prize).Scan(&t.ID)
 	return err
 }
 

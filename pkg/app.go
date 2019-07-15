@@ -9,10 +9,8 @@ import (
 	_ "github.com/lib/pq"
 	"log"
 	"net/http"
-	database "tournament/pkg/database/model"
-	"tournament/pkg/mhandler"
-	tournament "tournament/pkg/tournament/handlers"
-	user "tournament/pkg/user/handlers"
+	database "tournament/database/model"
+	"tournament/env/mhandler"
 )
 
 const (
@@ -28,29 +26,15 @@ func migrateTables(sqldb *sql.DB) {
 		log.Printf("Unexpected error trying to create a driver: "+err.Error())
 	}
 	m, err := migrate.NewWithDatabaseInstance(
-		"file://migrations",
+		"file://database/migrations",
 		DB.Database, driver)
 	if err != nil {
 		log.Printf("Unexpected error trying to create new migration: "+err.Error())
 	}
 	err = m.Up()
-	if err != nil || err != migrate.ErrNoChange {
+	if err != nil && err != migrate.ErrNoChange {
 		log.Printf("Unexpected error trying to migrate up: "+err.Error())
 	}
-}
-
-func initNewHandler() (h mhandler.Handler) {
-	h.HandleFunc("^/user$", user.CreateUser, "POST")
-	h.HandleFunc("^/user/"+UUIDRegex+"$", user.GetUser, "GET")
-	h.HandleFunc("^/user/"+UUIDRegex+"$", user.DeleteUser, "DELETE")
-	h.HandleFunc("^/user/"+UUIDRegex+"/take$", user.TakePoints, "POST")
-	h.HandleFunc("^/user/"+UUIDRegex+"/fund$", user.GivePoints, "POST")
-	h.HandleFunc("^/tournament$", tournament.CreateTournament, "POST")
-	h.HandleFunc("^/tournament/"+UUIDRegex+"$", tournament.GetTournament, "GET")
-	h.HandleFunc("^/tournament/"+UUIDRegex+"$", tournament.DeleteTournament, "DELETE")
-	h.HandleFunc("^/tournament/"+UUIDRegex+"/join$", tournament.JoinTournament, "POST")
-	h.HandleFunc("^/tournament/"+UUIDRegex+"/finish$", tournament.FinishTournament, "POST")
-	return
 }
 
 func initServer(h mhandler.Handler) *http.Server {
@@ -61,11 +45,12 @@ func initServer(h mhandler.Handler) *http.Server {
 	return s
 }
 
-func Init() {
+func Init(h mhandler.Handler) {
 	sqldb := DB.Connect()
 	migrateTables(sqldb)
-	Handler = initNewHandler()
+	Handler = h
 	s := initServer(Handler)
+
 	err := s.ListenAndServe()
 	if err != nil {
 		log.Printf("Unexpected http server error: "+err.Error())

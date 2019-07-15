@@ -2,8 +2,11 @@ package main
 
 import (
 	app "tournament/pkg"
+	"tournament/pkg/router"
 )
 
 func main() {
-	app.Init()
+	h := router.Route()
+	app.Init(h)
+
 }

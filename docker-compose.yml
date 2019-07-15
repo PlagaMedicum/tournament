@@ -9,7 +9,7 @@ services:
     depends_on:
       - database
     volumes:
-      - ./vendor:/go/src/tournament/vendor
+      - .:/go/src/tournament
     command: ./run.sh
   database:
     image: postgres
