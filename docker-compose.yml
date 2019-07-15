@@ -1,0 +1,25 @@
+version: "3.3"
+services:
+  server:
+    container_name: "tournament_server"
+    network_mode: "host"
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - database
+    volumes:
+      - .:/go/src/tournament
+    command: ./run.sh
+  database:
+    image: postgres
+    container_name: "tournament_db"
+    volumes:
+      - ./db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: tournament
+    restart: unless-stopped

@@ -5,3 +5,6 @@ go_build_main_go
 .vscode
 *.iml
 .go/
+bin
+db-data
+vendor
