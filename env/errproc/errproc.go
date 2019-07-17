@@ -14,8 +14,10 @@ var(
 	NotEnoughPoints = errors.New("user have not enough points to join the tournament")
 )
 
+// HandleJSONErr handles json errors.
 func HandleJSONErr(err error, w http.ResponseWriter) {
 	w.WriteHeader(http.StatusBadRequest)
+
 	err = json.NewEncoder(w).Encode("Unexpected json sending error: "+err.Error())
 	if err != nil {
 		log.Printf("Unable to encode and send error in json.")
@@ -50,18 +52,25 @@ func writeBadRequest(err error, w http.ResponseWriter) {
 	encodeErrInJSON(err, w)
 }
 
+// HandleErr handles other types of errors.
 func HandleErr(err error, w http.ResponseWriter) {
 	if pgerr, ok := err.(pgx.PgError); ok {
 		writePSQLErr(pgerr, w)
+
 		return
 	}
+
 	if err == NotEnoughPoints {
 		writeNotAcceptable(err, w)
+
 		return
 	}
+
 	if (err == NoUserWithID) || (err == NoTournamentWithID) {
 		writeNotFound(err, w)
+
 		return
 	}
+
 	writeBadRequest(err, w)
 }

@@ -1,19 +1,22 @@
-package mid
+package myuuid
 
 import (
 	uuid "github.com/satori/go.uuid"
 	"log"
 )
 
-type MID struct {
+type MyUUID struct {
 	ID uuid.UUID `json:"id"`
 }
 
-func (id *MID) Get() uuid.UUID {
+// Get returns the copy of ID field.
+func (id *MyUUID) Get() uuid.UUID {
+
 	return id.ID
 }
 
-func (id *MID) FromString(s string) {
+// FromString initialises the ID with string.
+func (id *MyUUID) FromString(s string) {
 	err := id.ID.Scan(s)
 	if err != nil {
 		log.Printf("Error trying to convert string in uuid: "+err.Error())

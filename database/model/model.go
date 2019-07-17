@@ -19,15 +19,18 @@ type DB struct {
 	Database       string            `yaml:"Database"`
 }
 
+// Connect initialises a new connection for the postgres database.
 func (db *DB) Connect() *sql.DB{
 	file, err := ioutil.ReadFile("./database/connconf.yaml")
 	if err != nil {
 		log.Printf("Unable to read yaml file: "+err.Error())
 	}
+
 	err = yaml.Unmarshal(file, &db)
 	if err != nil {
 		log.Printf("Unable to unmarshal yaml data: "+err.Error())
 	}
+
 	sqldb, err := sql.Open("pgx",
 		"user="+db.User+
 		" password="+db.Password+
@@ -38,14 +41,18 @@ func (db *DB) Connect() *sql.DB{
 	if err != nil {
 		log.Printf("Unable to open connection: "+err.Error())
 	}
+
 	err = sqldb.Ping()
 	if err != nil {
 		log.Printf("Postgresql ping: "+err.Error())
 	}
+
 	conn, err := stdlib.AcquireConn(sqldb)
 	if err != nil {
 		log.Printf("Unable to establish connection: "+err.Error())
 	}
+
 	db.Conn = conn
+
 	return sqldb
 }

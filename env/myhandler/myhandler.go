@@ -1,4 +1,4 @@
-package mhandler
+package myhandler
 
 import (
 	"net/http"
@@ -28,6 +28,7 @@ func (mHandler *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if b, _ := regexp.MatchString(route.pattern, r.URL.Path); b && r.Method == route.method {
 			w.Header().Set("Content-Type", "application/json")
 			route.handler.ServeHTTP(w, r)
+
 			return
 		}
 	}

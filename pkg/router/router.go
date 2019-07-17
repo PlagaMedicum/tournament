@@ -1,13 +1,14 @@
 package router
 
 import (
-	"tournament/env/mhandler"
+	"tournament/env/myhandler"
 	app "tournament/pkg"
 	tournament "tournament/pkg/tournament/handlers"
 	user "tournament/pkg/user/handlers"
 )
 
-func Route() (h mhandler.Handler) {
+// Route connects endpoints with handling functions.
+func Route() (h myhandler.Handler) {
 	h.HandleFunc("^/user$", user.CreateUser, "POST")
 	h.HandleFunc("^/user/"+app.UUIDRegex+"$", user.GetUser, "GET")
 	h.HandleFunc("^/user/"+app.UUIDRegex+"$", user.DeleteUser, "DELETE")
@@ -18,5 +19,6 @@ func Route() (h mhandler.Handler) {
 	h.HandleFunc("^/tournament/"+app.UUIDRegex+"$", tournament.DeleteTournament, "DELETE")
 	h.HandleFunc("^/tournament/"+app.UUIDRegex+"/join$", tournament.JoinTournament, "POST")
 	h.HandleFunc("^/tournament/"+app.UUIDRegex+"/finish$", tournament.FinishTournament, "POST")
+
 	return
 }

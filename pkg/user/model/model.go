@@ -1,9 +1,9 @@
 package model
 
-import "tournament/env/mid"
+import "tournament/env/myuuid"
 
 type User struct {
-	mid.MID
+	myuuid.MyUUID
 	Name    string `json:"name"`
 	Balance int    `json:"balance"`
 }
