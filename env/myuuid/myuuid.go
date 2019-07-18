@@ -11,7 +11,6 @@ type MyUUID struct {
 
 // Get returns the copy of ID field.
 func (id *MyUUID) Get() uuid.UUID {
-
 	return id.ID
 }
 

@@ -13,17 +13,13 @@ func CreateUser(user *model.User) error {
 			insert into users (name, balance) values 
 				($1, $2) returning id;
 		`, user.Name, user.Balance).Scan(&user.ID)
-
 	return err
 }
 
 // GetUsers returns a slice of all users in the database.
 func GetUsers() ([]model.User, error) {
-	rows, err := app.DB.Conn.Query(`
-			select * from users;
-		`)
+	rows, err := app.DB.Conn.Query(`select * from users;`)
 	if err != nil {
-
 		return nil, err
 	}
 
@@ -33,7 +29,6 @@ func GetUsers() ([]model.User, error) {
 
 		err := rows.Scan(&user.ID, &user.Name, &user.Balance)
 		if err != nil {
-
 			return nil, err
 		}
 
@@ -48,13 +43,11 @@ func GetUsers() ([]model.User, error) {
 func GetUser(id uuid.UUID) (model.User, error) {
 	userList, err := GetUsers()
 	if err != nil {
-
 		return model.User{}, err
 	}
 
 	for _, u := range userList {
 		if u.ID == id {
-
 			return u, nil
 		}
 	}
@@ -66,7 +59,6 @@ func GetUser(id uuid.UUID) (model.User, error) {
 func DeleteUser(id uuid.UUID) error{
 	userList, err := GetUsers()
 	if err != nil {
-
 		return err
 	}
 
@@ -75,11 +67,8 @@ func DeleteUser(id uuid.UUID) error{
 			continue
 		}
 
-		_, err := app.DB.Conn.Exec(`
-					delete from users
-						where id = $1;
-				`, id)
-
+		_, err := app.DB.Conn.Exec(`delete from users where id = $1;`,
+			id)
 		return err
 	}
 
@@ -90,7 +79,6 @@ func DeleteUser(id uuid.UUID) error{
 func FundUser(id uuid.UUID, points int) error {
 	userList, err := GetUsers()
 	if err != nil {
-
 		return err
 	}
 
@@ -100,11 +88,9 @@ func FundUser(id uuid.UUID, points int) error {
 		}
 
 		userList[index].Balance += points
-		_, err := app.DB.Conn.Exec(`
-					update users set balance = $1
-						where id = $2;
-				`, userList[index].Balance, id)
 
+		_, err := app.DB.Conn.Exec(`update users set balance = $1 where id = $2;`,
+			userList[index].Balance, id)
 		return err
 	}
 

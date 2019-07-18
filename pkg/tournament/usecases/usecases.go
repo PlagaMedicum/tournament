@@ -17,11 +17,11 @@ const (
 // CreateTournament inserts new tournament instance in database.
 func CreateTournament(t model.Tournament) error {
 	t.Prize = 4000
+
 	err := app.DB.Conn.QueryRow(`
 			insert into tournaments (name, deposit, prize) values
 				($1, $2, $3) returning id;
 		`, t.Name, t.Deposit, t.Prize).Scan(&t.ID)
-
 	return err
 }
 
@@ -29,12 +29,9 @@ func getTournamentParticipants(id uuid.NullUUID) ([]uuid.UUID, error) {
 	var d database.DB
 	d.Connect()
 
-	r, err := d.Conn.Query(`
-			select userid from participants
-				where id = $1;
-		`, id.UUID)
+	r, err := d.Conn.Query(`select userid from participants where id = $1;`,
+		id.UUID)
 	if err != nil {
-
 		return nil, err
 	}
 
@@ -44,7 +41,6 @@ func getTournamentParticipants(id uuid.NullUUID) ([]uuid.UUID, error) {
 
 		err := r.Scan(&u)
 		if err != nil {
-
 			return nil, err
 		}
 
@@ -59,7 +55,6 @@ func getTournaments() ([]model.Tournament, error) {
 			select * from tournaments;
 		`)
 	if err != nil {
-
 		return nil, err
 	}
 
@@ -70,7 +65,6 @@ func getTournaments() ([]model.Tournament, error) {
 
 		err := rows.Scan(&tournament.ID, &tournament.Name, &tournament.Deposit, &tournament.Prize, &id, &wid)
 		if err != nil {
-
 			return nil, err
 		}
 
@@ -81,7 +75,6 @@ func getTournaments() ([]model.Tournament, error) {
 		if id.Valid {
 			tournament.Users, err = getTournamentParticipants(id)
 			if err != nil {
-
 				return nil, err
 			}
 		}
@@ -96,13 +89,11 @@ func getTournaments() ([]model.Tournament, error) {
 func GetTournament(id uuid.UUID) (model.Tournament, error) {
 	tournamentList, err := getTournaments()
 	if err != nil {
-
 		return model.Tournament{}, err
 	}
 
 	for _, tournament := range tournamentList {
 		if tournament.ID == id {
-
 			return tournament, nil
 		}
 	}
@@ -128,7 +119,6 @@ func DeleteTournament(id uuid.UUID) error {
 				delete from tournaments
 					where id = $1;
 			`, tournament.ID)
-
 		return err
 	}
 
@@ -139,31 +129,23 @@ func addUserInTournament(u userm.User, t model.Tournament) error {
 	u.Balance -= t.Deposit
 	var pid uuid.NullUUID
 
-	err := app.DB.Conn.QueryRow(`
-			select users from tournaments
-				where id = $1;
-		`, t.ID).Scan(&pid)
+	err := app.DB.Conn.QueryRow(`select users from tournaments where id = $1;`,
+		t.ID).Scan(&pid)
 	if err != nil {
 
 		return err
 	}
 
 	if pid.Valid {
-		_, err = app.DB.Conn.Exec(`
-				insert into participants (id, userid) values
-					($1, $2);
-			`, pid, u.ID)
+		_, err = app.DB.Conn.Exec(`insert into participants (id, userid) values ($1, $2);`,
+			pid, u.ID)
 		if err != nil {
-
 			return err
 		}
 	} else {
-		_, err := app.DB.Conn.Exec(`
-				insert into participants (userid) values
-					($1);
-			`, u.ID)
+		_, err := app.DB.Conn.Exec(`insert into participants (userid) values ($1);`,
+			u.ID)
 		if err != nil {
-
 			return err
 		}
 
@@ -172,25 +154,21 @@ func addUserInTournament(u userm.User, t model.Tournament) error {
 					where participants.userid = $1;
 			`, u.ID)
 		if err != nil {
-
 			return err
 		}
 	}
 
-	_, err = app.DB.Conn.Exec(`
-			update users set balance = $2
-				where id = $1;
-		`, u.ID, u.Balance)
+	_, err = app.DB.Conn.Exec(`update users set balance = $2 where id = $1;`,
+		u.ID, u.Balance)
 
 	return err
 }
 
-// JoinTournament adds new participant in tournament
+// JoinTournament assigns new participant to the tournament
 // and updating balance of the participant.
 func JoinTournament(id uuid.UUID, userID uuid.UUID) error {
 	tlist, err := getTournaments()
 	if err != nil {
-
 		return err
 	}
 
@@ -201,7 +179,6 @@ func JoinTournament(id uuid.UUID, userID uuid.UUID) error {
 
 		ulist, err := user.GetUsers()
 		if err != nil {
-
 			return err
 		}
 
@@ -212,10 +189,8 @@ func JoinTournament(id uuid.UUID, userID uuid.UUID) error {
 
 			if u.Balance >= t.Deposit {
 				err := addUserInTournament(u, t)
-
 				return err
 			} else {
-
 				return errproc.NotEnoughPoints
 			}
 		}
@@ -229,7 +204,6 @@ func JoinTournament(id uuid.UUID, userID uuid.UUID) error {
 func findWinner(pIDList []uuid.UUID)  (userm.User, error) {
 	uList, err := user.GetUsers()
 	if err != nil {
-
 		return userm.User{}, err
 	}
 
@@ -255,15 +229,11 @@ func setWinner(w userm.User, t model.Tournament) error {
 	_, err := app.DB.Conn.Exec(`update tournaments set winner = $1 where id = $2;`,
 		w.ID, t.ID)
 	if err != nil {
-
 		return err
 	}
 
-	_, err = app.DB.Conn.Exec(`
-			update users set balance = $2
-				where id = $1;
-		`, w.ID, w.Balance)
-
+	_, err = app.DB.Conn.Exec(`update users set balance = $2 where id = $1;`,
+		w.ID, w.Balance)
 	return err
 }
 
@@ -287,7 +257,6 @@ func FinishTournament(id uuid.UUID) error {
 			}
 
 			err = setWinner(winner, t)
-
 			return err
 		}
 		break

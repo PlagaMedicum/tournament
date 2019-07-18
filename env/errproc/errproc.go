@@ -56,19 +56,16 @@ func writeBadRequest(err error, w http.ResponseWriter) {
 func HandleErr(err error, w http.ResponseWriter) {
 	if pgerr, ok := err.(pgx.PgError); ok {
 		writePSQLErr(pgerr, w)
-
 		return
 	}
 
 	if err == NotEnoughPoints {
 		writeNotAcceptable(err, w)
-
 		return
 	}
 
 	if (err == NoUserWithID) || (err == NoTournamentWithID) {
 		writeNotFound(err, w)
-
 		return
 	}
 

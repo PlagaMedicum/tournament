@@ -18,7 +18,6 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&u)
 	if err != nil {
 		errproc.HandleJSONErr(err, w)
-
 		return
 	}
 
@@ -27,14 +26,12 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	err = usecases.CreateUser(&u)
 	if err != nil {
 		errproc.HandleErr(err, w)
-
 		return
 	}
 
 	err = json.NewEncoder(w).Encode(u.ID)
 	if err != nil {
 		errproc.HandleJSONErr(err, w)
-
 		return
 	}
 
@@ -51,14 +48,12 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 	u, err := usecases.GetUser(id.Get())
 	if err != nil {
 		errproc.HandleErr(err, w)
-
 		return
 	}
 
 	err = json.NewEncoder(w).Encode(u)
 	if err != nil {
 		errproc.HandleJSONErr(err, w)
-
 		return
 	}
 
@@ -73,7 +68,6 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	err := usecases.DeleteUser(id.Get())
 	if err != nil {
 		errproc.HandleErr(err, w)
-
 		return
 	}
 
@@ -85,19 +79,18 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 func TakePoints(w http.ResponseWriter, r *http.Request) {
 	var id myuuid.MyUUID
 	id.FromString(r.URL.Path[len("/user/") : len("/user/")+36])
+
 	var st struct{ Points int `json:"points"` }
 
 	err := json.NewDecoder(r.Body).Decode(&st)
 	if err != nil {
 		errproc.HandleJSONErr(err, w)
-
 		return
 	}
 
 	err = usecases.FundUser(id.Get(), -st.Points)
 	if err != nil {
 		errproc.HandleErr(err, w)
-
 		return
 	}
 
@@ -110,19 +103,18 @@ func TakePoints(w http.ResponseWriter, r *http.Request) {
 func GivePoints(w http.ResponseWriter, r *http.Request) {
 	var id myuuid.MyUUID
 	id.FromString(r.URL.Path[len("/user/") : len("/user/")+36])
+
 	var st struct{ Points int `json:"points"` }
 
 	err := json.NewDecoder(r.Body).Decode(&st)
 	if err != nil {
 		errproc.HandleJSONErr(err, w)
-
 		return
 	}
 
 	err = usecases.FundUser(id.Get(), st.Points)
 	if err != nil {
 		errproc.HandleErr(err, w)
-
 		return
 	}
 

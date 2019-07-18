@@ -15,24 +15,22 @@ import (
 // Writes tournament's id in response body.
 func CreateTournament(w http.ResponseWriter, r *http.Request) {
 	var t model.Tournament
+
 	err := json.NewDecoder(r.Body).Decode(&t)
 	if err != nil {
 		errproc.HandleJSONErr(err, w)
-
 		return
 	}
 
 	err = usecases.CreateTournament(t)
 	if err != nil {
 		errproc.HandleErr(err, w)
-
 		return
 	}
 
 	err = json.NewEncoder(w).Encode(t.ID)
 	if err != nil {
 		errproc.HandleJSONErr(err, w)
-
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
@@ -49,14 +47,12 @@ func GetTournament(w http.ResponseWriter, r *http.Request) {
 	t, err := usecases.GetTournament(id.Get())
 	if err != nil {
 		errproc.HandleErr(err, w)
-
 		return
 	}
 
 	err = json.NewEncoder(w).Encode(t)
 	if err != nil {
 		errproc.HandleJSONErr(err, w)
-
 		return
 	}
 
@@ -71,31 +67,29 @@ func DeleteTournament(w http.ResponseWriter, r *http.Request) {
 	err := usecases.DeleteTournament(id.Get())
 	if err != nil {
 		errproc.HandleErr(err, w)
-
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
 }
 
-// JoinTournament is the http handler for adding a new participant
-// in the tournament using theirs id's.
+// JoinTournament is the http handler for assigning a new participant
+// to the tournament using theirs id's.
 func JoinTournament(w http.ResponseWriter, r *http.Request) {
 	var id myuuid.MyUUID
 	id.FromString(r.URL.Path[len("/tournament/") : len("/tournament/")+36])
+
 	var st struct{ ID uuid.UUID `json:"userId"` }
 
 	err := json.NewDecoder(r.Body).Decode(&st)
 	if err != nil {
 		errproc.HandleJSONErr(err, w)
-
 		return
 	}
 
 	err = usecases.JoinTournament(id.Get(), st.ID)
 	if err != nil {
 		errproc.HandleErr(err, w)
-
 		return
 	}
 
@@ -111,7 +105,6 @@ func FinishTournament(w http.ResponseWriter, r *http.Request) {
 	err := usecases.FinishTournament(id.Get())
 	if err != nil {
 		errproc.HandleErr(err, w)
-
 		return
 	}
 
