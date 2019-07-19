@@ -72,7 +72,7 @@ func (db *DB) connect(dbName string) *sql.DB {
 	return sqldb
 }
 
-//Connect initialises Postgresql connection with stage database.
+// Connect initialises Postgresql connection with stage database.
 func (db *DB) Connect() *sql.DB {
 	db.readConfigFile()
 
@@ -80,7 +80,7 @@ func (db *DB) Connect() *sql.DB {
 	return sqldb
 }
 
-//Connect initialises Postgresql connection with test database.
+// ConnectForTests initialises Postgresql connection with test database.
 func (db *DB) ConnectForTests() *sql.DB {
 	db.readConfigFile()
 

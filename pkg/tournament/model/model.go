@@ -14,8 +14,8 @@ type Tournament struct {
 	WinnerID uuid.UUID   `json:"winner"`
 }
 
-// GetUsers returns a slice, which contains ids of tournament's participants.
-func (t *Tournament) GetUsers() (users []uuid.UUID) {
+// GetParticipants returns a slice, which contains ids of tournament's participants.
+func (t *Tournament) GetParticipants() (users []uuid.UUID) {
 	users = append(users, t.Users...)
 
 	return

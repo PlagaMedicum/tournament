@@ -11,17 +11,30 @@ import (
 )
 
 const (
-	nulluuid = "00000000-0000-0000-0000-000000000000"
+	nullUUID     = "00000000-0000-0000-0000-000000000000"
+	defaultPrize = 4000
 )
 
-// CreateTournament inserts new tournament instance in database.
-func CreateTournament(t model.Tournament) error {
-	t.Prize = 4000
+type TournamentInterface interface {
+	CreateTournament(*model.Tournament) error
+	GetTournament(uuid.UUID) (model.Tournament, error)
+	DeleteTournament(uuid.UUID) error
+	JoinTournament(uuid.UUID, uuid.UUID) error
+	FinishTournament(uuid.UUID) error
+}
+
+type Tournament struct {
+	model.Tournament
+}
+
+// CreateTournamentHandler inserts new tournament instance in database.
+func (c *Tournament) CreateTournament(t *model.Tournament) error {
+	t.Prize = defaultPrize
 
 	err := app.DB.Conn.QueryRow(`
 			insert into tournaments (name, deposit, prize) values
 				($1, $2, $3) returning id;
-		`, t.Name, t.Deposit, t.Prize).Scan(&t.ID)
+		`, t.Name, t.Deposit, t.Prize).Scan(t.ID)
 	return err
 }
 
@@ -84,9 +97,9 @@ func getTournaments() ([]model.Tournament, error) {
 	return tournamentList, nil
 }
 
-// GetTournament returns tournament instance with id from
+// GetTournamentHandler returns tournament instance with id from
 // slice list of all tournaments in database.
-func GetTournament(id uuid.UUID) (model.Tournament, error) {
+func (c *Tournament) GetTournament(id uuid.UUID) (model.Tournament, error) {
 	tournamentList, err := getTournaments()
 	if err != nil {
 		return model.Tournament{}, err
@@ -101,8 +114,8 @@ func GetTournament(id uuid.UUID) (model.Tournament, error) {
 	return model.Tournament{}, errproc.NoTournamentWithID
 }
 
-// DeleteTournament deletes tournament instance with id from database.
-func DeleteTournament(id uuid.UUID) error {
+// DeleteTournamentHandler deletes tournament instance with id from database.
+func (c *Tournament) DeleteTournament(id uuid.UUID) error {
 	tournamentList, err := getTournaments()
 	if err != nil {
 		return err
@@ -164,9 +177,9 @@ func addUserInTournament(u userm.User, t model.Tournament) error {
 	return err
 }
 
-// JoinTournament assigns new participant to the tournament
+// JoinTournamentHandler assigns new participant to the tournament
 // and updating balance of the participant.
-func JoinTournament(id uuid.UUID, userID uuid.UUID) error {
+func (c *Tournament) JoinTournament(id uuid.UUID, userID uuid.UUID) error {
 	tlist, err := getTournaments()
 	if err != nil {
 		return err
@@ -177,7 +190,9 @@ func JoinTournament(id uuid.UUID, userID uuid.UUID) error {
 			continue
 		}
 
-		ulist, err := user.GetUsers()
+		usr := user.User{}
+
+		ulist, err := usr.GetUsers()
 		if err != nil {
 			return err
 		}
@@ -202,7 +217,9 @@ func JoinTournament(id uuid.UUID, userID uuid.UUID) error {
 }
 
 func findWinner(pIDList []uuid.UUID)  (userm.User, error) {
-	uList, err := user.GetUsers()
+	usr := user.User{}
+
+	uList, err := usr.GetUsers()
 	if err != nil {
 		return userm.User{}, err
 	}
@@ -237,9 +254,9 @@ func setWinner(w userm.User, t model.Tournament) error {
 	return err
 }
 
-// FinishTournament updates winner field of the tournament.
+// FinishTournamentHandler updates winner field of the tournament.
 // Adds prize to the winner's balance.
-func FinishTournament(id uuid.UUID) error {
+func (c *Tournament) FinishTournament(id uuid.UUID) error {
 	tlist, err := getTournaments()
 	if err != nil {
 		return err
@@ -250,8 +267,8 @@ func FinishTournament(id uuid.UUID) error {
 			continue
 		}
 
-		if t.WinnerID.String() == nulluuid {
-			winner, err := findWinner(t.GetUsers())
+		if t.WinnerID.String() == nullUUID {
+			winner, err := findWinner(t.GetParticipants())
 			if err != nil {
 				return err
 			}
