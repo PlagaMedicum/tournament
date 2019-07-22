@@ -14,6 +14,10 @@ func (id *MyUUID) Get() uuid.UUID {
 	return id.ID
 }
 
+func (id *MyUUID) String() string {
+	return id.ID.String()
+}
+
 // FromString initialises the ID with string.
 func (id *MyUUID) FromString(s string) {
 	err := id.ID.Scan(s)

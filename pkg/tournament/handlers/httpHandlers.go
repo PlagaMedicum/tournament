@@ -26,7 +26,7 @@ func (c TournamentController) CreateTournamentHandler(w http.ResponseWriter, r *
 		return
 	}
 
-	err = c.CreateTournament(&t)
+	id, err := c.CreateTournament(t)
 	if err != nil {
 		errproc.HandleErr(err, w)
 		return
@@ -34,7 +34,7 @@ func (c TournamentController) CreateTournamentHandler(w http.ResponseWriter, r *
 
 	w.WriteHeader(http.StatusCreated)
 
-	err = json.NewEncoder(w).Encode(t.ID)
+	err = json.NewEncoder(w).Encode(id)
 	if err != nil {
 		errproc.HandleJSONErr(err, w)
 		return

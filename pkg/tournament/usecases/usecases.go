@@ -16,7 +16,7 @@ const (
 )
 
 type TournamentInterface interface {
-	CreateTournament(*model.Tournament) error
+	CreateTournament(model.Tournament) (uuid.UUID, error)
 	GetTournament(uuid.UUID) (model.Tournament, error)
 	DeleteTournament(uuid.UUID) error
 	JoinTournament(uuid.UUID, uuid.UUID) error
@@ -28,14 +28,14 @@ type Tournament struct {
 }
 
 // CreateTournamentHandler inserts new tournament instance in database.
-func (c *Tournament) CreateTournament(t *model.Tournament) error {
+func (c *Tournament) CreateTournament(t model.Tournament) (uuid.UUID, error) {
 	t.Prize = defaultPrize
 
 	err := app.DB.Conn.QueryRow(`
 			insert into tournaments (name, deposit, prize) values
 				($1, $2, $3) returning id;
 		`, t.Name, t.Deposit, t.Prize).Scan(t.ID)
-	return err
+	return t.ID, err
 }
 
 func getTournamentParticipants(id uuid.NullUUID) ([]uuid.UUID, error) {
@@ -97,7 +97,7 @@ func getTournaments() ([]model.Tournament, error) {
 	return tournamentList, nil
 }
 
-// GetTournamentHandler returns tournament instance with id from
+// GetTournamentHandler returns tournament instance with ID from
 // slice list of all tournaments in database.
 func (c *Tournament) GetTournament(id uuid.UUID) (model.Tournament, error) {
 	tournamentList, err := getTournaments()
@@ -114,7 +114,7 @@ func (c *Tournament) GetTournament(id uuid.UUID) (model.Tournament, error) {
 	return model.Tournament{}, errproc.NoTournamentWithID
 }
 
-// DeleteTournamentHandler deletes tournament instance with id from database.
+// DeleteTournamentHandler deletes tournament instance with ID from database.
 func (c *Tournament) DeleteTournament(id uuid.UUID) error {
 	tournamentList, err := getTournaments()
 	if err != nil {
@@ -268,7 +268,7 @@ func (c *Tournament) FinishTournament(id uuid.UUID) error {
 		}
 
 		if t.WinnerID.String() == nullUUID {
-			winner, err := findWinner(t.GetParticipants())
+			winner, err := findWinner(c.GetParticipants())
 			if err != nil {
 				return err
 			}

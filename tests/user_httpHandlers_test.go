@@ -1,59 +1,22 @@
 package tests
 
 import (
-	"bytes"
 	"errors"
 	uuid "github.com/satori/go.uuid"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 	"tournament/env/myhandler"
 	"tournament/pkg/router"
 	user "tournament/pkg/user/model"
 )
 
-type tester struct {
-	caseName			string
-	path 				string
-	method				string
-	methodName 			string
-	resultErr			error
-	resultID			uuid.UUID
-	requestUser			user.User
-	requestBody			[]byte
-	expectedStatus 		int
-}
-
-func handleTester(t *testing.T, mo *mockedUser, tr tester) {
-	h := myhandler.Handler{}
-	router.RouteForUser(&h, mo)
-
-	r, err := http.NewRequest(
-		tr.method, tr.path, bytes.NewBuffer(tr.requestBody))
-	if err != nil {
-		t.Errorf("Cannot encode request: '%v'", err)
-	}
-
-	w := httptest.NewRecorder()
-
-	h.ServeHTTP(w, r)
-
-	if w.Code != tr.expectedStatus {
-		t.Errorf("Test case: %s. Wrong status code.\nExpected: %v\nGot: %v\nResponse body is: %s",
-			tr.caseName, tr.expectedStatus, w.Code, w.Body)
-	}
-}
-
-// TestCreateUser tests creation of user.
-func TestCreateUserHandling(t *testing.T) {
+// TestCreateUserHandler tests creation of user.
+func TestCreateUserHandler(t *testing.T) {
 	trList := []tester{
 		{
-			caseName:   "everything ok",
-			path:       router.UserPath,
-			method:     http.MethodPost,
-			methodName: "CreateUser",
-			resultErr:	nil,
-			resultID:	uuid.NewV1(),
+			caseName:  "everything ok",
+			resultErr: nil,
+			resultID:  uuid.NewV1(),
 			requestUser: user.User{
 				Name: "Daniil Dankovskij",
 			},
@@ -61,20 +24,15 @@ func TestCreateUserHandling(t *testing.T) {
 			expectedStatus: http.StatusCreated,
 		},
 		{
-			caseName:   "wrong body",
-			path:       router.UserPath,
-			method:     http.MethodPost,
-			methodName: "CreateUser",
-			requestBody: []byte(`{"name": "Vladislav Olgimskij"`),
+			caseName: "wrong body",
+			requestBody: []byte(`i'm the wrong body"`),
+			requestUser: user.User{},
 			expectedStatus: http.StatusBadRequest,
 		},
 		{
-			caseName:   "wrong user error",
-			path:       router.UserPath,
-			method:     http.MethodPost,
-			methodName: "CreateUser",
-			resultErr:	errors.New("i'm the bad err"),
-			resultID:	uuid.NewV1(),
+			caseName: "wrong user error",
+			resultErr: errors.New("i'm the bad err"),
+			resultID: uuid.NewV1(),
 			requestUser: user.User{
 				Name: "Artemij Burah",
 			},
@@ -84,45 +42,184 @@ func TestCreateUserHandling(t *testing.T) {
 	}
 
 	mo := mockedUser{}
+	h := myhandler.Handler{}
+	router.RouteForUser(&h, &mo)
 
 	for _, tr := range trList {
-		mo.On(tr.methodName, tr.requestUser).Return(tr.resultId, tr.resultErr)
-		handleTester(t, &mo, tr)
+		tr.path = router.UserPath
+		tr.method = http.MethodPost
+
+		if tr.requestUser != (user.User{}) {
+			mo.On("CreateUser", tr.requestUser).Return(tr.resultID, tr.resultErr)
+		}
+
+		handleTester(t, &h, tr)
 	}
 
+	t.Logf("Asserted mocks expectations:")
 	mo.AssertExpectations(t)
 }
 
-// TestCreateUser tests getting of user information.
-func TestGetUserHandling(t *testing.T) {
-	sampleID := uuid.NewV1()
+// TestGetUserHandler tests getting of user's information.
+func TestGetUserHandler(t *testing.T) {
 	trList := []tester{
 		{
-			caseName:   "everything ok",
-			path:       router.UserPath+sampleID,
-			method:     http.MethodPost,
-			methodName: "GetUser",
-			resultErr:	nil,
-			resultUser: ,
-			expectedStatus: http.StatusCreated,
+			caseName:  "everything ok",
+			resultErr: nil,
+			resultUser: user.User{
+				Name: "Anna Angel",
+			},
+			requestID: uuid.NewV1(),
+			expectedStatus: http.StatusOK,
 		},
 		{
-			caseName:   "wrong user error",
-			path:       router.UserPath,
-			method:     http.MethodPost,
-			methodName: "GetUser",
-			resultErr:	errors.New("i'm the bad err"),
-			resultUser: ,
+			caseName: "wrong user error",
+			resultErr: errors.New("i'm the bad err"),
+			resultUser: user.User{},
+			requestID: uuid.NewV1(),
 			expectedStatus: http.StatusBadRequest,
 		},
 	}
 
 	mo := mockedUser{}
+	h := myhandler.Handler{}
+	router.RouteForUser(&h, &mo)
 
 	for _, tr := range trList {
-		mo.On(tr.methodName, tr.requestUser).Return(tr., tr.resultErr)		
-		handleTester(t, &mo, tr)
+		tr.path = router.UserPath + "/" + tr.requestID.String()
+		tr.method = http.MethodGet
+
+		if tr.requestID != uuid.Nil{
+			mo.On("GetUser", tr.requestID).Return(tr.resultUser, tr.resultErr)
+		}
+
+		handleTester(t, &h, tr)
 	}
 
+	t.Logf("Asserted mocks expectations:")
+	mo.AssertExpectations(t)
+}
+
+// TestDeleteUserHandler tests deleting of user.
+func TestDeleteUserHandler(t *testing.T) {
+	trList := []tester{
+		{
+			caseName: "everything ok",
+			resultErr: nil,
+			requestID: uuid.NewV1(),
+			expectedStatus: http.StatusOK,
+		},
+		{
+			caseName: "wrong user error",
+			resultErr: errors.New("i'm the bad err"),
+			requestID: uuid.NewV1(),
+			expectedStatus: http.StatusBadRequest,
+		},
+	}
+
+	mo := mockedUser{}
+	h := myhandler.Handler{}
+	router.RouteForUser(&h, &mo)
+
+	for _, tr := range trList {
+		tr.path = router.UserPath + "/" + tr.requestID.String()
+		tr.method = http.MethodDelete
+
+		if tr.requestID != uuid.Nil{
+			mo.On("DeleteUser", tr.requestID).Return(tr.resultErr)
+		}
+
+		handleTester(t, &h, tr)
+	}
+
+	t.Logf("Asserted mocks expectations:")
+	mo.AssertExpectations(t)
+}
+
+// TestTakePointsHandler tests taking points from user.
+func TestTakePointsHandler(t *testing.T) {
+	trList := []tester{
+		{
+			caseName: "everything ok",
+			resultErr: nil,
+			requestID: uuid.NewV1(),
+			requestBody: []byte(`{"points": 1}`),
+			expectedStatus: http.StatusOK,
+		},
+		{
+			caseName: "wrong body",
+			requestBody: []byte(`i'm the wrong body"`),
+			requestID: uuid.Nil,
+			expectedStatus: http.StatusBadRequest,
+		},
+		{
+			caseName: "wrong user error",
+			resultErr: errors.New("i'm the bad err"),
+			requestID: uuid.NewV1(),
+			requestBody: []byte(`{"points": 1}`),
+			expectedStatus: http.StatusBadRequest,
+		},
+	}
+
+	mo := mockedUser{}
+	h := myhandler.Handler{}
+	router.RouteForUser(&h, &mo)
+
+	for _, tr := range trList {
+		tr.path = router.UserPath + "/" + tr.requestID.String() + router.TakingPointsPath
+		tr.method = http.MethodPost
+
+		if tr.requestID != uuid.Nil{
+			mo.On("FundUser", tr.requestID, -1).Return(tr.resultErr)
+		}
+
+		handleTester(t, &h, tr)
+	}
+
+	t.Logf("Asserted mocks expectations:")
+	mo.AssertExpectations(t)
+}
+
+// TestGivePointsHandler tests giving points to user.
+func TestGivePointsHandler(t *testing.T) {
+	trList := []tester{
+		{
+			caseName: "everything ok",
+			resultErr: nil,
+			requestID: uuid.NewV1(),
+			requestBody: []byte(`{"points": 1}`),
+			expectedStatus: http.StatusOK,
+		},
+		{
+			caseName: "wrong body",
+			requestBody: []byte(`i'm the wrong body"`),
+			requestID: uuid.Nil,
+			expectedStatus: http.StatusBadRequest,
+		},
+		{
+			caseName: "wrong user error",
+			resultErr: errors.New("i'm the bad err"),
+			requestID: uuid.NewV1(),
+			requestBody: []byte(`{"points": 1}`),
+			expectedStatus: http.StatusBadRequest,
+		},
+	}
+
+	mo := mockedUser{}
+	h := myhandler.Handler{}
+	router.RouteForUser(&h, &mo)
+
+	for _, tr := range trList {
+		tr.path = router.UserPath + "/" + tr.requestID.String() + router.GivingPointsPath
+		tr.method = http.MethodPost
+
+		if tr.requestID != uuid.Nil{
+			mo.On("FundUser", tr.requestID, 1).Return(tr.resultErr)
+		}
+
+		handleTester(t, &h, tr)
+	}
+
+	t.Logf("Asserted mocks expectations:")
 	mo.AssertExpectations(t)
 }

@@ -11,8 +11,12 @@ import (
 )
 
 const (
-	UserPath = "/user"
-	TournamentPath = "/tournament"
+	UserPath             = "/user"
+	TakingPointsPath     = "/take"
+	GivingPointsPath     = "/give"
+	TournamentPath       = "/tournament"
+	JoinTournamentPath   = "/join"
+	FinishTournamentPath = "/finish"
 )
 
 // RouteForUser connects endpoints with user's handling functions.
@@ -22,8 +26,8 @@ func RouteForUser(h *myhandler.Handler, ui userUseCases.UserInterface) {
 	h.HandleFunc("^"+UserPath+"$", u.CreateUserHandler, http.MethodPost)
 	h.HandleFunc("^"+UserPath+"/"+app.UUIDRegex+"$", u.GetUserHandler, http.MethodGet)
 	h.HandleFunc("^"+UserPath+"/"+app.UUIDRegex+"$", u.DeleteUserHandler, http.MethodDelete)
-	h.HandleFunc("^"+UserPath+"/"+app.UUIDRegex+"/take$", u.TakePointsHandler, http.MethodPost)
-	h.HandleFunc("^"+UserPath+"/"+app.UUIDRegex+"/fund$", u.GivePointsHandler, http.MethodPost)
+	h.HandleFunc("^"+UserPath+"/"+app.UUIDRegex+TakingPointsPath+"$", u.TakePointsHandler, http.MethodPost)
+	h.HandleFunc("^"+UserPath+"/"+app.UUIDRegex+GivingPointsPath+"$", u.GivePointsHandler, http.MethodPost)
 }
 
 // RouteForUser connects endpoints with tournament's handling functions.
@@ -33,6 +37,6 @@ func RouteForTournament(h *myhandler.Handler, ti tournamentUseCases.TournamentIn
 	h.HandleFunc("^"+TournamentPath+"$", t.CreateTournamentHandler, http.MethodPost)
 	h.HandleFunc("^"+TournamentPath+"/"+app.UUIDRegex+"$", t.GetTournamentHandler, http.MethodGet)
 	h.HandleFunc("^"+TournamentPath+"/"+app.UUIDRegex+"$", t.DeleteTournamentHandler, http.MethodDelete)
-	h.HandleFunc("^"+TournamentPath+"/"+app.UUIDRegex+"/join$", t.JoinTournamentHandler, http.MethodPost)
-	h.HandleFunc("^"+TournamentPath+"/"+app.UUIDRegex+"/finish$", t.FinishTournamentHandler, http.MethodPost)
+	h.HandleFunc("^"+TournamentPath+"/"+app.UUIDRegex+JoinTournamentPath+"$", t.JoinTournamentHandler, http.MethodPost)
+	h.HandleFunc("^"+TournamentPath+"/"+app.UUIDRegex+FinishTournamentPath+"$", t.FinishTournamentHandler, http.MethodPost)
 }

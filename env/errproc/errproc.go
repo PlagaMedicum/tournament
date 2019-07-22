@@ -18,7 +18,7 @@ var(
 func HandleJSONErr(err error, w http.ResponseWriter) {
 	w.WriteHeader(http.StatusBadRequest)
 
-	err = json.NewEncoder(w).Encode("Unexpected json sending error: "+err.Error())
+	err = json.NewEncoder(w).Encode("Unexpected json encoding/decoding error: "+err.Error())
 	if err != nil {
 		log.Printf("Unable to encode and send error in json.")
 	}

@@ -27,10 +27,10 @@ func (m *mockedUser) GetUser(id uuid.UUID) (user.User, error) {
 
 func (m *mockedUser) DeleteUser(id uuid.UUID) error {
 	args := m.Called(id)
-	return args.Error(1)
+	return args.Error(0)
 }
 
 func (m *mockedUser) FundUser(id uuid.UUID, points int) error {
-	args := m.Called(id)
-	return args.Error(1)
+	args := m.Called(id, points)
+	return args.Error(0)
 }

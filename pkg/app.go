@@ -15,6 +15,11 @@ const (
 // for processing queries.
 var DB database.DB
 
+type IDInterface interface {
+	String() string
+	FromString(string)
+}
+
 // InitServer initialises server.
 func InitServer(h *myhandler.Handler) *http.Server {
 	s := &http.Server{
