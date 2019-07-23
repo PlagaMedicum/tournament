@@ -5,8 +5,8 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"net/http"
 	"testing"
-	"tournament/env/myhandler"
-	"tournament/pkg/router"
+	"tournament/pkg/infrastructure/myhandler"
+	"tournament/pkg/infrastructure/router"
 	user "tournament/pkg/user/model"
 )
 

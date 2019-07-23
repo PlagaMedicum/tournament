@@ -3,21 +3,21 @@ package tests
 import (
 	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/mock"
-	tournament "tournament/pkg/tournament/model"
+	"tournament/pkg/domain"
 )
 
 type mockedTournament struct {
 	mock.Mock
 }
 
-func (m *mockedTournament) CreateTournament(t tournament.Tournament) (uuid.UUID, error) {
+func (m *mockedTournament) CreateTournament(t domain.Tournament) (uuid.UUID, error) {
 	args := m.Called(t)
 	return args.Get(0).(uuid.UUID), args.Error(1)
 }
 
-func (m *mockedTournament) GetTournament(id uuid.UUID) (tournament.Tournament, error) {
+func (m *mockedTournament) GetTournament(id uuid.UUID) (domain.Tournament, error) {
 	args := m.Called(id)
-	return args.Get(0).(tournament.Tournament), args.Error(1)
+	return args.Get(0).(domain.Tournament), args.Error(1)
 }
 
 func (m *mockedTournament) DeleteTournament(id uuid.UUID) error {

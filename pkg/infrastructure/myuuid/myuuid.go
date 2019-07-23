@@ -5,13 +5,13 @@ import (
 	"log"
 )
 
+const (
+	idRegex = "[0-9+a-z]{8}-[0-9+a-z]{4}-[0-9+a-z]{4}-[0-9+a-z]{4}-[0-9+a-z]{12}"
+	nullUUID     = "00000000-0000-0000-0000-000000000000"
+)
+
 type MyUUID struct {
 	ID uuid.UUID `json:"id"`
-}
-
-// Get returns the copy of ID field.
-func (id *MyUUID) Get() uuid.UUID {
-	return id.ID
 }
 
 func (id *MyUUID) String() string {
@@ -24,4 +24,17 @@ func (id *MyUUID) FromString(s string) {
 	if err != nil {
 		log.Printf("Error trying to convert string in uuid: "+err.Error())
 	}
+}
+
+func (id MyUUID) Valid() bool {
+
+	return id.ID.String()
+}
+
+func (id MyUUID) Null() string {
+	return nullUUID
+}
+
+func (id MyUUID) Regex() string {
+	return idRegex
 }

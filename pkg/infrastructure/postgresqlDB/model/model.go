@@ -27,12 +27,12 @@ type DB struct {
 }
 
 const (
-	migrationsPath     = "file://database/migrations"
-	testMigrationsPath = "file://../database/test_migrations"
+	migrationsPath     = "file://postgresqlDB/migrations"
+	testMigrationsPath = "file://../postgresqlDB/test_migrations"
 )
 
 func (db *DB) readConfigFile() {
-	file, err := ioutil.ReadFile("../database/connconf.yaml")
+	file, err := ioutil.ReadFile("./postgresqlDB/connconf.yaml")
 	if err != nil {
 		log.Printf("Unable to read yaml file: " + err.Error())
 	}
@@ -44,14 +44,14 @@ func (db *DB) readConfigFile() {
 }
 
 // connect reads configuration file and initialises a new
-// connection with the postgres database.
+// connection with the postgres postgresqlDB.
 func (db *DB) connect(dbName string) *sql.DB {
 	sqldb, err := sql.Open("pgx",
 		"user="+db.User+
 			" password="+db.Password+
 			" host="+db.Host+
 			" port="+strconv.FormatUint(db.Port, 10)+
-			" database="+dbName+
+			" postgresqlDB="+dbName+
 			" sslmode=disable")
 	if err != nil {
 		log.Printf("Unable to open connection: " + err.Error())
@@ -72,7 +72,7 @@ func (db *DB) connect(dbName string) *sql.DB {
 	return sqldb
 }
 
-// Connect initialises Postgresql connection with stage database.
+// Connect initialises Postgresql connection with stage postgresqlDB.
 func (db *DB) Connect() *sql.DB {
 	db.readConfigFile()
 
@@ -80,7 +80,7 @@ func (db *DB) Connect() *sql.DB {
 	return sqldb
 }
 
-// ConnectForTests initialises Postgresql connection with test database.
+// ConnectForTests initialises Postgresql connection with test postgresqlDB.
 func (db *DB) ConnectForTests() *sql.DB {
 	db.readConfigFile()
 
@@ -109,7 +109,7 @@ func (db *DB) migrateTablesUp() {
 	}
 }
 
-// MigrateTablesDown migrates database's tables down.
+// MigrateTablesDown migrates postgresqlDB's tables down.
 func (db *DB) MigrateTablesDown() {
 	err := db.m.Down()
 	if err != nil && err != migrate.ErrNoChange {
@@ -117,7 +117,7 @@ func (db *DB) MigrateTablesDown() {
 	}
 }
 
-// InitNewPostgresDB initialises new database connection
+// InitNewPostgresDB initialises new postgresqlDB connection
 // and calls it's migrations.
 func (db *DB) InitNewPostgresDB() {
 	sqldb := db.Connect()
@@ -125,7 +125,7 @@ func (db *DB) InitNewPostgresDB() {
 	db.migrateTablesUp()
 }
 
-// InitNewTestPostgresDB initialises new database connection
+// InitNewTestPostgresDB initialises new postgresqlDB connection
 // for tests and calls it's migrations.
 func (db *DB) InitNewTestPostgresDB() {
 	sqldb := db.ConnectForTests()

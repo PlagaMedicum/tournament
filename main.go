@@ -2,23 +2,29 @@ package main
 
 import (
 	"log"
-	"tournament/env/myhandler"
+	"net/http"
 	app "tournament/pkg"
-	"tournament/pkg/router"
+	"tournament/pkg/infrastructure/myhandler"
+	"tournament/pkg/infrastructure/router"
+	"tournament/pkg/usecases"
 	user "tournament/pkg/user/usecases"
-	tournament "tournament/pkg/tournament/usecases"
 )
 
 func main() {
+
+
 	app.DB.InitNewPostgresDB()
 
 	h := myhandler.Handler{}
 	u := user.User{}
 	router.RouteForUser(&h, &u)
-	t := tournament.Tournament{}
+	t := usecases.Tournament{}
 	router.RouteForTournament(&h, &t)
 
-	s:= app.InitServer(&h)
+	s := http.Server{
+		Addr:    ":8080",
+		Handler: &h,
+	}
 
 	err := s.ListenAndServe()
 	if err != nil {

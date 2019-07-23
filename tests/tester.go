@@ -6,24 +6,24 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"tournament/env/myhandler"
-	tournament "tournament/pkg/tournament/model"
+	"tournament/pkg/domain"
+	"tournament/pkg/infrastructure/myhandler"
 	user "tournament/pkg/user/model"
 )
 
 type tester struct {
-	caseName       		string
-	path           		string
-	method         		string
-	resultErr      		error
-	resultID       		uuid.UUID
-	resultTournament 	tournament.Tournament
-	requestTournament	tournament.Tournament
-	resultUser     		user.User
-	requestUser    		user.User
-	requestID      		uuid.UUID
-	requestBody    		[]byte
-	expectedStatus 		int
+	caseName          string
+	path              string
+	method            string
+	resultErr         error
+	resultID          uuid.UUID
+	resultTournament  domain.Tournament
+	requestTournament domain.Tournament
+	resultUser        user.User
+	requestUser       user.User
+	requestID         uuid.UUID
+	requestBody       []byte
+	expectedStatus    int
 }
 
 func handleTester(t *testing.T, h *myhandler.Handler, tr tester) {

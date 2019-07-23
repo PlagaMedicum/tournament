@@ -5,9 +5,9 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"net/http"
 	"testing"
-	"tournament/env/myhandler"
-	"tournament/pkg/router"
-	tournament "tournament/pkg/tournament/model"
+	"tournament/pkg/domain"
+	"tournament/pkg/infrastructure/myhandler"
+	"tournament/pkg/infrastructure/router"
 )
 
 // TestCreateTournamentHandler tests creation of tournament.
@@ -17,7 +17,7 @@ func TestCreateTournamentHandler(t *testing.T) {
 			caseName: "everything ok",
 			resultErr: nil,
 			resultID: uuid.NewV1(),
-			requestTournament: tournament.Tournament{
+			requestTournament: domain.Tournament{
 				Name: "Unreal Tournament",
 				Deposit: 10000,
 			},
@@ -25,16 +25,16 @@ func TestCreateTournamentHandler(t *testing.T) {
 			expectedStatus: http.StatusCreated,
 		},
 		{
-			caseName: "wrong body",
-			requestBody: []byte(`i'm the wrong body"`),
-			requestTournament: tournament.Tournament{},
-			expectedStatus: http.StatusBadRequest,
+			caseName:          "wrong body",
+			requestBody:       []byte(`i'm the wrong body"`),
+			requestTournament: domain.Tournament{},
+			expectedStatus:    http.StatusBadRequest,
 		},
 		{
 			caseName: "wrong tournament error",
 			resultErr: errors.New("i'm the bad err"),
 			resultID: uuid.NewV1(),
-			requestTournament: tournament.Tournament{
+			requestTournament: domain.Tournament{
 				Name: "test tour",
 				Deposit: 1,
 			},
@@ -68,18 +68,18 @@ func TestGetTournamentHandler(t *testing.T) {
 		{
 			caseName: "everything ok",
 			resultErr: nil,
-			resultTournament: tournament.Tournament{
+			resultTournament: domain.Tournament{
 				Name: "test tour",
 			},
 			requestID: uuid.NewV1(),
 			expectedStatus: http.StatusOK,
 		},
 		{
-			caseName: "wrong tournament error",
-			resultErr: errors.New("i'm the bad err"),
-			resultTournament: tournament.Tournament{},
-			requestID: uuid.NewV1(),
-			expectedStatus: http.StatusBadRequest,
+			caseName:         "wrong tournament error",
+			resultErr:        errors.New("i'm the bad err"),
+			resultTournament: domain.Tournament{},
+			requestID:        uuid.NewV1(),
+			expectedStatus:   http.StatusBadRequest,
 		},
 	}
 
