@@ -7,16 +7,19 @@ import (
 	"testing"
 	"tournament/pkg/domain"
 	"tournament/pkg/infrastructure/myhandler"
-	"tournament/pkg/infrastructure/router"
+	"tournament/pkg/infrastructure/myuuid"
+	handler "tournament/pkg/interfaces/handlers/http"
+	router "tournament/pkg/interfaces/routers/http"
 )
 
 // TestCreateTournamentHandler tests creation of tournament.
 func TestCreateTournamentHandler(t *testing.T) {
+	idFabric := myuuid.IDFabric{}
 	trList := []tester{
 		{
-			caseName: "everything ok",
+			caseName:  "everything ok",
 			resultErr: nil,
-			resultID: uuid.NewV1(),
+			resultID:  idFabric.New(),
 			requestTournament: domain.Tournament{
 				Name: "Unreal Tournament",
 				Deposit: 10000,
@@ -31,9 +34,9 @@ func TestCreateTournamentHandler(t *testing.T) {
 			expectedStatus:    http.StatusBadRequest,
 		},
 		{
-			caseName: "wrong tournament error",
+			caseName:  "wrong tournament error",
 			resultErr: errors.New("i'm the bad err"),
-			resultID: uuid.NewV1(),
+			resultID:  idFabric.New(),
 			requestTournament: domain.Tournament{
 				Name: "test tour",
 				Deposit: 1,
@@ -43,12 +46,14 @@ func TestCreateTournamentHandler(t *testing.T) {
 		},
 	}
 
-	mo := mockedTournament{}
+	idType := myuuid.IDType{}
+	mo := mockedRepositoryInteractor{}
 	h := myhandler.Handler{}
-	router.RouteForTournament(&h, &mo)
+	r := router.Router{IDType: idType}
+	r.Route(&h, &mo)
 
 	for _, tr := range trList {
-		tr.path = router.TournamentPath
+		tr.path = handler.TournamentPath
 		tr.method = http.MethodPost
 
 		if tr.requestTournament.Name != "" {
@@ -64,6 +69,7 @@ func TestCreateTournamentHandler(t *testing.T) {
 
 // TestGetTournamentHandler tests getting of tournament's information.
 func TestGetTournamentHandler(t *testing.T) {
+	idFabric := myuuid.IDFabric{}
 	trList := []tester{
 		{
 			caseName: "everything ok",
@@ -83,12 +89,14 @@ func TestGetTournamentHandler(t *testing.T) {
 		},
 	}
 
-	mo := mockedTournament{}
+	idType := myuuid.IDType{}
+	mo := mockedRepositoryInteractor{}
 	h := myhandler.Handler{}
-	router.RouteForTournament(&h, &mo)
+	r := router.Router{IDType: idType}
+	r.Route(&h, &mo)
 
 	for _, tr := range trList {
-		tr.path = router.TournamentPath + "/" + tr.requestID.String()
+		tr.path = handler.TournamentPath + "/" + tr.requestID
 		tr.method = http.MethodGet
 
 		if tr.requestID != uuid.Nil {
@@ -104,6 +112,7 @@ func TestGetTournamentHandler(t *testing.T) {
 
 // TestGetTournamentHandler tests deleting of tournament.
 func TestDeleteTournamentHandler(t *testing.T) {
+	idFabric := myuuid.IDFabric{}
 	trList := []tester{
 		{
 			caseName: "everything ok",
@@ -119,12 +128,14 @@ func TestDeleteTournamentHandler(t *testing.T) {
 		},
 	}
 
-	mo := mockedTournament{}
+	idType := myuuid.IDType{}
+	mo := mockedRepositoryInteractor{}
 	h := myhandler.Handler{}
-	router.RouteForTournament(&h, &mo)
+	r := router.Router{IDType: idType}
+	r.Route(&h, &mo)
 
 	for _, tr := range trList {
-		tr.path = router.TournamentPath + "/" + tr.requestID.String()
+		tr.path = handler.TournamentPath + "/" + tr.requestID
 		tr.method = http.MethodDelete
 
 		if tr.requestID != uuid.Nil {
@@ -140,13 +151,14 @@ func TestDeleteTournamentHandler(t *testing.T) {
 
 // TestJoinTournamentHandler tests joining tournament.
 func TestJoinTournamentHandler(t *testing.T) {
-	requestUserID := uuid.NewV1()
+	idFabric := myuuid.IDFabric{}
+	requestUserID := idFabric.New()
 	trList := []tester{
 		{
 			caseName: "everything ok",
 			resultErr: nil,
 			requestID: uuid.NewV1(),
-			requestBody: []byte(`{"userId": "`+requestUserID.String()+`"}`),
+			requestBody: []byte(`{"userId": "`+requestUserID+`"}`),
 			expectedStatus: http.StatusOK,
 		},
 		{
@@ -159,17 +171,19 @@ func TestJoinTournamentHandler(t *testing.T) {
 			caseName: "wrong tournament error",
 			resultErr: errors.New("i'm the bad err"),
 			requestID: uuid.NewV1(),
-			requestBody: []byte(`{"userId": "`+requestUserID.String()+`"}`),
+			requestBody: []byte(`{"userId": "`+requestUserID+`"}`),
 			expectedStatus: http.StatusBadRequest,
 		},
 	}
 
-	mo := mockedTournament{}
+	idType := myuuid.IDType{}
+	mo := mockedRepositoryInteractor{}
 	h := myhandler.Handler{}
-	router.RouteForTournament(&h, &mo)
+	r := router.Router{IDType: idType}
+	r.Route(&h, &mo)
 
 	for _, tr := range trList {
-		tr.path = router.TournamentPath + "/" + tr.requestID.String() + router.JoinTournamentPath
+		tr.path = handler.TournamentPath + "/" + tr.requestID + handler.JoinTournamentPath
 		tr.method = http.MethodPost
 
 		if tr.requestID != uuid.Nil {
@@ -185,6 +199,7 @@ func TestJoinTournamentHandler(t *testing.T) {
 
 // TestFinishTournamentHandler tests joining tournament.
 func TestFinishTournamentHandler(t *testing.T) {
+	idFabric := myuuid.IDFabric{}
 	trList := []tester{
 		{
 			caseName: "everything ok",
@@ -200,15 +215,17 @@ func TestFinishTournamentHandler(t *testing.T) {
 		},
 	}
 
-	mo := mockedTournament{}
+	idType := myuuid.IDType{}
+	mo := mockedRepositoryInteractor{}
 	h := myhandler.Handler{}
-	router.RouteForTournament(&h, &mo)
+	r := router.Router{IDType: idType}
+	r.Route(&h, &mo)
 
 	for _, tr := range trList {
-		tr.path = router.TournamentPath + "/" + tr.requestID.String() + router.FinishTournamentPath
+		tr.path = handler.TournamentPath + "/" + tr.requestID + handler.FinishTournamentPath
 		tr.method = http.MethodPost
 
-		if tr.requestID != uuid.Nil {
+		if tr.requestID != idType.Null() {
 			mo.On("FinishTournament", tr.requestID).Return(tr.resultErr)
 		}
 

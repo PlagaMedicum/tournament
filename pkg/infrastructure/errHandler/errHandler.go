@@ -1,4 +1,4 @@
-package errproc
+package errHandler
 
 import (
 	"encoding/json"
@@ -6,12 +6,7 @@ import (
 	"github.com/jackc/pgx"
 	"log"
 	"net/http"
-)
-
-var(
-	NoTournamentWithID = errors.New("no tournament with target id found")
-	NoUserWithID = errors.New("no user with target id found")
-	NotEnoughPoints = errors.New("user have not enough points to join the tournament")
+	"tournament/pkg/usecases"
 )
 
 // HandleJSONErr handles json errors.
@@ -59,12 +54,12 @@ func HandleErr(err error, w http.ResponseWriter) {
 		return
 	}
 
-	if err == NotEnoughPoints {
+	if (err == usecases.ErrNotEnoughPoints) || (err == usecases.ErrFinishedTournament) || (err == usecases.ErrParticipantExists) {
 		writeNotAcceptable(err, w)
 		return
 	}
 
-	if (err == NoUserWithID) || (err == NoTournamentWithID) {
+	if (err == usecases.ErrNoUserWithID) || (err == usecases.ErrNoTournamentWithID) {
 		writeNotFound(err, w)
 		return
 	}

@@ -3,27 +3,34 @@ package main
 import (
 	"log"
 	"net/http"
-	app "tournament/pkg"
 	"tournament/pkg/infrastructure/myhandler"
-	"tournament/pkg/infrastructure/router"
+	"tournament/pkg/infrastructure/myuuid"
+	"tournament/pkg/infrastructure/postgresqlDB"
+	"tournament/pkg/interfaces/repositories/postgresql"
+	http2 "tournament/pkg/interfaces/routers/http"
 	"tournament/pkg/usecases"
-	user "tournament/pkg/user/usecases"
 )
 
 func main() {
+	db := postgresqlDB.DB{}
+	db.InitNewPostgresDB()
 
-
-	app.DB.InitNewPostgresDB()
-
-	h := myhandler.Handler{}
-	u := user.User{}
-	router.RouteForUser(&h, &u)
-	t := usecases.Tournament{}
-	router.RouteForTournament(&h, &t)
+	idType := myuuid.MyUUID{}
+	handler := myhandler.Handler{}
+	dbController := postgresql.PSQLController{
+		Handler: db.Conn,
+		IDType: idType,
+	}
+	controller := usecases.Controller{
+		Repository: &dbController,
+		IDType: idType,
+	}
+	r := http2.Router{IDType: idType}
+	r.Route(&handler, &controller)
 
 	s := http.Server{
 		Addr:    ":8080",
-		Handler: &h,
+		Handler: &handler,
 	}
 
 	err := s.ListenAndServe()

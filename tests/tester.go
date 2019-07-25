@@ -2,13 +2,11 @@ package tests
 
 import (
 	"bytes"
-	uuid "github.com/satori/go.uuid"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"tournament/pkg/domain"
 	"tournament/pkg/infrastructure/myhandler"
-	user "tournament/pkg/user/model"
 )
 
 type tester struct {
@@ -16,12 +14,12 @@ type tester struct {
 	path              string
 	method            string
 	resultErr         error
-	resultID          uuid.UUID
+	resultID          string
 	resultTournament  domain.Tournament
 	requestTournament domain.Tournament
-	resultUser        user.User
-	requestUser       user.User
-	requestID         uuid.UUID
+	resultUser        domain.User
+	requestUser       domain.User
+	requestID         string
 	requestBody       []byte
 	expectedStatus    int
 }
