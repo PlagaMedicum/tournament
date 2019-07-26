@@ -27,12 +27,13 @@ type DB struct {
 }
 
 const (
-	migrationsPath     = "file://postgresqlDB/migrations"
-	testMigrationsPath = "file://../postgresqlDB/test_migrations"
+	migrationsPath     = "file://pkg/infrastructure/postgresqlDB/migrations"
+	testMigrationsPath = "file://../pkg/infrastructure/postgresqlDB/test_migrations"
+	configurationFilePath = "./pkg/infrastructure/postgresqlDB/connConfig.yaml"
 )
 
 func (db *DB) readConfigFile() {
-	file, err := ioutil.ReadFile("./postgresqlDB/connconf.yaml")
+	file, err := ioutil.ReadFile(configurationFilePath)
 	if err != nil {
 		log.Printf("Unable to read yaml file: " + err.Error())
 	}
@@ -51,7 +52,7 @@ func (db *DB) connect(dbName string) *sql.DB {
 			" password="+db.Password+
 			" host="+db.Host+
 			" port="+strconv.FormatUint(db.Port, 10)+
-			" postgresqlDB="+dbName+
+			" database="+dbName+
 			" sslmode=disable")
 	if err != nil {
 		log.Printf("Unable to open connection: " + err.Error())

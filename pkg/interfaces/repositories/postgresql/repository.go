@@ -15,11 +15,17 @@ type NullableID interface{
 	String() string
 }
 
-type idType interface {
+type ID interface {
+	String() string
+	UnmarshalText([]byte) error
+}
+
+type IDFactory interface {
 	NewNullable() NullableID
+	New() ID
 }
 
 type PSQLController struct {
-	Handler handler
-	IDType  idType
+	Handler   handler
+	IDFactory IDFactory
 }

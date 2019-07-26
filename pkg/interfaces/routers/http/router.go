@@ -27,6 +27,6 @@ func (r Router) Route(h *myhandler.Handler, ri usecases.RepositoryInteractor) {
 	h.HandleFunc("^"+handlers.TournamentPath+"$", c.CreateTournamentHandler, http.MethodPost)
 	h.HandleFunc("^"+handlers.TournamentPath+"/"+r.IDType.Regex()+"$", c.GetTournamentHandler, http.MethodGet)
 	h.HandleFunc("^"+handlers.TournamentPath+"/"+r.IDType.Regex()+"$", c.DeleteTournamentHandler, http.MethodDelete)
-	h.HandleFunc("^"+handlers.TournamentPath+"/"+r.IDType.Regex()+handlers.TournamentPath+"$", c.JoinTournamentHandler, http.MethodPost)
-	h.HandleFunc("^"+handlers.TournamentPath+"/"+r.IDType.Regex()+handlers.TournamentPath+"$", c.FinishTournamentHandler, http.MethodPost)
+	h.HandleFunc("^"+handlers.TournamentPath+"/"+r.IDType.Regex()+handlers.JoinTournamentPath+"$", c.JoinTournamentHandler, http.MethodPost)
+	h.HandleFunc("^"+handlers.TournamentPath+"/"+r.IDType.Regex()+handlers.FinishTournamentPath+"$", c.FinishTournamentHandler, http.MethodPost)
 }

@@ -22,7 +22,7 @@ type Repository interface {
 	InsertTournament(string, int, int) (string, error)
 	GetTournaments() ([]domain.Tournament, error)
 	GetTournamentByID(string) (domain.Tournament, error)
-	GetTournamentParticipants(string) ([]string, error)
+	GetTournamentParticipantList(string) ([]string, error)
 	DeleteTournamentByID(string) error
 	AddUserInTournament(string, string) error
 	SetWinner(string, string) error

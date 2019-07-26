@@ -19,7 +19,7 @@ func (c Controller) CreateTournamentHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	id, err := c.CreateTournament(t.Name, t.Deposit)
+	t.ID, err = c.CreateTournament(t.Name, t.Deposit)
 	if err != nil {
 		errHandler.HandleErr(err, w)
 		return
@@ -27,7 +27,7 @@ func (c Controller) CreateTournamentHandler(w http.ResponseWriter, r *http.Reque
 
 	w.WriteHeader(http.StatusCreated)
 
-	err = json.NewEncoder(w).Encode(id)
+	err = json.NewEncoder(w).Encode(t.ID)
 	if err != nil {
 		errHandler.HandleJSONErr(err, w)
 		return

@@ -15,17 +15,16 @@ func main() {
 	db := postgresqlDB.DB{}
 	db.InitNewPostgresDB()
 
-	idType := myuuid.MyUUID{}
 	handler := myhandler.Handler{}
 	dbController := postgresql.PSQLController{
-		Handler: db.Conn,
-		IDType: idType,
+		Handler:   db.Conn,
+		IDFactory: myuuid.IDFactory{},
 	}
 	controller := usecases.Controller{
 		Repository: &dbController,
-		IDType: idType,
+		IDType: myuuid.IDType{},
 	}
-	r := http2.Router{IDType: idType}
+	r := http2.Router{IDType: myuuid.IDType{}}
 	r.Route(&handler, &controller)
 
 	s := http.Server{

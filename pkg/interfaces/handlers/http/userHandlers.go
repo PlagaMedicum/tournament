@@ -19,7 +19,7 @@ func (c Controller) CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := c.CreateUser(u.Name)
+	u.ID, err = c.CreateUser(u.Name)
 	if err != nil {
 		errHandler.HandleErr(err, w)
 		return
@@ -27,7 +27,7 @@ func (c Controller) CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 
-	err = json.NewEncoder(w).Encode(id)
+	err = json.NewEncoder(w).Encode(u.ID)
 	if err != nil {
 		errHandler.HandleJSONErr(err, w)
 		return

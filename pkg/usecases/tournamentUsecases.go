@@ -30,7 +30,7 @@ func (c *Controller) DeleteTournament(id string) error {
 }
 
 func (c *Controller) checkUserIsParticipant(u domain.User, t domain.Tournament) error {
-	participants, err := c.Repository.GetTournamentParticipants(t.ID)
+	participants, err := c.Repository.GetTournamentParticipantList(t.ID)
 	if err != nil {
 		return err
 	}

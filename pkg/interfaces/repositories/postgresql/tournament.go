@@ -7,18 +7,19 @@ import (
 )
 
 func (c *PSQLController) InsertTournament(name string, deposit int, prize int) (string, error){
-	var id string
+	id := c.IDFactory.New()
+
 	err := c.Handler.QueryRow(`
 			insert into tournaments (name, deposit, prize) values
 				($1, $2, $3) returning id;
 		`, name, deposit, prize).Scan(id)
-	return id, err
+	return id.String(), err
 }
 
 func (c *PSQLController) scanTournamentRow(row *pgx.Rows) (domain.Tournament, error) {
 	t := domain.Tournament{}
-	participantsID := c.IDType.NewNullable()
-	winnerID := c.IDType.NewNullable()
+	participantsID := c.IDFactory.NewNullable()
+	winnerID := c.IDFactory.NewNullable()
 
 	err := row.Scan(&t.ID, &t.Name, &t.Deposit, &t.Prize, &participantsID, &winnerID)
 	if err != nil {
@@ -44,17 +45,17 @@ func (c *PSQLController) GetTournaments() ([]domain.Tournament, error) {
 		return nil, err
 	}
 
-	var tournamentList []domain.Tournament
+	var tournaments []domain.Tournament
 	for rows.Next() {
 		t, err := c.scanTournamentRow(rows)
 		if err != nil {
 			return nil, err
 		}
 
-		tournamentList = append(tournamentList, t)
+		tournaments = append(tournaments, t)
 	}
 
-	return tournamentList, nil
+	return tournaments, nil
 }
 
 func (c *PSQLController) GetTournamentByID(id string) (domain.Tournament, error){
@@ -105,7 +106,7 @@ func (c *PSQLController) DeleteTournamentByID(id string) error {
 }
 
 func (c *PSQLController) GetTournamentParticipants(id string) (NullableID, error) {
-	pid := c.IDType.NewNullable()
+	pid := c.IDFactory.NewNullable()
 
 	err := c.Handler.QueryRow(`select users from tournaments where id = $1;`,
 		id).Scan(&pid)

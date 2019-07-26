@@ -1,4 +1,4 @@
-package tests
+package http
 
 import (
 	"bytes"
@@ -9,10 +9,11 @@ import (
 	"tournament/pkg/infrastructure/myhandler"
 )
 
-type tester struct {
+type testCase struct {
 	caseName          string
 	path              string
 	method            string
+	noMock			  bool
 	resultErr         error
 	resultID          string
 	resultTournament  domain.Tournament
@@ -20,13 +21,13 @@ type tester struct {
 	resultUser        domain.User
 	requestUser       domain.User
 	requestID         string
-	requestBody       []byte
+	requestBody       string
 	expectedStatus    int
 }
 
-func handleTester(t *testing.T, h *myhandler.Handler, tr tester) {
+func handleTestCase(t *testing.T, h *myhandler.Handler, tc testCase) {
 	r, err := http.NewRequest(
-		tr.method, tr.path, bytes.NewBuffer(tr.requestBody))
+		tc.method, tc.path, bytes.NewBuffer([]byte(tc.requestBody)))
 	if err != nil {
 		t.Errorf("Cannot encode request: '%v'", err)
 	}
@@ -35,11 +36,11 @@ func handleTester(t *testing.T, h *myhandler.Handler, tr tester) {
 
 	h.ServeHTTP(w, r)
 
-	if w.Code != tr.expectedStatus {
-		t.Errorf("Test case: %s. Wrong status code.\nExpected: %v\nGot: %v\nResponse body is: %s",
-			tr.caseName, tr.expectedStatus, w.Code, w.Body)
+	if w.Code != tc.expectedStatus {
+		t.Errorf("FAIL! Test case: %s. Wrong status code.\nURL-Path: %v\nExpected: %v\nGot: %v\nResponse body is: \n'''\n%s\n'''\nTester info: %+v",
+			tc.caseName, r.URL.Path, tc.expectedStatus, w.Code, w.Body, tc)
 		return
 	}
 
-	t.Logf("Test case PASSED: %s", tr.caseName)
+	t.Logf("PASSED. Test case: %s", tc.caseName)
 }
