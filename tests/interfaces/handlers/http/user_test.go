@@ -24,7 +24,6 @@ func TestCreateUserHandler(t *testing.T) {
 	testCases := []testCase{
 		{
 			caseName:  "everything ok",
-			resultErr: nil,
 			resultID:  idFactory.NewString(),
 			requestUser: domain.User{
 				Name: "Daniil Dankovskij",
@@ -78,7 +77,6 @@ func TestGetUserHandler(t *testing.T) {
 	testCases := []testCase{
 		{
 			caseName:  "everything ok",
-			resultErr: nil,
 			resultUser: domain.User{
 				Name: "Anna Angel",
 			},
@@ -121,7 +119,6 @@ func TestDeleteUserHandler(t *testing.T) {
 	testCases := []testCase{
 		{
 			caseName:       "everything ok",
-			resultErr:      nil,
 			requestID:      idFactory.NewString(),
 			expectedStatus: http.StatusOK,
 		},
@@ -160,7 +157,6 @@ func TestTakePointsHandler(t *testing.T) {
 	testCases := []testCase{
 		{
 			caseName:       "everything ok",
-			resultErr:      nil,
 			requestID:      idFactory.NewString(),
 			requestBody:    `{"points": 1}`,
 			expectedStatus: http.StatusOK,
@@ -208,7 +204,6 @@ func TestGivePointsHandler(t *testing.T) {
 	testCases := []testCase{
 		{
 			caseName:       "everything ok",
-			resultErr:      nil,
 			requestID:      idFactory.NewString(),
 			requestBody:    `{"points": 1}`,
 			expectedStatus: http.StatusOK,

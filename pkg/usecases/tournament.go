@@ -20,12 +20,7 @@ func (c *Controller) GetTournament(id string) (domain.Tournament, error) {
 
 // DeleteTournament deletes tournament instance with ID from Repository.
 func (c *Controller) DeleteTournament(id string) error {
-	t, err := c.Repository.GetTournamentByID(id)
-	if err != nil {
-		return err
-	}
-
-	err = c.Repository.DeleteTournamentByID(t.ID)
+	err := c.Repository.DeleteTournamentByID(id)
 	return err
 }
 
@@ -67,7 +62,7 @@ func (c *Controller) JoinTournament(tournamentID string, userID string) error {
 	}
 
 	u.Balance -= t.Deposit
-	err = c.Repository.UpdateUserBalanceByID(u.Balance, u.ID)
+	err = c.Repository.UpdateUserBalanceByID(u.ID, u.Balance)
 	return err
 }
 
@@ -110,7 +105,7 @@ func (c *Controller) FinishTournament(id string) error {
 		return ErrFinishedTournament
 	}
 
-	winner, err := c.findWinner(t.GetParticipants())
+	winner, err := c.findWinner(t.Participants)
 	if err != nil {
 		return err
 	}
@@ -122,6 +117,6 @@ func (c *Controller) FinishTournament(id string) error {
 		return err
 	}
 
-	err = c.Repository.UpdateUserBalanceByID(winner.Balance, winner.ID)
+	err = c.Repository.UpdateUserBalanceByID(winner.ID, winner.Balance)
 	return err
 }

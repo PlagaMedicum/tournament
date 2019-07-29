@@ -80,7 +80,7 @@ func (c *PSQLController) DeleteUserByID(uid string) error {
 	return err
 }
 
-func (c *PSQLController) UpdateUserBalanceByID(balance int, uid string) error {
+func (c *PSQLController) UpdateUserBalanceByID(uid string, balance int) error {
 	id := c.IDFactory.New()
 
 	err := id.UnmarshalText([]byte(uid))

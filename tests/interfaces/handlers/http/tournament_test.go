@@ -25,7 +25,6 @@ func TestCreateTournamentHandler(t *testing.T) {
 	testCases := []testCase{
 		{
 			caseName:  "everything ok",
-			resultErr: nil,
 			resultID:  idFactory.NewString(),
 			requestTournament: domain.Tournament{
 				Name:    "Unreal Tournament",
@@ -81,7 +80,6 @@ func TestGetTournamentHandler(t *testing.T) {
 	testCases := []testCase{
 		{
 			caseName:  "everything ok",
-			resultErr: nil,
 			resultTournament: domain.Tournament{
 				Name: "test tour",
 			},
@@ -124,7 +122,6 @@ func TestDeleteTournamentHandler(t *testing.T) {
 	testCases := []testCase{
 		{
 			caseName:       "everything ok",
-			resultErr:      nil,
 			requestID:      idFactory.NewString(),
 			expectedStatus: http.StatusOK,
 		},
@@ -164,7 +161,6 @@ func TestJoinTournamentHandler(t *testing.T) {
 	testCases := []testCase{
 		{
 			caseName:       "everything ok",
-			resultErr:      nil,
 			requestID:      idFactory.NewString(),
 			requestBody:    `{"userId": "` + requestUserID + `"}`,
 			expectedStatus: http.StatusOK,
@@ -212,7 +208,6 @@ func TestFinishTournamentHandler(t *testing.T) {
 	testCases := []testCase{
 		{
 			caseName:       "everything ok",
-			resultErr:      nil,
 			requestID:      idFactory.NewString(),
 			expectedStatus: http.StatusOK,
 		},

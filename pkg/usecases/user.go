@@ -20,12 +20,7 @@ func (c *Controller) GetUser(id string) (domain.User, error) {
 
 // DeleteUser deletes user instance with ID from Repository.
 func (c *Controller) DeleteUser(id string) error {
-	u, err := c.Repository.GetUserByID(id)
-	if err != nil {
-		return err
-	}
-
-	err = c.Repository.DeleteUserByID(u.ID)
+	err := c.Repository.DeleteUserByID(id)
 	return err
 }
 
@@ -38,6 +33,6 @@ func (c *Controller) FundUser(id string, points int) error {
 
 	u.Balance += points
 
-	err = c.Repository.UpdateUserBalanceByID(u.Balance, u.ID)
+	err = c.Repository.UpdateUserBalanceByID(u.ID, u.Balance)
 	return err
 }
