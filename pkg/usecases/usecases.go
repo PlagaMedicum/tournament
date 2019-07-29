@@ -11,6 +11,7 @@ var (
 	ErrNoTournamentWithID = errors.New("no tournament with target id found")
 	ErrParticipantExists  = errors.New("this user already joined the tournament")
 	ErrFinishedTournament = errors.New("this tournament already finished")
+	ErrNoParticipants	  = errors.New("cannot assign winner while there is no participants")
 )
 
 type Repository interface {

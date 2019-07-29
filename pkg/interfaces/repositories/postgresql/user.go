@@ -19,9 +19,9 @@ func (c *PSQLController) scanUserRow(row *pgx.Rows) (domain.User, error) {
 	u := domain.User{}
 	id := c.IDFactory.New()
 
-	err := row.Scan(&id, &u.Name, &u.Balance)
+	err := row.Scan(id, &u.Name, &u.Balance)
 	if err != nil {
-		return domain.User{}, err
+		return u, err
 	}
 
 	u.ID = id.String()
@@ -57,9 +57,8 @@ func (c *PSQLController) GetUserByID(uid string) (domain.User, error){
 		return u, err
 	}
 
-	err = c.Handler.QueryRow(`
-			select from users where id = $1;
-		`, id).Scan(&id, &u.Name, &u.Balance)
+	err = c.Handler.QueryRow(`select * from users where id = $1;`,
+		id).Scan(id, &u.Name, &u.Balance)
 	if err != nil {
 		return u, err
 	}

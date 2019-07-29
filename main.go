@@ -7,7 +7,7 @@ import (
 	"tournament/pkg/infrastructure/myuuid"
 	"tournament/pkg/infrastructure/postgresqlDB"
 	"tournament/pkg/interfaces/repositories/postgresql"
-	http2 "tournament/pkg/interfaces/routers/http"
+	httpRouter "tournament/pkg/interfaces/routers/http"
 	"tournament/pkg/usecases"
 )
 
@@ -24,7 +24,8 @@ func main() {
 		Repository: &dbController,
 		IDType: myuuid.IDType{},
 	}
-	r := http2.Router{IDType: myuuid.IDType{}}
+
+	r := httpRouter.Router{IDType: myuuid.IDType{}}
 	r.Route(&handler, &controller)
 
 	s := http.Server{

@@ -4,7 +4,7 @@ import (
 	"tournament/pkg/domain"
 )
 
-const defaultPrize   = 4000
+const defaultPrize = 4000
 
 // CreateTournament inserts new tournament instance in Repository.
 func (c *Controller) CreateTournament(name string, deposit int) (string, error) {
@@ -30,13 +30,8 @@ func (c *Controller) DeleteTournament(id string) error {
 }
 
 func (c *Controller) checkUserIsParticipant(u domain.User, t domain.Tournament) error {
-	participants, err := c.Repository.GetTournamentParticipantList(t.ID)
-	if err != nil {
-		return err
-	}
-
-	for _, participantID := range participants {
-		if participantID == u.ID{
+	for _, p := range t.Participants {
+		if p == u.ID {
 			return ErrParticipantExists
 		}
 	}
@@ -62,64 +57,71 @@ func (c *Controller) JoinTournament(tournamentID string, userID string) error {
 		return err
 	}
 
-	if u.Balance >= t.Deposit {
-		err := c.Repository.AddUserInTournament(u.ID, t.ID)
-		if err != nil {
-			return err
-		}
+	if u.Balance < t.Deposit {
+		return ErrNotEnoughPoints
+	}
 
-		u.Balance -= t.Deposit
-		err = c.Repository.UpdateUserBalanceByID(u.Balance, u.ID)
+	err = c.Repository.AddUserInTournament(u.ID, t.ID)
+	if err != nil {
 		return err
 	}
-	return ErrNotEnoughPoints
+
+	u.Balance -= t.Deposit
+	err = c.Repository.UpdateUserBalanceByID(u.Balance, u.ID)
+	return err
 }
 
-func (c *Controller) findWinner(pIDList []string)  (domain.User, error) {
-	uList, err := c.Repository.GetUsers()
+func (c *Controller) findWinner(participantIDs []string) (domain.User, error) {
+	users, err := c.Repository.GetUsers()
 	if err != nil {
 		return domain.User{}, err
 	}
 
-	var winner domain.User
-	for _, pid := range pIDList {
-		for _, u := range uList {
-			if u.ID == pid {
-				if u.Balance > winner.Balance {
-					winner = u
-				}
-
-				break
+	winner := domain.User{ID: c.IDType.Null()}
+	for _, pid := range participantIDs {
+		for _, u := range users {
+			if u.ID != pid {
+				continue
 			}
+
+			if u.Balance >= winner.Balance {
+				winner = u
+			}
+
+			break
 		}
 	}
 
-	return winner, nil
+	if winner.ID != c.IDType.Null() {
+		return winner, nil
+	}
+	return winner, ErrNoParticipants
 }
 
-// FinishTournament updates winner field of the tournament with id.
-// Adds prize to the winner's balance.
+// FinishTournament updates winner field of the tournament with id
+// and adds prize to the winner's balance.
 func (c *Controller) FinishTournament(id string) error {
 	t, err := c.Repository.GetTournamentByID(id)
 	if err != nil {
 		return err
 	}
 
-	if t.WinnerID == c.IDType.Null() {
-		winner, err := c.findWinner(t.GetParticipants())
-		if err != nil {
-			return err
-		}
+	if t.WinnerID != c.IDType.Null() {
+		return ErrFinishedTournament
+	}
 
-		winner.Balance += t.Prize
-
-		err = c.Repository.SetWinner(winner.ID, t.ID)
-		if err != nil {
-			return err
-		}
-
-		err = c.Repository.UpdateUserBalanceByID(winner.Balance, winner.ID)
+	winner, err := c.findWinner(t.GetParticipants())
+	if err != nil {
 		return err
 	}
-	return ErrFinishedTournament
+
+	winner.Balance += t.Prize
+
+	err = c.Repository.SetWinner(winner.ID, t.ID)
+	if err != nil {
+		return err
+	}
+
+	err = c.Repository.UpdateUserBalanceByID(winner.Balance, winner.ID)
+	return err
 }

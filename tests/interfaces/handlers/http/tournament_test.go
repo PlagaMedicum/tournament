@@ -21,12 +21,12 @@ const(
 
 // TestCreateTournamentHandler tests creation of tournament.
 func TestCreateTournamentHandler(t *testing.T) {
-	idFabric := myuuid.IDFactory{}
+	idFactory := myuuid.IDFactory{}
 	testCases := []testCase{
 		{
 			caseName:  "everything ok",
 			resultErr: nil,
-			resultID:  idFabric.NewString(),
+			resultID:  idFactory.NewString(),
 			requestTournament: domain.Tournament{
 				Name:    "Unreal Tournament",
 				Deposit: 10000,
@@ -44,7 +44,7 @@ func TestCreateTournamentHandler(t *testing.T) {
 		{
 			caseName:  "wrong tournament error",
 			resultErr: errors.New("i'm the bad err"),
-			resultID:  idFabric.NewString(),
+			resultID:  idFactory.NewString(),
 			requestTournament: domain.Tournament{
 				Name:    "test tour",
 				Deposit: 1,
@@ -77,7 +77,7 @@ func TestCreateTournamentHandler(t *testing.T) {
 
 // TestGetTournamentHandler tests getting of tournament's information.
 func TestGetTournamentHandler(t *testing.T) {
-	idFabric := myuuid.IDFactory{}
+	idFactory := myuuid.IDFactory{}
 	testCases := []testCase{
 		{
 			caseName:  "everything ok",
@@ -85,14 +85,14 @@ func TestGetTournamentHandler(t *testing.T) {
 			resultTournament: domain.Tournament{
 				Name: "test tour",
 			},
-			requestID:      idFabric.NewString(),
+			requestID:      idFactory.NewString(),
 			expectedStatus: http.StatusOK,
 		},
 		{
 			caseName:         "wrong tournament error",
 			resultErr:        errors.New("i'm the bad err"),
 			resultTournament: domain.Tournament{},
-			requestID:        idFabric.NewString(),
+			requestID:        idFactory.NewString(),
 			expectedStatus:   http.StatusBadRequest,
 		},
 	}
@@ -120,18 +120,18 @@ func TestGetTournamentHandler(t *testing.T) {
 
 // TestGetTournamentHandler tests deleting of tournament.
 func TestDeleteTournamentHandler(t *testing.T) {
-	idFabric := myuuid.IDFactory{}
+	idFactory := myuuid.IDFactory{}
 	testCases := []testCase{
 		{
 			caseName:       "everything ok",
 			resultErr:      nil,
-			requestID:      idFabric.NewString(),
+			requestID:      idFactory.NewString(),
 			expectedStatus: http.StatusOK,
 		},
 		{
 			caseName:       "wrong tournament error",
 			resultErr:      errors.New("i'm the bad err"),
-			requestID:      idFabric.NewString(),
+			requestID:      idFactory.NewString(),
 			expectedStatus: http.StatusBadRequest,
 		},
 	}
@@ -159,13 +159,13 @@ func TestDeleteTournamentHandler(t *testing.T) {
 
 // TestJoinTournamentHandler tests joining tournament.
 func TestJoinTournamentHandler(t *testing.T) {
-	idFabric := myuuid.IDFactory{}
-	requestUserID := idFabric.NewString()
+	idFactory := myuuid.IDFactory{}
+	requestUserID := idFactory.NewString()
 	testCases := []testCase{
 		{
 			caseName:       "everything ok",
 			resultErr:      nil,
-			requestID:      idFabric.NewString(),
+			requestID:      idFactory.NewString(),
 			requestBody:    `{"userId": "` + requestUserID + `"}`,
 			expectedStatus: http.StatusOK,
 		},
@@ -173,13 +173,13 @@ func TestJoinTournamentHandler(t *testing.T) {
 			caseName:       "wrong body",
 			noMock:         true,
 			requestBody:    `i'm the wrong body"`,
-			requestID:      idFabric.NewString(),
+			requestID:      idFactory.NewString(),
 			expectedStatus: http.StatusBadRequest,
 		},
 		{
 			caseName:       "wrong tournament error",
 			resultErr:      errors.New("i'm the bad err"),
-			requestID:      idFabric.NewString(),
+			requestID:      idFactory.NewString(),
 			requestBody:    `{"userId": "` + requestUserID + `"}`,
 			expectedStatus: http.StatusBadRequest,
 		},
@@ -208,18 +208,18 @@ func TestJoinTournamentHandler(t *testing.T) {
 
 // TestFinishTournamentHandler tests joining tournament.
 func TestFinishTournamentHandler(t *testing.T) {
-	idFabric := myuuid.IDFactory{}
+	idFactory := myuuid.IDFactory{}
 	testCases := []testCase{
 		{
 			caseName:       "everything ok",
 			resultErr:      nil,
-			requestID:      idFabric.NewString(),
+			requestID:      idFactory.NewString(),
 			expectedStatus: http.StatusOK,
 		},
 		{
 			caseName:       "wrong tournament error",
 			resultErr:      errors.New("i'm the bad err"),
-			requestID:      idFabric.NewString(),
+			requestID:      idFactory.NewString(),
 			expectedStatus: http.StatusBadRequest,
 		},
 	}

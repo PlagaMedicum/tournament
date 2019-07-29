@@ -20,12 +20,12 @@ const(
 
 // TestCreateUserHandler tests creation of user.
 func TestCreateUserHandler(t *testing.T) {
-	idFabric := myuuid.IDFactory{}
+	idFactory := myuuid.IDFactory{}
 	testCases := []testCase{
 		{
 			caseName:  "everything ok",
 			resultErr: nil,
-			resultID:  idFabric.NewString(),
+			resultID:  idFactory.NewString(),
 			requestUser: domain.User{
 				Name: "Daniil Dankovskij",
 			},
@@ -42,7 +42,7 @@ func TestCreateUserHandler(t *testing.T) {
 		{
 			caseName:  "wrong user error",
 			resultErr: errors.New("i'm the bad err"),
-			resultID:  idFabric.NewString(),
+			resultID:  idFactory.NewString(),
 			requestUser: domain.User{
 				Name: "Artemij Burah",
 			},
@@ -74,7 +74,7 @@ func TestCreateUserHandler(t *testing.T) {
 
 // TestGetUserHandler tests getting of user's information.
 func TestGetUserHandler(t *testing.T) {
-	idFabric := myuuid.IDFactory{}
+	idFactory := myuuid.IDFactory{}
 	testCases := []testCase{
 		{
 			caseName:  "everything ok",
@@ -82,14 +82,14 @@ func TestGetUserHandler(t *testing.T) {
 			resultUser: domain.User{
 				Name: "Anna Angel",
 			},
-			requestID:      idFabric.NewString(),
+			requestID:      idFactory.NewString(),
 			expectedStatus: http.StatusOK,
 		},
 		{
 			caseName:       "wrong user error",
 			resultErr:      errors.New("i'm the bad err"),
 			resultUser:     domain.User{},
-			requestID:      idFabric.NewString(),
+			requestID:      idFactory.NewString(),
 			expectedStatus: http.StatusBadRequest,
 		},
 	}
@@ -117,18 +117,18 @@ func TestGetUserHandler(t *testing.T) {
 
 // TestDeleteUserHandler tests deleting of user.
 func TestDeleteUserHandler(t *testing.T) {
-	idFabric := myuuid.IDFactory{}
+	idFactory := myuuid.IDFactory{}
 	testCases := []testCase{
 		{
 			caseName:       "everything ok",
 			resultErr:      nil,
-			requestID:      idFabric.NewString(),
+			requestID:      idFactory.NewString(),
 			expectedStatus: http.StatusOK,
 		},
 		{
 			caseName:       "wrong user error",
 			resultErr:      errors.New("i'm the bad err"),
-			requestID:      idFabric.NewString(),
+			requestID:      idFactory.NewString(),
 			expectedStatus: http.StatusBadRequest,
 		},
 	}
@@ -156,12 +156,12 @@ func TestDeleteUserHandler(t *testing.T) {
 
 // TestTakePointsHandler tests taking points from user.
 func TestTakePointsHandler(t *testing.T) {
-	idFabric := myuuid.IDFactory{}
+	idFactory := myuuid.IDFactory{}
 	testCases := []testCase{
 		{
 			caseName:       "everything ok",
 			resultErr:      nil,
-			requestID:      idFabric.NewString(),
+			requestID:      idFactory.NewString(),
 			requestBody:    `{"points": 1}`,
 			expectedStatus: http.StatusOK,
 		},
@@ -169,13 +169,13 @@ func TestTakePointsHandler(t *testing.T) {
 			caseName:       "wrong body",
 			noMock:         true,
 			requestBody:    `i'm the wrong body"`,
-			requestID:      idFabric.NewString(),
+			requestID:      idFactory.NewString(),
 			expectedStatus: http.StatusBadRequest,
 		},
 		{
 			caseName:       "wrong user error",
 			resultErr:      errors.New("i'm the bad err"),
-			requestID:      idFabric.NewString(),
+			requestID:      idFactory.NewString(),
 			requestBody:    `{"points": 1}`,
 			expectedStatus: http.StatusBadRequest,
 		},
@@ -204,12 +204,12 @@ func TestTakePointsHandler(t *testing.T) {
 
 // TestGivePointsHandler tests giving points to user.
 func TestGivePointsHandler(t *testing.T) {
-	idFabric := myuuid.IDFactory{}
+	idFactory := myuuid.IDFactory{}
 	testCases := []testCase{
 		{
 			caseName:       "everything ok",
 			resultErr:      nil,
-			requestID:      idFabric.NewString(),
+			requestID:      idFactory.NewString(),
 			requestBody:    `{"points": 1}`,
 			expectedStatus: http.StatusOK,
 		},
@@ -217,13 +217,13 @@ func TestGivePointsHandler(t *testing.T) {
 			caseName:       "wrong body",
 			noMock:         true,
 			requestBody:    `i'm the wrong body"`,
-			requestID:      idFabric.NewString(),
+			requestID:      idFactory.NewString(),
 			expectedStatus: http.StatusBadRequest,
 		},
 		{
 			caseName:       "wrong user error",
 			resultErr:      errors.New("i'm the bad err"),
-			requestID:      idFabric.NewString(),
+			requestID:      idFactory.NewString(),
 			requestBody:    `{"points": 1}`,
 			expectedStatus: http.StatusBadRequest,
 		},
