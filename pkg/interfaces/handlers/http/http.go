@@ -14,5 +14,5 @@ const (
 )
 
 type Controller struct {
-	usecases.RepositoryInteractor
+	usecases.Usecases
 }

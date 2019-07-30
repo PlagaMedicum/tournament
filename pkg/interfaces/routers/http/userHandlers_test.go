@@ -8,47 +8,43 @@ import (
 	"tournament/pkg/infrastructure/myhandler"
 	"tournament/pkg/infrastructure/myuuid"
 	handler "tournament/pkg/interfaces/handlers/http"
-	router "tournament/pkg/interfaces/routers/http"
 )
 
 const(
-	methodNameCreateTournament = "CreateTournament"
-	methodNameGetTournament    = "GetTournament"
-	methodNameDeleteTournament = "DeleteTournament"
-	methodNameJoinTournament   = "JoinTournament"
-	methodNameFinishTournament = "FinishTournament"
+	methodNameCreateUser       = "CreateUser"
+	methodNameGetUser          = "GetUser"
+	methodNameDeleteUser       = "DeleteUser"
+	methodNameFundUser   	   = "FundUser"
 )
 
-// TestCreateTournamentHandler tests creation of tournament.
-func TestCreateTournamentHandler(t *testing.T) {
+// TestCreateUserHandler tests creation of user.
+func TestCreateUserHandler(t *testing.T) {
 	idFactory := myuuid.IDFactory{}
 	testCases := []testCase{
 		{
 			caseName:  "everything ok",
 			resultID:  idFactory.NewString(),
-			requestTournament: domain.Tournament{
-				Name:    "Unreal Tournament",
-				Deposit: 10000,
+			requestUser: domain.User{
+				Name: "Daniil Dankovskij",
 			},
-			requestBody:    `{"name": "Unreal Tournament", "deposit": 10000}`,
+			requestBody:    `{"name": "Daniil Dankovskij"}`,
 			expectedStatus: http.StatusCreated,
 		},
 		{
-			caseName:          "wrong body",
-			noMock:            true,
-			requestBody:       `i'm the wrong body"`,
-			requestTournament: domain.Tournament{},
-			expectedStatus:    http.StatusBadRequest,
+			caseName:       "wrong body",
+			noMock:         true,
+			requestBody:    `i'm the wrong body"`,
+			requestUser:    domain.User{},
+			expectedStatus: http.StatusBadRequest,
 		},
 		{
-			caseName:  "wrong tournament error",
+			caseName:  "wrong user error",
 			resultErr: errors.New("i'm the bad err"),
 			resultID:  idFactory.NewString(),
-			requestTournament: domain.Tournament{
-				Name:    "test tour",
-				Deposit: 1,
+			requestUser: domain.User{
+				Name: "Artemij Burah",
 			},
-			requestBody:    `{"name": "test tour", "deposit": 1}`,
+			requestBody:    `{"name": "Artemij Burah"}`,
 			expectedStatus: http.StatusBadRequest,
 		},
 	}
@@ -56,15 +52,15 @@ func TestCreateTournamentHandler(t *testing.T) {
 	idType := myuuid.IDType{}
 	mo := mockedRepositoryInteractor{}
 	h := myhandler.Handler{}
-	r := router.Router{IDType: idType}
+	r := Router{IDType: idType}
 	r.Route(&h, &mo)
 
 	for _, tc := range testCases {
-		tc.path = handler.TournamentPath
+		tc.path = handler.UserPath
 		tc.method = http.MethodPost
 
 		if !tc.noMock {
-			mo.On(methodNameCreateTournament, tc.requestTournament.Name, tc.requestTournament.Deposit).Return(tc.resultID, tc.resultErr)
+			mo.On(methodNameCreateUser, tc.requestUser.Name).Return(tc.resultID, tc.resultErr)
 		}
 
 		handleTestCase(t, &h, tc)
@@ -74,39 +70,39 @@ func TestCreateTournamentHandler(t *testing.T) {
 	mo.AssertExpectations(t)
 }
 
-// TestGetTournamentHandler tests getting of tournament's information.
-func TestGetTournamentHandler(t *testing.T) {
+// TestGetUserHandler tests getting of user's information.
+func TestGetUserHandler(t *testing.T) {
 	idFactory := myuuid.IDFactory{}
 	testCases := []testCase{
 		{
 			caseName:  "everything ok",
-			resultTournament: domain.Tournament{
-				Name: "test tour",
+			resultUser: domain.User{
+				Name: "Anna Angel",
 			},
 			requestID:      idFactory.NewString(),
 			expectedStatus: http.StatusOK,
 		},
 		{
-			caseName:         "wrong tournament error",
-			resultErr:        errors.New("i'm the bad err"),
-			resultTournament: domain.Tournament{},
-			requestID:        idFactory.NewString(),
-			expectedStatus:   http.StatusBadRequest,
+			caseName:       "wrong user error",
+			resultErr:      errors.New("i'm the bad err"),
+			resultUser:     domain.User{},
+			requestID:      idFactory.NewString(),
+			expectedStatus: http.StatusBadRequest,
 		},
 	}
 
 	idType := myuuid.IDType{}
 	mo := mockedRepositoryInteractor{}
 	h := myhandler.Handler{}
-	r := router.Router{IDType: idType}
+	r := Router{IDType: idType}
 	r.Route(&h, &mo)
 
 	for _, tc := range testCases {
-		tc.path = handler.TournamentPath + "/" + tc.requestID
+		tc.path = handler.UserPath + "/" + tc.requestID
 		tc.method = http.MethodGet
 
 		if !tc.noMock {
-			mo.On(methodNameGetTournament, tc.requestID).Return(tc.resultTournament, tc.resultErr)
+			mo.On(methodNameGetUser, tc.requestID).Return(tc.resultUser, tc.resultErr)
 		}
 
 		handleTestCase(t, &h, tc)
@@ -116,8 +112,8 @@ func TestGetTournamentHandler(t *testing.T) {
 	mo.AssertExpectations(t)
 }
 
-// TestGetTournamentHandler tests deleting of tournament.
-func TestDeleteTournamentHandler(t *testing.T) {
+// TestDeleteUserHandler tests deleting of user.
+func TestDeleteUserHandler(t *testing.T) {
 	idFactory := myuuid.IDFactory{}
 	testCases := []testCase{
 		{
@@ -126,7 +122,7 @@ func TestDeleteTournamentHandler(t *testing.T) {
 			expectedStatus: http.StatusOK,
 		},
 		{
-			caseName:       "wrong tournament error",
+			caseName:       "wrong user error",
 			resultErr:      errors.New("i'm the bad err"),
 			requestID:      idFactory.NewString(),
 			expectedStatus: http.StatusBadRequest,
@@ -136,15 +132,15 @@ func TestDeleteTournamentHandler(t *testing.T) {
 	idType := myuuid.IDType{}
 	mo := mockedRepositoryInteractor{}
 	h := myhandler.Handler{}
-	r := router.Router{IDType: idType}
+	r := Router{IDType: idType}
 	r.Route(&h, &mo)
 
 	for _, tc := range testCases {
-		tc.path = handler.TournamentPath + "/" + tc.requestID
+		tc.path = handler.UserPath + "/" + tc.requestID
 		tc.method = http.MethodDelete
 
 		if !tc.noMock {
-			mo.On(methodNameDeleteTournament, tc.requestID).Return(tc.resultErr)
+			mo.On(methodNameDeleteUser, tc.requestID).Return(tc.resultErr)
 		}
 
 		handleTestCase(t, &h, tc)
@@ -154,15 +150,14 @@ func TestDeleteTournamentHandler(t *testing.T) {
 	mo.AssertExpectations(t)
 }
 
-// TestJoinTournamentHandler tests joining tournament.
-func TestJoinTournamentHandler(t *testing.T) {
+// TestTakePointsHandler tests taking points from user.
+func TestTakePointsHandler(t *testing.T) {
 	idFactory := myuuid.IDFactory{}
-	requestUserID := idFactory.NewString()
 	testCases := []testCase{
 		{
 			caseName:       "everything ok",
 			requestID:      idFactory.NewString(),
-			requestBody:    `{"userId": "` + requestUserID + `"}`,
+			requestBody:    `{"points": 1}`,
 			expectedStatus: http.StatusOK,
 		},
 		{
@@ -173,10 +168,10 @@ func TestJoinTournamentHandler(t *testing.T) {
 			expectedStatus: http.StatusBadRequest,
 		},
 		{
-			caseName:       "wrong tournament error",
+			caseName:       "wrong user error",
 			resultErr:      errors.New("i'm the bad err"),
 			requestID:      idFactory.NewString(),
-			requestBody:    `{"userId": "` + requestUserID + `"}`,
+			requestBody:    `{"points": 1}`,
 			expectedStatus: http.StatusBadRequest,
 		},
 	}
@@ -184,15 +179,15 @@ func TestJoinTournamentHandler(t *testing.T) {
 	idType := myuuid.IDType{}
 	mo := mockedRepositoryInteractor{}
 	h := myhandler.Handler{}
-	r := router.Router{IDType: idType}
+	r := Router{IDType: idType}
 	r.Route(&h, &mo)
 
 	for _, tc := range testCases {
-		tc.path = handler.TournamentPath + "/" + tc.requestID + handler.JoinTournamentPath
+		tc.path = handler.UserPath + "/" + tc.requestID + handler.TakingPointsPath
 		tc.method = http.MethodPost
 
 		if !tc.noMock {
-			mo.On(methodNameJoinTournament, tc.requestID, requestUserID).Return(tc.resultErr)
+			mo.On(methodNameFundUser, tc.requestID, -1).Return(tc.resultErr)
 		}
 
 		handleTestCase(t, &h, tc)
@@ -202,19 +197,28 @@ func TestJoinTournamentHandler(t *testing.T) {
 	mo.AssertExpectations(t)
 }
 
-// TestFinishTournamentHandler tests joining tournament.
-func TestFinishTournamentHandler(t *testing.T) {
+// TestGivePointsHandler tests giving points to user.
+func TestGivePointsHandler(t *testing.T) {
 	idFactory := myuuid.IDFactory{}
 	testCases := []testCase{
 		{
 			caseName:       "everything ok",
 			requestID:      idFactory.NewString(),
+			requestBody:    `{"points": 1}`,
 			expectedStatus: http.StatusOK,
 		},
 		{
-			caseName:       "wrong tournament error",
+			caseName:       "wrong body",
+			noMock:         true,
+			requestBody:    `i'm the wrong body"`,
+			requestID:      idFactory.NewString(),
+			expectedStatus: http.StatusBadRequest,
+		},
+		{
+			caseName:       "wrong user error",
 			resultErr:      errors.New("i'm the bad err"),
 			requestID:      idFactory.NewString(),
+			requestBody:    `{"points": 1}`,
 			expectedStatus: http.StatusBadRequest,
 		},
 	}
@@ -222,15 +226,15 @@ func TestFinishTournamentHandler(t *testing.T) {
 	idType := myuuid.IDType{}
 	mo := mockedRepositoryInteractor{}
 	h := myhandler.Handler{}
-	r := router.Router{IDType: idType}
+	r := Router{IDType: idType}
 	r.Route(&h, &mo)
 
 	for _, tc := range testCases {
-		tc.path = handler.TournamentPath + "/" + tc.requestID + handler.FinishTournamentPath
+		tc.path = handler.UserPath + "/" + tc.requestID + handler.GivingPointsPath
 		tc.method = http.MethodPost
 
 		if !tc.noMock {
-			mo.On(methodNameFinishTournament, tc.requestID).Return(tc.resultErr)
+			mo.On(methodNameFundUser, tc.requestID, 1).Return(tc.resultErr)
 		}
 
 		handleTestCase(t, &h, tc)

@@ -39,19 +39,9 @@ func (m *mockedRepository) InsertTournament(name string, deposit int, prize int)
 	return args.String(0), args.Error(1)
 }
 
-func (m *mockedRepository) GetTournamentParticipantList(pid string) ([]string, error) {
-	args := m.Called(pid)
-	return args.Get(0).([]string), args.Error(1)
-}
-
 func (m *mockedRepository) GetTournamentByID(tid string) (domain.Tournament, error) {
 	args := m.Called(tid)
 	return args.Get(0).(domain.Tournament), args.Error(1)
-}
-
-func (m *mockedRepository) GetTournaments() ([]domain.Tournament, error) {
-	args := m.Called()
-	return args.Get(0).([]domain.Tournament), args.Error(1)
 }
 
 func (m *mockedRepository) DeleteTournamentByID(tid string) error {

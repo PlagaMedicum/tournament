@@ -21,15 +21,13 @@ type Repository interface {
 	DeleteUserByID(string) error
 	UpdateUserBalanceByID(string, int) error
 	InsertTournament(string, int, int) (string, error)
-	GetTournamentParticipantList(string) ([]string, error)
-	GetTournaments() ([]domain.Tournament, error)
 	GetTournamentByID(string) (domain.Tournament, error)
 	DeleteTournamentByID(string) error
 	AddUserInTournament(string, string) error
 	SetWinner(string, string) error
 }
 
-type RepositoryInteractor interface {
+type Usecases interface {
 	CreateUser(string) (string, error)
 	GetUser(string) (domain.User, error)
 	DeleteUser(string) error

@@ -16,8 +16,8 @@ type Router struct {
 }
 
 // Route connects endpoints with handling functions.
-func (r Router) Route(h *myhandler.Handler, ri usecases.RepositoryInteractor) {
-	c := &handlers.Controller{RepositoryInteractor: ri}
+func (r Router) Route(h *myhandler.Handler, ri usecases.Usecases) {
+	c := &handlers.Controller{Usecases: ri}
 
 	h.HandleFunc("^"+handlers.UserPath+"$", c.CreateUserHandler, http.MethodPost)
 	h.HandleFunc("^"+handlers.UserPath+"/"+r.IDType.Regex()+"$", c.GetUserHandler, http.MethodGet)

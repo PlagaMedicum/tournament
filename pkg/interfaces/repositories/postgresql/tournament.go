@@ -14,7 +14,7 @@ func (c *PSQLController) InsertTournament(name string, deposit int, prize int) (
 	return id.String(), err
 }
 
-func (c *PSQLController) GetTournamentParticipantList(pid string) ([]string, error) {
+func (c *PSQLController) getTournamentParticipantList(pid string) ([]string, error) {
 	id := c.IDFactory.NewNullable()
 
 	err := id.UnmarshalText([]byte(pid))
@@ -64,41 +64,10 @@ func (c *PSQLController) GetTournamentByID(tid string) (domain.Tournament, error
 	t.WinnerID = wid.String()
 
 	if pid.IsValid() {
-		t.Participants, err = c.GetTournamentParticipantList(pid.String())
+		t.Participants, err = c.getTournamentParticipantList(pid.String())
 	}
 
 	return t, err
-}
-
-func (c *PSQLController) GetTournaments() ([]domain.Tournament, error) {
-	rows, err := c.Handler.Query(`select id from tournaments;`)
-	if err != nil {
-		return nil, err
-	}
-
-	var tidList []string
-	for rows.Next() {
-		id := c.IDFactory.New()
-
-		err := rows.Scan(id)
-		if err != nil {
-			return nil, err
-		}
-
-		tidList = append(tidList, id.String())
-	}
-
-	var tournaments []domain.Tournament
-	for _, tid := range tidList {
-		t, err := c.GetTournamentByID(tid)
-		if err != nil {
-			return nil, err
-		}
-
-		tournaments = append(tournaments, t)
-	}
-
-	return tournaments, nil
 }
 
 func (c *PSQLController) DeleteTournamentByID(tid string) error {
