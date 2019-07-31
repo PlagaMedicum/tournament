@@ -2,7 +2,7 @@ package myuuid
 
 import (
 	uuid "github.com/satori/go.uuid"
-	"tournament/pkg/interfaces/repositories/postgresql"
+	"tournament/pkg/controllers/repositories/postgresql"
 )
 
 type nullable struct {

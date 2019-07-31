@@ -1,6 +1,7 @@
 package domain
 
 type Tournament struct {
+	// TODO: Change to uint?
 	ID           string   `json:"id"`
 	Name         string   `json:"name"`
 	Deposit      int      `json:"deposit"`

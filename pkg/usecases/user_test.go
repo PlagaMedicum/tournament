@@ -131,16 +131,16 @@ func TestFundUser(t *testing.T) {
 		if tc.mockingStop == 1 {
 			mo.On(methodNameGetUserByID, tc.userID).Return(tc.user, tc.err)
 			continue
-		} else {
-			mo.On(methodNameGetUserByID, tc.userID).Return(tc.user, nil)
-		}
+		} 
+
+		mo.On(methodNameGetUserByID, tc.userID).Return(tc.user, nil)
 
 		if tc.mockingStop == 2 {
 			mo.On(methodNameUpdateUserBalanceByID, tc.user.ID, tc.user.Balance+tc.requestPoints).Return(tc.err)
 			continue
-		} else {
-			mo.On(methodNameUpdateUserBalanceByID, tc.user.ID, tc.user.Balance+tc.requestPoints).Return(nil)
-		}
+		} 
+
+		mo.On(methodNameUpdateUserBalanceByID, tc.user.ID, tc.user.Balance+tc.requestPoints).Return(nil)
 	}
 
 	for name, tc := range testCases {

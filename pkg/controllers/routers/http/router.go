@@ -3,7 +3,7 @@ package http
 import (
 	"net/http"
 	"tournament/pkg/infrastructure/myhandler"
-	handlers "tournament/pkg/interfaces/handlers/http"
+	handlers "tournament/pkg/controllers/handlers/http"
 	"tournament/pkg/usecases"
 )
 

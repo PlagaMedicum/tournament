@@ -207,23 +207,23 @@ func TestJoinTournament(t *testing.T) {
 		if tc.mockingStop == 1 {
 			mo.On(methodNameGetTournamentByID, tc.tournamentID).Return(tc.tournament, tc.err)
 			continue
-		} else {
-			mo.On(methodNameGetTournamentByID, tc.tournamentID).Return(tc.tournament, nil)
 		}
+		
+		mo.On(methodNameGetTournamentByID, tc.tournamentID).Return(tc.tournament, nil)
 
 		if tc.mockingStop == 2 {
 			mo.On(methodNameGetUserByID, tc.userID).Return(tc.user, tc.err)
 			continue
-		} else {
-			mo.On(methodNameGetUserByID, tc.userID).Return(tc.user, nil)
-		}
+		} 
+
+		mo.On(methodNameGetUserByID, tc.userID).Return(tc.user, nil)
 
 		if tc.mockingStop == 3 {
 			mo.On(methodNameAddUserInTournament, tc.user.ID, tc.tournament.ID).Return(tc.err)
 			continue
-		} else {
-			mo.On(methodNameAddUserInTournament, tc.user.ID, tc.tournament.ID).Return(nil)
-		}
+		} 
+
+		mo.On(methodNameAddUserInTournament, tc.user.ID, tc.tournament.ID).Return(nil)
 
 		mo.On(methodNameUpdateUserBalanceByID, tc.user.ID, tc.user.Balance-tc.tournament.Deposit).Return(tc.err)
 	}
@@ -259,23 +259,23 @@ func mockForTestFinishTournament(tc testCase, name string) (*mockedRepository, *
 	if tc.mockingStop == 1 {
 		mo.On(methodNameGetTournamentByID, tc.tournamentID).Return(tc.tournament, tc.err)
 		return &mo, &c
-	} else {
-		mo.On(methodNameGetTournamentByID, tc.tournamentID).Return(tc.tournament, nil)
 	}
+	
+	mo.On(methodNameGetTournamentByID, tc.tournamentID).Return(tc.tournament, nil)
 
 	if tc.mockingStop == 2 {
 		mo.On(methodNameGetUsers).Return([]domain.User{}, tc.err)
 		return &mo, &c
-	} else {
-		mo.On(methodNameGetUsers).Return([]domain.User{{ID: "1", Balance: 1}, tc.user}, nil)
 	}
+	
+	mo.On(methodNameGetUsers).Return([]domain.User{{ID: "1", Balance: 1}, tc.user}, nil)
 
 	if tc.mockingStop == 3 {
 		mo.On(methodNameSetWinner, tc.user.ID, tc.tournament.ID).Return(tc.err)
 		return &mo, &c
-	} else {
-		mo.On(methodNameSetWinner, tc.user.ID, tc.tournament.ID).Return(nil)
 	}
+	
+	mo.On(methodNameSetWinner, tc.user.ID, tc.tournament.ID).Return(nil)
 
 	mo.On(methodNameUpdateUserBalanceByID, tc.user.ID, tc.user.Balance+tc.tournament.Prize).Return(tc.err)
 	return &mo, &c

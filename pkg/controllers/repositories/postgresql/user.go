@@ -1,7 +1,6 @@
 package postgresql
 
 import (
-	"github.com/jackc/pgx"
 	"tournament/pkg/domain"
 )
 
@@ -15,7 +14,7 @@ func (c *PSQLController) InsertUser(name string, balance int) (string, error) {
 	return id.String(), err
 }
 
-func (c *PSQLController) scanUserRow(row *pgx.Rows) (domain.User, error) {
+func (c *PSQLController) scanUserRow(row Rows) (domain.User, error) {
 	u := domain.User{}
 	id := c.IDFactory.New()
 

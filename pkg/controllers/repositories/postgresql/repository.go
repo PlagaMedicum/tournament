@@ -1,14 +1,19 @@
 package postgresql
 
-import (
-	"github.com/jackc/pgx"
-)
+type Row interface {
+	Scan(...interface{}) error
+}
 
-// TODO: Create interfaces for pgx
+type Rows interface {
+	Next() bool
+	Scan(...interface{}) error
+}
+
 type handler interface{
-	QueryRow(string, ...interface{}) *pgx.Row
-	Query(string, ...interface{}) (*pgx.Rows, error)
-	Exec(string, ...interface{}) (pgx.CommandTag, error)
+	// TODO: Get rid of QueryRow?
+	QueryRow(string, ...interface{}) Row
+	Query(string, ...interface{}) (Rows, error)
+	Exec(string, ...interface{}) (interface{}, error)
 }
 
 type ID interface {

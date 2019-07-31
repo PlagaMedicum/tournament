@@ -13,10 +13,27 @@ import (
 	"io/ioutil"
 	"log"
 	"strconv"
+	"tournament/pkg/controllers/repositories/postgresql"
 )
 
+type conn struct{
+	conn *pgx.Conn
+}
+
+func (c conn) QueryRow(sql string, args ...interface{}) postgresql.Row{
+	return c.conn.QueryRow(sql, args)
+}
+
+func (c conn) Query(sql string, args ...interface{}) (postgresql.Rows, error){
+	return c.conn.Query(sql, args)
+}
+
+func (c conn) Exec(sql string, args ...interface{}) (interface{}, error){
+	return c.conn.Exec(sql, args)
+}
+
 type DB struct {
-	Conn         *pgx.Conn
+	Conn         conn
 	User         string `yaml:"User"`
 	Password     string `yaml:"Password"`
 	Host         string `yaml:"Host"`
@@ -68,7 +85,7 @@ func (db *DB) connect(dbName string) *sql.DB {
 		log.Printf("Unable to establish connection: " + err.Error())
 	}
 
-	db.Conn = conn
+	db.Conn.conn = conn
 
 	return sqldb
 }

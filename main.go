@@ -6,8 +6,8 @@ import (
 	"tournament/pkg/infrastructure/myhandler"
 	"tournament/pkg/infrastructure/myuuid"
 	"tournament/pkg/infrastructure/postgresqlDB"
-	"tournament/pkg/interfaces/repositories/postgresql"
-	httpRouter "tournament/pkg/interfaces/routers/http"
+	"tournament/pkg/controllers/repositories/postgresql"
+	httpRouter "tournament/pkg/controllers/routers/http"
 	"tournament/pkg/usecases"
 )
 
