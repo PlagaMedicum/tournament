@@ -2,10 +2,27 @@ package http
 
 import (
 	"net/http"
-	"tournament/pkg/infrastructure/myhandler"
 	handlers "tournament/pkg/controllers/handlers/http"
-	"tournament/pkg/usecases"
 )
+
+type handler interface {
+	Handle(string, http.Handler, string)
+	HandleFunc(string, func(http.ResponseWriter, *http.Request), string)
+	http.Handler
+}
+
+type httpController interface {
+	CreateUserHandler(http.ResponseWriter, *http.Request)
+	GetUserHandler(http.ResponseWriter, *http.Request)
+	DeleteUserHandler(http.ResponseWriter, *http.Request)
+	TakePointsHandler(http.ResponseWriter, *http.Request)
+	GivePointsHandler(http.ResponseWriter, *http.Request)
+	CreateTournamentHandler(http.ResponseWriter, *http.Request)
+	GetTournamentHandler(http.ResponseWriter, *http.Request)
+	DeleteTournamentHandler(http.ResponseWriter, *http.Request)
+	JoinTournamentHandler(http.ResponseWriter, *http.Request)
+	FinishTournamentHandler(http.ResponseWriter, *http.Request)
+}
 
 type idInterface interface {
 	Regex() string
@@ -16,9 +33,7 @@ type Router struct {
 }
 
 // Route connects endpoints with handling functions.
-func (r Router) Route(h *myhandler.Handler, ri usecases.Usecases) {
-	c := &handlers.Controller{Usecases: ri}
-
+func (r Router) Route(h handler, c httpController) {
 	h.HandleFunc("^"+handlers.UserPath+"$", c.CreateUserHandler, http.MethodPost)
 	h.HandleFunc("^"+handlers.UserPath+"/"+r.IDType.Regex()+"$", c.GetUserHandler, http.MethodGet)
 	h.HandleFunc("^"+handlers.UserPath+"/"+r.IDType.Regex()+"$", c.DeleteUserHandler, http.MethodDelete)

@@ -27,18 +27,6 @@ type Repository interface {
 	SetWinner(string, string) error
 }
 
-type Usecases interface {
-	CreateUser(string) (string, error)
-	GetUser(string) (domain.User, error)
-	DeleteUser(string) error
-	FundUser(string, int) error
-	CreateTournament(string, int) (string, error)
-	GetTournament(string) (domain.Tournament, error)
-	DeleteTournament(string) error
-	JoinTournament(string, string) error
-	FinishTournament(string) error
-}
-
 type idType interface {
 	Null() string
 }

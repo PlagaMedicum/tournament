@@ -4,10 +4,10 @@ import (
 	"errors"
 	"net/http"
 	"testing"
+	httpHandler "tournament/pkg/controllers/handlers/http"
 	"tournament/pkg/domain"
 	"tournament/pkg/infrastructure/myhandler"
 	"tournament/pkg/infrastructure/myuuid"
-	handler "tournament/pkg/controllers/handlers/http"
 )
 
 const(
@@ -53,13 +53,13 @@ func TestCreateTournamentHandler(t *testing.T) {
 	}
 
 	idType := myuuid.IDType{}
-	mo := mockedRepositoryInteractor{}
+	mo := mockedUsecases{}
 	h := myhandler.Handler{}
 	r := Router{IDType: idType}
-	r.Route(&h, &mo)
+	r.Route(&h, httpHandler.Controller{Usecases: &mo})
 
 	for _, tc := range testCases {
-		tc.path = handler.TournamentPath
+		tc.path = httpHandler.TournamentPath
 		tc.method = http.MethodPost
 
 		if !tc.noMock {
@@ -95,13 +95,13 @@ func TestGetTournamentHandler(t *testing.T) {
 	}
 
 	idType := myuuid.IDType{}
-	mo := mockedRepositoryInteractor{}
+	mo := mockedUsecases{}
 	h := myhandler.Handler{}
 	r := Router{IDType: idType}
-	r.Route(&h, &mo)
+	r.Route(&h, httpHandler.Controller{Usecases: &mo})
 
 	for _, tc := range testCases {
-		tc.path = handler.TournamentPath + "/" + tc.requestID
+		tc.path = httpHandler.TournamentPath + "/" + tc.requestID
 		tc.method = http.MethodGet
 
 		if !tc.noMock {
@@ -133,13 +133,13 @@ func TestDeleteTournamentHandler(t *testing.T) {
 	}
 
 	idType := myuuid.IDType{}
-	mo := mockedRepositoryInteractor{}
+	mo := mockedUsecases{}
 	h := myhandler.Handler{}
 	r := Router{IDType: idType}
-	r.Route(&h, &mo)
+	r.Route(&h, httpHandler.Controller{Usecases: &mo})
 
 	for _, tc := range testCases {
-		tc.path = handler.TournamentPath + "/" + tc.requestID
+		tc.path = httpHandler.TournamentPath + "/" + tc.requestID
 		tc.method = http.MethodDelete
 
 		if !tc.noMock {
@@ -181,13 +181,13 @@ func TestJoinTournamentHandler(t *testing.T) {
 	}
 
 	idType := myuuid.IDType{}
-	mo := mockedRepositoryInteractor{}
+	mo := mockedUsecases{}
 	h := myhandler.Handler{}
 	r := Router{IDType: idType}
-	r.Route(&h, &mo)
+	r.Route(&h, httpHandler.Controller{Usecases: &mo})
 
 	for _, tc := range testCases {
-		tc.path = handler.TournamentPath + "/" + tc.requestID + handler.JoinTournamentPath
+		tc.path = httpHandler.TournamentPath + "/" + tc.requestID + httpHandler.JoinTournamentPath
 		tc.method = http.MethodPost
 
 		if !tc.noMock {
@@ -219,13 +219,13 @@ func TestFinishTournamentHandler(t *testing.T) {
 	}
 
 	idType := myuuid.IDType{}
-	mo := mockedRepositoryInteractor{}
+	mo := mockedUsecases{}
 	h := myhandler.Handler{}
 	r := Router{IDType: idType}
-	r.Route(&h, &mo)
+	r.Route(&h, httpHandler.Controller{Usecases: &mo})
 
 	for _, tc := range testCases {
-		tc.path = handler.TournamentPath + "/" + tc.requestID + handler.FinishTournamentPath
+		tc.path = httpHandler.TournamentPath + "/" + tc.requestID + httpHandler.FinishTournamentPath
 		tc.method = http.MethodPost
 
 		if !tc.noMock {

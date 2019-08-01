@@ -4,17 +4,17 @@ import (
 	"errors"
 	"net/http"
 	"testing"
+	httpHandler "tournament/pkg/controllers/handlers/http"
 	"tournament/pkg/domain"
 	"tournament/pkg/infrastructure/myhandler"
 	"tournament/pkg/infrastructure/myuuid"
-	handler "tournament/pkg/controllers/handlers/http"
 )
 
-const(
-	methodNameCreateUser       = "CreateUser"
-	methodNameGetUser          = "GetUser"
-	methodNameDeleteUser       = "DeleteUser"
-	methodNameFundUser   	   = "FundUser"
+const (
+	methodNameCreateUser = "CreateUser"
+	methodNameGetUser    = "GetUser"
+	methodNameDeleteUser = "DeleteUser"
+	methodNameFundUser   = "FundUser"
 )
 
 // TestCreateUserHandler tests creation of user.
@@ -22,8 +22,8 @@ func TestCreateUserHandler(t *testing.T) {
 	idFactory := myuuid.IDFactory{}
 	testCases := []testCase{
 		{
-			caseName:  "everything ok",
-			resultID:  idFactory.NewString(),
+			caseName: "everything ok",
+			resultID: idFactory.NewString(),
 			requestUser: domain.User{
 				Name: "Daniil Dankovskij",
 			},
@@ -50,13 +50,13 @@ func TestCreateUserHandler(t *testing.T) {
 	}
 
 	idType := myuuid.IDType{}
-	mo := mockedRepositoryInteractor{}
+	mo := mockedUsecases{}
 	h := myhandler.Handler{}
 	r := Router{IDType: idType}
-	r.Route(&h, &mo)
+	r.Route(&h, httpHandler.Controller{Usecases: &mo})
 
 	for _, tc := range testCases {
-		tc.path = handler.UserPath
+		tc.path = httpHandler.UserPath
 		tc.method = http.MethodPost
 
 		if !tc.noMock {
@@ -75,7 +75,7 @@ func TestGetUserHandler(t *testing.T) {
 	idFactory := myuuid.IDFactory{}
 	testCases := []testCase{
 		{
-			caseName:  "everything ok",
+			caseName: "everything ok",
 			resultUser: domain.User{
 				Name: "Anna Angel",
 			},
@@ -92,13 +92,13 @@ func TestGetUserHandler(t *testing.T) {
 	}
 
 	idType := myuuid.IDType{}
-	mo := mockedRepositoryInteractor{}
+	mo := mockedUsecases{}
 	h := myhandler.Handler{}
 	r := Router{IDType: idType}
-	r.Route(&h, &mo)
+	r.Route(&h, httpHandler.Controller{Usecases: &mo})
 
 	for _, tc := range testCases {
-		tc.path = handler.UserPath + "/" + tc.requestID
+		tc.path = httpHandler.UserPath + "/" + tc.requestID
 		tc.method = http.MethodGet
 
 		if !tc.noMock {
@@ -130,13 +130,13 @@ func TestDeleteUserHandler(t *testing.T) {
 	}
 
 	idType := myuuid.IDType{}
-	mo := mockedRepositoryInteractor{}
+	mo := mockedUsecases{}
 	h := myhandler.Handler{}
 	r := Router{IDType: idType}
-	r.Route(&h, &mo)
+	r.Route(&h, httpHandler.Controller{Usecases: &mo})
 
 	for _, tc := range testCases {
-		tc.path = handler.UserPath + "/" + tc.requestID
+		tc.path = httpHandler.UserPath + "/" + tc.requestID
 		tc.method = http.MethodDelete
 
 		if !tc.noMock {
@@ -177,13 +177,13 @@ func TestTakePointsHandler(t *testing.T) {
 	}
 
 	idType := myuuid.IDType{}
-	mo := mockedRepositoryInteractor{}
+	mo := mockedUsecases{}
 	h := myhandler.Handler{}
 	r := Router{IDType: idType}
-	r.Route(&h, &mo)
+	r.Route(&h, httpHandler.Controller{Usecases: &mo})
 
 	for _, tc := range testCases {
-		tc.path = handler.UserPath + "/" + tc.requestID + handler.TakingPointsPath
+		tc.path = httpHandler.UserPath + "/" + tc.requestID + httpHandler.TakingPointsPath
 		tc.method = http.MethodPost
 
 		if !tc.noMock {
@@ -224,13 +224,13 @@ func TestGivePointsHandler(t *testing.T) {
 	}
 
 	idType := myuuid.IDType{}
-	mo := mockedRepositoryInteractor{}
+	mo := mockedUsecases{}
 	h := myhandler.Handler{}
 	r := Router{IDType: idType}
-	r.Route(&h, &mo)
+	r.Route(&h, httpHandler.Controller{Usecases: &mo})
 
 	for _, tc := range testCases {
-		tc.path = handler.UserPath + "/" + tc.requestID + handler.GivingPointsPath
+		tc.path = httpHandler.UserPath + "/" + tc.requestID + httpHandler.GivingPointsPath
 		tc.method = http.MethodPost
 
 		if !tc.noMock {

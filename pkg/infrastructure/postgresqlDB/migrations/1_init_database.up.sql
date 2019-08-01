@@ -1,21 +1,31 @@
 create extension if not exists "uuid-ossp";
+
 create table if not exists users(
     id uuid constraint user_pk primary key default uuid_generate_v4() not null,
+    -- id serial primary key,
     name text not null,
     balance int not null
 );
+
 create table if not exists tournaments(
     id uuid constraint tournament_pk primary key default uuid_generate_v4() not null,
+    -- id serial primary key,
     name text not null,
     deposit int not null,
     prize int not null,
     users uuid,
+    -- users int -or- users serial
     winner uuid
+    -- winner int
 );
+
 create table if not exists participants(
      id uuid constraint participant_pk primary key default uuid_generate_v4() not null,
+    -- id serial primary key,
      userid uuid not null
+    -- userid serial -or- userid int
 );
+
 insert into users (id, name, balance) values
 ('bef80618-779e-4cbd-b776-cbd27386a902', 'Samuel Plaunik', 1200);
 insert into tournaments (id, name, deposit, prize) values
