@@ -15,12 +15,12 @@ type testCase struct {
 	method            string
 	noMock			  bool
 	resultErr         error
-	resultID          string
+	resultID          uint64
 	resultTournament  domain.Tournament
 	requestTournament domain.Tournament
 	resultUser        domain.User
 	requestUser       domain.User
-	requestID         string
+	requestID         uint64
 	requestBody       string
 	expectedStatus    int
 }

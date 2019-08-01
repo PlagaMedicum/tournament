@@ -4,175 +4,119 @@ import (
 	"tournament/pkg/domain"
 )
 
-func (c *PSQLController) InsertTournament(name string, deposit int, prize int) (string, error) {
-	id := c.IDFactory.New()
-
-	err := c.Handler.QueryRow(`
+// InsertTournament creates in DB the new tournament with the name,
+// deposit and prize.
+func (c *PSQLController) InsertTournament(name string, deposit int, prize int) (uint64, error) {
+	var id uint64
+	
+	err := c.Database.QueryRow(`
 			insert into tournaments (name, deposit, prize) values
 				($1, $2, $3) returning id;
-		`, name, deposit, prize).Scan(id)
-	return id.String(), err
+		`, name, deposit, prize).Scan(&id)
+	return id, err
 }
 
-func (c *PSQLController) getTournamentParticipantList(pid string) ([]string, error) {
-	id := c.IDFactory.NewNullable()
-
-	err := id.UnmarshalText([]byte(pid))
+func (c *PSQLController) getTournamentParticipantList(pid uint64) ([]uint64, error) {
+	r, err := c.Database.Query(`select userid from participants where id = $1;`,
+		pid)
 	if err != nil {
 		return nil, err
 	}
 
-	r, err := c.Handler.Query(`select userid from participants where id = $1;`,
-		id.GetPointer())
-	if err != nil {
-		return nil, err
-	}
-
-	var plist []string
+	var plist []uint64
 	for r.Next() {
-		uid := c.IDFactory.New()
+		var uid uint64
 
-		err := r.Scan(uid)
+		err := r.Scan(&uid)
 		if err != nil {
 			return nil, err
 		}
 
-		plist = append(plist, uid.String())
+		plist = append(plist, uid)
 	}
 
 	return plist, nil
 }
 
-func (c *PSQLController) GetTournamentByID(tid string) (domain.Tournament, error) {
-	id := c.IDFactory.New()
-	pid := c.IDFactory.NewNullable()
-	wid := c.IDFactory.NewNullable()
+// GetTournamentByID returns from DB the tournament with tid.
+func (c *PSQLController) GetTournamentByID(tid uint64) (domain.Tournament, error) {
 	t := domain.Tournament{}
+	var pid uint64
 
-	err := id.UnmarshalText([]byte(tid))
+	err := c.Database.QueryRow(`select * from tournaments where id = $1;`,
+		tid).Scan(&t.ID, &t.Name, &t.Deposit, &t.Prize, &pid, &t.WinnerID)
 	if err != nil {
 		return domain.Tournament{}, err
 	}
 
-	err = c.Handler.QueryRow(`select * from tournaments where id = $1;`,
-		id).Scan(id, &t.Name, &t.Deposit, &t.Prize, pid.GetPointer(), wid.GetPointer())
-	if err != nil {
-		return domain.Tournament{}, err
-	}
-
-	t.ID = id.String()
-	t.WinnerID = wid.String()
-
-	if pid.IsValid() {
-		t.Participants, err = c.getTournamentParticipantList(pid.String())
+	if pid != 0 {
+		t.Participants, err = c.getTournamentParticipantList(pid)
 	}
 
 	return t, err
 }
 
-func (c *PSQLController) DeleteTournamentByID(tid string) error {
-	id := c.IDFactory.New()
-
-	err := id.UnmarshalText([]byte(tid))
-	if err != nil {
-		return err
-	}
-
-	_, err = c.Handler.Exec(`
+// DeleteTournamentByID deletes from DB the tournament with tid.
+func (c *PSQLController) DeleteTournamentByID(tid uint64) error {
+	_, err := c.Database.Exec(`
 			delete from participants using tournaments 
 				where tournaments.id = $1 and participants.id = tournaments.users;
-		`, id)
+		`, tid)
 	if err != nil {
 		return err
 	}
 
-	_, err = c.Handler.Exec(`delete from tournaments where id = $1;`,
-		id)
+	_, err = c.Database.Exec(`delete from tournaments where id = $1;`,
+		tid)
 	return err
 }
 
-func (c *PSQLController) getTournamentParticipants(tournamentID string) (NullableID, error) {
-	tid := c.IDFactory.New()
-	pid := c.IDFactory.NewNullable()
+func (c *PSQLController) getTournamentParticipants(tid uint64) (uint64, error) {
+	var pid uint64
 
-	err := tid.UnmarshalText([]byte(tournamentID))
-	if err != nil {
-		return pid, err
-	}
-
-	err = c.Handler.QueryRow(`select users from tournaments where id = $1;`,
-		tid).Scan(pid.GetPointer())
+	err := c.Database.QueryRow(`select users from tournaments where id = $1;`,
+		tid).Scan(pid)
 	return pid, err
 }
 
-func (c *PSQLController) insertParticipant(pid NullableID, userID string) (error, NullableID) {
-	uid := c.IDFactory.New()
-
-	err := uid.UnmarshalText([]byte(userID))
-	if err != nil {
+func (c *PSQLController) insertParticipant(pid, uid uint64) (error, uint64) {
+	if pid != 0 {
+		_, err := c.Database.Exec(`insert into participants (id, userid) values ($1, $2);`,
+			pid, uid)
 		return err, pid
 	}
 
-	if pid.IsValid() {
-		_, err = c.Handler.Exec(`insert into participants (id, userid) values ($1, $2);`,
-			pid.GetNotNullPointer(), uid)
-		return err, pid
-	}
-
-	err = c.Handler.QueryRow(`insert into participants (userid) values ($1) returning id;`,
-		uid).Scan(pid.GetNotNullPointer())
+	err := c.Database.QueryRow(`insert into participants (userid) values ($1) returning id;`,
+		uid).Scan(&pid)
 	return err, pid
 }
 
-func (c *PSQLController) updateTournamentParticipants(listID string, tournamentID string) error {
-	pid := c.IDFactory.NewNullable()
-	tid := c.IDFactory.New()
-
-	err := pid.UnmarshalText([]byte(listID))
-	if err != nil {
-		return err
-	}
-
-	err = tid.UnmarshalText([]byte(tournamentID))
-	if err != nil {
-		return err
-	}
-
-	_, err = c.Handler.Exec(`update tournaments set users = $1 where id = $2;`,
+func (c *PSQLController) updateTournamentParticipants(pid, tid uint64) error {
+	_, err := c.Database.Exec(`update tournaments set users = $1 where id = $2;`,
 		pid, tid)
 	return err
 }
 
-func (c *PSQLController) AddUserInTournament(userID, tournamentID string) error {
-	pid, err := c.getTournamentParticipants(tournamentID)
+// AddUserInTournament adds the user with uid in participant of
+// tournament with tid.
+func (c *PSQLController) AddUserInTournament(uid, tid uint64) error {
+	pid, err := c.getTournamentParticipants(tid)
 	if err != nil {
 		return err
 	}
 
-	err, pid = c.insertParticipant(pid, userID)
+	err, pid = c.insertParticipant(pid, uid)
 	if err != nil {
 		return err
 	}
 
-	err = c.updateTournamentParticipants(pid.String(), tournamentID)
+	err = c.updateTournamentParticipants(pid, tid)
 	return err
 }
 
-func (c *PSQLController) SetWinner(winnerID, tournamentID string) error {
-	wid := c.IDFactory.NewNullable()
-	tid := c.IDFactory.New()
-
-	err := wid.UnmarshalText([]byte(winnerID))
-	if err != nil {
-		return err
-	}
-
-	err = tid.UnmarshalText([]byte(tournamentID))
-	if err != nil {
-		return err
-	}
-
-	_, err = c.Handler.Exec(`update tournaments set winner = $1 where id = $2;`,
-		wid.GetPointer(), tid)
+// SetWinner sets the user with wid a winner of tournament with tid.
+func (c *PSQLController) SetWinner(wid, tid uint64) error {
+	_, err := c.Database.Exec(`update tournaments set winner = $1 where id = $2;`,
+		wid, tid)
 	return err
 }

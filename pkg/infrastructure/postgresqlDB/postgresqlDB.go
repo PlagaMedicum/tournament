@@ -16,6 +16,12 @@ import (
 	"tournament/pkg/controllers/repositories/postgresql"
 )
 
+const (
+	migrationsPath     = "file://pkg/infrastructure/postgresqlDB/migrations"
+	testMigrationsPath = "file://../pkg/infrastructure/postgresqlDB/test_migrations"
+	configurationFilePath = "./pkg/infrastructure/postgresqlDB/connConfig.yaml"
+)
+
 type conn struct{
 	conn *pgx.Conn
 }
@@ -42,12 +48,6 @@ type DB struct {
 	TestDatabase string `yaml:"TestDatabase"`
 	m            *migrate.Migrate
 }
-
-const (
-	migrationsPath     = "file://pkg/infrastructure/postgresqlDB/migrations"
-	testMigrationsPath = "file://../pkg/infrastructure/postgresqlDB/test_migrations"
-	configurationFilePath = "./pkg/infrastructure/postgresqlDB/connConfig.yaml"
-)
 
 func (db *DB) readConfigFile() {
 	file, err := ioutil.ReadFile(configurationFilePath)

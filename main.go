@@ -17,17 +17,14 @@ func main() {
 	db.InitNewPostgresDB()
 
 	handler := myhandler.Handler{}
-	dbController := postgresql.PSQLController{
-		Handler:   db.Conn,
-		IDFactory: myuuid.IDFactory{},
-	}
-	uc := usecases.Controller{
-		Repository: &dbController,
-		IDType:     myuuid.IDType{},
-	}
 
-	r := httpRouter.Router{IDType: myuuid.IDType{}}
-	r.Route(&handler, &httpHandlers.Controller{Usecases: &uc})
+	httpRouter.Route(&handler, &httpHandlers.Controller{
+		Usecases: &usecases.Controller{
+			Repository: &postgresql.PSQLController{
+				Database: db.Conn,
+			},
+		},
+	})
 
 	s := http.Server{
 		Addr:    ":8080",

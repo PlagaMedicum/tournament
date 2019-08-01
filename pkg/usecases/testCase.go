@@ -7,12 +7,12 @@ import (
 
 type testCase struct {
 	mockingStop    int
-	userID         string
-	tournamentID   string
+	userID         uint64
+	tournamentID   uint64
 	requestName    string
 	requestDeposit int
 	requestPoints  int
-	resultID       string
+	resultID       uint64
 	user           domain.User
 	tournament     domain.Tournament
 	err            error
@@ -30,7 +30,7 @@ func handleTestCase(caseName string, expectedTC testCase, gotTC testCase, t *tes
 
 	if expectedTC.resultID != gotTC.resultID {
 		t.Errorf("FAIL! Test case: %s.\n"+
-			"resultID:\n\texpected: \"%s\"\n\tgot: \"%s\"\n",
+			"resultID:\n\texpected: \"%d\"\n\tgot: \"%d\"\n",
 			caseName,
 			expectedTC.resultID, gotTC.resultID)
 

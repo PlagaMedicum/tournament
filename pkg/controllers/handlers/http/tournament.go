@@ -3,6 +3,7 @@ package http
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"tournament/pkg/domain"
 	"tournament/pkg/infrastructure/errHandler"
 )
@@ -39,7 +40,11 @@ func (c Controller) CreateTournamentHandler(w http.ResponseWriter, r *http.Reque
 // Writes tournament's name, deposit, prize, list of participants
 // and winner in response body.
 func (c Controller) GetTournamentHandler(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Path[len(TournamentPath+"/"):]
+	id, err := strconv.ParseUint(r.URL.Path[len(TournamentPath+"/"):], 10, 64)
+	if err != nil {
+		errHandler.HandleErr(err, w)
+		return
+	}
 
 	t, err := c.GetTournament(id)
 	if err != nil {
@@ -58,9 +63,13 @@ func (c Controller) GetTournamentHandler(w http.ResponseWriter, r *http.Request)
 
 // DeleteTournamentHandler is the http handler for deleting tournaments by id.
 func (c Controller) DeleteTournamentHandler(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Path[len(TournamentPath+"/"):]
+	id, err := strconv.ParseUint(r.URL.Path[len(TournamentPath+"/"):], 10, 64)
+	if err != nil {
+		errHandler.HandleErr(err, w)
+		return
+	}
 
-	err := c.DeleteTournament(id)
+	err = c.DeleteTournament(id)
 	if err != nil {
 		errHandler.HandleErr(err, w)
 		return
@@ -72,11 +81,15 @@ func (c Controller) DeleteTournamentHandler(w http.ResponseWriter, r *http.Reque
 // JoinTournamentHandler is the http handler for assigning a new participant
 // to the tournament using theirs id's.
 func (c Controller) JoinTournamentHandler(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Path[len(TournamentPath+"/") : len(TournamentPath+"/")+36]
+	id, err := scanID(TournamentPath, r)
+	if err != nil {
+		errHandler.HandleErr(err, w)
+		return
+	}
 
-	var st struct{ ID string `json:"userId"` }
+	var st struct{ ID uint64 `json:"userId"` }
 
-	err := json.NewDecoder(r.Body).Decode(&st)
+	err = json.NewDecoder(r.Body).Decode(&st)
 	if err != nil {
 		errHandler.HandleJSONErr(err, w)
 		return
@@ -94,9 +107,13 @@ func (c Controller) JoinTournamentHandler(w http.ResponseWriter, r *http.Request
 // FinishTournamentHandler is the http handler for finishing the tournament by id.
 // Updates winner of the tournament and adding prize to winner's balance.
 func (c Controller) FinishTournamentHandler(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Path[len(TournamentPath+"/") : len(TournamentPath+"/")+36]
+	id, err := scanID(TournamentPath, r)
+	if err != nil {
+		errHandler.HandleErr(err, w)
+		return
+	}
 
-	err := c.FinishTournament(id)
+	err = c.FinishTournament(id)
 	if err != nil {
 		errHandler.HandleErr(err, w)
 		return

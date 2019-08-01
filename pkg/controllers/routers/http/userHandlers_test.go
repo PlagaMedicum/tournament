@@ -3,11 +3,12 @@ package http
 import (
 	"errors"
 	"net/http"
+	"strconv"
 	"testing"
 	httpHandler "tournament/pkg/controllers/handlers/http"
+	"tournament/pkg/controllers/routers/http/mocks"
 	"tournament/pkg/domain"
 	"tournament/pkg/infrastructure/myhandler"
-	"tournament/pkg/infrastructure/myuuid"
 )
 
 const (
@@ -19,11 +20,10 @@ const (
 
 // TestCreateUserHandler tests creation of user.
 func TestCreateUserHandler(t *testing.T) {
-	idFactory := myuuid.IDFactory{}
 	testCases := []testCase{
 		{
 			caseName: "everything ok",
-			resultID: idFactory.NewString(),
+			resultID: 1,
 			requestUser: domain.User{
 				Name: "Daniil Dankovskij",
 			},
@@ -40,7 +40,7 @@ func TestCreateUserHandler(t *testing.T) {
 		{
 			caseName:  "wrong user error",
 			resultErr: errors.New("i'm the bad err"),
-			resultID:  idFactory.NewString(),
+			resultID:  3,
 			requestUser: domain.User{
 				Name: "Artemij Burah",
 			},
@@ -49,114 +49,105 @@ func TestCreateUserHandler(t *testing.T) {
 		},
 	}
 
-	idType := myuuid.IDType{}
-	mo := mockedUsecases{}
+	mock := mocks.MockedUsecases{}
 	h := myhandler.Handler{}
-	r := Router{IDType: idType}
-	r.Route(&h, httpHandler.Controller{Usecases: &mo})
+	Route(&h, httpHandler.Controller{Usecases: &mock})
 
 	for _, tc := range testCases {
 		tc.path = httpHandler.UserPath
 		tc.method = http.MethodPost
 
 		if !tc.noMock {
-			mo.On(methodNameCreateUser, tc.requestUser.Name).Return(tc.resultID, tc.resultErr)
+			mock.On(methodNameCreateUser, tc.requestUser.Name).Return(tc.resultID, tc.resultErr)
 		}
 
 		handleTestCase(t, &h, tc)
 	}
 
 	t.Logf("Asserted mocks expectations:")
-	mo.AssertExpectations(t)
+	mock.AssertExpectations(t)
 }
 
 // TestGetUserHandler tests getting of user's information.
 func TestGetUserHandler(t *testing.T) {
-	idFactory := myuuid.IDFactory{}
 	testCases := []testCase{
 		{
 			caseName: "everything ok",
 			resultUser: domain.User{
 				Name: "Anna Angel",
 			},
-			requestID:      idFactory.NewString(),
+			requestID:      1,
 			expectedStatus: http.StatusOK,
 		},
 		{
 			caseName:       "wrong user error",
 			resultErr:      errors.New("i'm the bad err"),
 			resultUser:     domain.User{},
-			requestID:      idFactory.NewString(),
+			requestID:      2,
 			expectedStatus: http.StatusBadRequest,
 		},
 	}
 
-	idType := myuuid.IDType{}
-	mo := mockedUsecases{}
+	mock := mocks.MockedUsecases{}
 	h := myhandler.Handler{}
-	r := Router{IDType: idType}
-	r.Route(&h, httpHandler.Controller{Usecases: &mo})
+	Route(&h, httpHandler.Controller{Usecases: &mock})
 
 	for _, tc := range testCases {
-		tc.path = httpHandler.UserPath + "/" + tc.requestID
+		tc.path = httpHandler.UserPath + "/" + strconv.FormatUint(tc.requestID, 10)
 		tc.method = http.MethodGet
 
 		if !tc.noMock {
-			mo.On(methodNameGetUser, tc.requestID).Return(tc.resultUser, tc.resultErr)
+			mock.On(methodNameGetUser, tc.requestID).Return(tc.resultUser, tc.resultErr)
 		}
 
 		handleTestCase(t, &h, tc)
 	}
 
 	t.Logf("Asserted mocks expectations:")
-	mo.AssertExpectations(t)
+	mock.AssertExpectations(t)
 }
 
 // TestDeleteUserHandler tests deleting of user.
 func TestDeleteUserHandler(t *testing.T) {
-	idFactory := myuuid.IDFactory{}
 	testCases := []testCase{
 		{
 			caseName:       "everything ok",
-			requestID:      idFactory.NewString(),
+			requestID:      1,
 			expectedStatus: http.StatusOK,
 		},
 		{
 			caseName:       "wrong user error",
 			resultErr:      errors.New("i'm the bad err"),
-			requestID:      idFactory.NewString(),
+			requestID:      2,
 			expectedStatus: http.StatusBadRequest,
 		},
 	}
 
-	idType := myuuid.IDType{}
-	mo := mockedUsecases{}
+	mock := mocks.MockedUsecases{}
 	h := myhandler.Handler{}
-	r := Router{IDType: idType}
-	r.Route(&h, httpHandler.Controller{Usecases: &mo})
+	Route(&h, httpHandler.Controller{Usecases: &mock})
 
 	for _, tc := range testCases {
-		tc.path = httpHandler.UserPath + "/" + tc.requestID
+		tc.path = httpHandler.UserPath + "/" + strconv.FormatUint(tc.requestID,10)
 		tc.method = http.MethodDelete
 
 		if !tc.noMock {
-			mo.On(methodNameDeleteUser, tc.requestID).Return(tc.resultErr)
+			mock.On(methodNameDeleteUser, tc.requestID).Return(tc.resultErr)
 		}
 
 		handleTestCase(t, &h, tc)
 	}
 
 	t.Logf("Asserted mocks expectations:")
-	mo.AssertExpectations(t)
+	mock.AssertExpectations(t)
 }
 
 // TestTakePointsHandler tests taking points from user.
 func TestTakePointsHandler(t *testing.T) {
-	idFactory := myuuid.IDFactory{}
 	testCases := []testCase{
 		{
 			caseName:       "everything ok",
-			requestID:      idFactory.NewString(),
+			requestID:      1,
 			requestBody:    `{"points": 1}`,
 			expectedStatus: http.StatusOK,
 		},
@@ -164,46 +155,43 @@ func TestTakePointsHandler(t *testing.T) {
 			caseName:       "wrong body",
 			noMock:         true,
 			requestBody:    `i'm the wrong body"`,
-			requestID:      idFactory.NewString(),
+			requestID:      2,
 			expectedStatus: http.StatusBadRequest,
 		},
 		{
 			caseName:       "wrong user error",
 			resultErr:      errors.New("i'm the bad err"),
-			requestID:      idFactory.NewString(),
+			requestID:      3,
 			requestBody:    `{"points": 1}`,
 			expectedStatus: http.StatusBadRequest,
 		},
 	}
 
-	idType := myuuid.IDType{}
-	mo := mockedUsecases{}
+	mock := mocks.MockedUsecases{}
 	h := myhandler.Handler{}
-	r := Router{IDType: idType}
-	r.Route(&h, httpHandler.Controller{Usecases: &mo})
+	Route(&h, httpHandler.Controller{Usecases: &mock})
 
 	for _, tc := range testCases {
-		tc.path = httpHandler.UserPath + "/" + tc.requestID + httpHandler.TakingPointsPath
+		tc.path = httpHandler.UserPath + "/" + strconv.FormatUint(tc.requestID,10) + httpHandler.TakingPointsPath
 		tc.method = http.MethodPost
 
 		if !tc.noMock {
-			mo.On(methodNameFundUser, tc.requestID, -1).Return(tc.resultErr)
+			mock.On(methodNameFundUser, tc.requestID, -1).Return(tc.resultErr)
 		}
 
 		handleTestCase(t, &h, tc)
 	}
 
 	t.Logf("Asserted mocks expectations:")
-	mo.AssertExpectations(t)
+	mock.AssertExpectations(t)
 }
 
 // TestGivePointsHandler tests giving points to user.
 func TestGivePointsHandler(t *testing.T) {
-	idFactory := myuuid.IDFactory{}
 	testCases := []testCase{
 		{
 			caseName:       "everything ok",
-			requestID:      idFactory.NewString(),
+			requestID:      1,
 			requestBody:    `{"points": 1}`,
 			expectedStatus: http.StatusOK,
 		},
@@ -211,35 +199,33 @@ func TestGivePointsHandler(t *testing.T) {
 			caseName:       "wrong body",
 			noMock:         true,
 			requestBody:    `i'm the wrong body"`,
-			requestID:      idFactory.NewString(),
+			requestID:      2,
 			expectedStatus: http.StatusBadRequest,
 		},
 		{
 			caseName:       "wrong user error",
 			resultErr:      errors.New("i'm the bad err"),
-			requestID:      idFactory.NewString(),
+			requestID:      3,
 			requestBody:    `{"points": 1}`,
 			expectedStatus: http.StatusBadRequest,
 		},
 	}
 
-	idType := myuuid.IDType{}
-	mo := mockedUsecases{}
+	mock := mocks.MockedUsecases{}
 	h := myhandler.Handler{}
-	r := Router{IDType: idType}
-	r.Route(&h, httpHandler.Controller{Usecases: &mo})
+	Route(&h, httpHandler.Controller{Usecases: &mock})
 
 	for _, tc := range testCases {
-		tc.path = httpHandler.UserPath + "/" + tc.requestID + httpHandler.GivingPointsPath
+		tc.path = httpHandler.UserPath + "/" + strconv.FormatUint(tc.requestID, 10) + httpHandler.GivingPointsPath
 		tc.method = http.MethodPost
 
 		if !tc.noMock {
-			mo.On(methodNameFundUser, tc.requestID, 1).Return(tc.resultErr)
+			mock.On(methodNameFundUser, tc.requestID, 1).Return(tc.resultErr)
 		}
 
 		handleTestCase(t, &h, tc)
 	}
 
 	t.Logf("Asserted mocks expectations:")
-	mo.AssertExpectations(t)
+	mock.AssertExpectations(t)
 }

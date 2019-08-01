@@ -4,32 +4,31 @@ import (
 	"tournament/pkg/domain"
 )
 
-func (c *PSQLController) InsertUser(name string, balance int) (string, error) {
-	id := c.IDFactory.New()
+// InsertUser in DB creates a new user with the name and balance.
+func (c *PSQLController) InsertUser(name string, balance int) (uint64, error) {
+	var id uint64
 
-	err := c.Handler.QueryRow(`
+	err := c.Database.QueryRow(`
 			insert into users (name, balance) values 
 				($1, $2) returning id;
-		`, name, balance).Scan(id)
-	return id.String(), err
+		`, name, balance).Scan(&id)
+	return id, err
 }
 
 func (c *PSQLController) scanUserRow(row Rows) (domain.User, error) {
 	u := domain.User{}
-	id := c.IDFactory.New()
 
-	err := row.Scan(id, &u.Name, &u.Balance)
+	err := row.Scan(&u.ID, &u.Name, &u.Balance)
 	if err != nil {
 		return u, err
 	}
 
-	u.ID = id.String()
 	return u, nil
 }
 
-// GetUsers returns a slice of all users in the postgresqlDB.
+// GetUsers returns a slice of all users from DB.
 func (c *PSQLController) GetUsers() ([]domain.User, error) {
-	rows, err := c.Handler.Query(`select * from users;`)
+	rows, err := c.Database.Query(`select * from users;`)
 	if err != nil {
 		return nil, err
 	}
@@ -47,47 +46,29 @@ func (c *PSQLController) GetUsers() ([]domain.User, error) {
 	return users, nil
 }
 
-func (c *PSQLController) GetUserByID(uid string) (domain.User, error){
+// GetUserByID returns from DB the user with uid.
+func (c *PSQLController) GetUserByID(uid uint64) (domain.User, error){
 	u := domain.User{}
-	id := c.IDFactory.New()
 
-	err := id.UnmarshalText([]byte(uid))
+	err := c.Database.QueryRow(`select * from users where id = $1;`,
+		uid).Scan(&u.ID, &u.Name, &u.Balance)
 	if err != nil {
 		return u, err
 	}
 
-	err = c.Handler.QueryRow(`select * from users where id = $1;`,
-		id).Scan(id, &u.Name, &u.Balance)
-	if err != nil {
-		return u, err
-	}
-
-	u.ID = id.String()
 	return u, nil
 }
 
-func (c *PSQLController) DeleteUserByID(uid string) error {
-	id := c.IDFactory.New()
-
-	err := id.UnmarshalText([]byte(uid))
-	if err != nil {
-		return err
-	}
-
-	_, err = c.Handler.Exec(`delete from users where id = $1;`,
-		id)
+// DeleteUserByID deletes from DB the user with uid.
+func (c *PSQLController) DeleteUserByID(uid uint64) error {
+	_, err := c.Database.Exec(`delete from users where id = $1;`,
+		uid)
 	return err
 }
 
-func (c *PSQLController) UpdateUserBalanceByID(uid string, balance int) error {
-	id := c.IDFactory.New()
-
-	err := id.UnmarshalText([]byte(uid))
-	if err != nil {
-		return err
-	}
-
-	_, err = c.Handler.Exec(`update users set balance = $1 where id = $2;`,
-		balance, id)
+// UpdateUserBalanceByID updates balance of the user with uid in DB.
+func (c *PSQLController) UpdateUserBalanceByID(uid uint64, balance int) error {
+	_, err := c.Database.Exec(`update users set balance = $1 where id = $2;`,
+		balance, uid)
 	return err
 }

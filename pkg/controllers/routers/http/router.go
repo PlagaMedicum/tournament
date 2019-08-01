@@ -5,6 +5,8 @@ import (
 	handlers "tournament/pkg/controllers/handlers/http"
 )
 
+const regex = "/[0-9]+"
+
 type handler interface {
 	Handle(string, http.Handler, string)
 	HandleFunc(string, func(http.ResponseWriter, *http.Request), string)
@@ -24,24 +26,16 @@ type httpController interface {
 	FinishTournamentHandler(http.ResponseWriter, *http.Request)
 }
 
-type idInterface interface {
-	Regex() string
-}
-
-type Router struct {
-	IDType idInterface
-}
-
 // Route connects endpoints with handling functions.
-func (r Router) Route(h handler, c httpController) {
+func Route(h handler, c httpController) {
 	h.HandleFunc("^"+handlers.UserPath+"$", c.CreateUserHandler, http.MethodPost)
-	h.HandleFunc("^"+handlers.UserPath+"/"+r.IDType.Regex()+"$", c.GetUserHandler, http.MethodGet)
-	h.HandleFunc("^"+handlers.UserPath+"/"+r.IDType.Regex()+"$", c.DeleteUserHandler, http.MethodDelete)
-	h.HandleFunc("^"+handlers.UserPath+"/"+r.IDType.Regex()+handlers.TakingPointsPath+"$", c.TakePointsHandler, http.MethodPost)
-	h.HandleFunc("^"+handlers.UserPath+"/"+r.IDType.Regex()+handlers.GivingPointsPath+"$", c.GivePointsHandler, http.MethodPost)
+	h.HandleFunc("^"+handlers.UserPath+regex+"$", c.GetUserHandler, http.MethodGet)
+	h.HandleFunc("^"+handlers.UserPath+regex+"$", c.DeleteUserHandler, http.MethodDelete)
+	h.HandleFunc("^"+handlers.UserPath+regex+handlers.TakingPointsPath+"$", c.TakePointsHandler, http.MethodPost)
+	h.HandleFunc("^"+handlers.UserPath+regex+handlers.GivingPointsPath+"$", c.GivePointsHandler, http.MethodPost)
 	h.HandleFunc("^"+handlers.TournamentPath+"$", c.CreateTournamentHandler, http.MethodPost)
-	h.HandleFunc("^"+handlers.TournamentPath+"/"+r.IDType.Regex()+"$", c.GetTournamentHandler, http.MethodGet)
-	h.HandleFunc("^"+handlers.TournamentPath+"/"+r.IDType.Regex()+"$", c.DeleteTournamentHandler, http.MethodDelete)
-	h.HandleFunc("^"+handlers.TournamentPath+"/"+r.IDType.Regex()+handlers.JoinTournamentPath+"$", c.JoinTournamentHandler, http.MethodPost)
-	h.HandleFunc("^"+handlers.TournamentPath+"/"+r.IDType.Regex()+handlers.FinishTournamentPath+"$", c.FinishTournamentHandler, http.MethodPost)
+	h.HandleFunc("^"+handlers.TournamentPath+regex+"$", c.GetTournamentHandler, http.MethodGet)
+	h.HandleFunc("^"+handlers.TournamentPath+regex+"$", c.DeleteTournamentHandler, http.MethodDelete)
+	h.HandleFunc("^"+handlers.TournamentPath+regex+handlers.JoinTournamentPath+"$", c.JoinTournamentHandler, http.MethodPost)
+	h.HandleFunc("^"+handlers.TournamentPath+regex+handlers.FinishTournamentPath+"$", c.FinishTournamentHandler, http.MethodPost)
 }

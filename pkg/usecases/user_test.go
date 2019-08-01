@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 	"tournament/pkg/domain"
-	"tournament/pkg/infrastructure/myuuid"
+	"tournament/pkg/usecases/mocks"
 )
 
 const (
@@ -16,131 +16,123 @@ const (
 )
 
 func TestCreateUser(t *testing.T) {
-	factory := myuuid.IDFactory{}
 	testCases := map[string]testCase{
 		"everything ok": {
 			requestName: "Josip",
-			resultID:    factory.NewString(),
+			resultID:    1,
 		},
 	}
 
-	mo := mockedRepository{}
+	mock := mocks.MockedRepository{}
 	c := Controller{
-		Repository: &mo,
-		IDType:     myuuid.IDType{},
+		Repository: &mock,
 	}
 
 	name := "everything ok"
 	tc := testCases[name]
 
-	mo.On(methodNameInsertUser, tc.requestName, defaultBalance).Return(tc.resultID, tc.err)
+	mock.On(methodNameInsertUser, tc.requestName, defaultBalance).Return(tc.resultID, tc.err)
 
 	gotTC := tc
 	gotTC.resultID, gotTC.err = c.CreateUser(tc.requestName)
 	handleTestCase(name, tc, gotTC, t)
 
 	t.Logf("Asserted mocks expectations:")
-	mo.AssertExpectations(t)
+	mock.AssertExpectations(t)
 }
 
 func TestGetUser(t *testing.T) {
-	factory := myuuid.IDFactory{}
 	testCases := map[string]testCase{
 		"everything ok": {
-			userID: factory.NewString(),
-			user:   domain.User{ID: factory.NewString()},
+			userID: 1,
+			user:   domain.User{ID: 1},
 		},
 	}
 
-	mo := mockedRepository{}
+	mock := mocks.MockedRepository{}
 	c := Controller{
-		Repository: &mo,
-		IDType:     myuuid.IDType{},
+		Repository: &mock,
 	}
 
 	name := "everything ok"
 	tc := testCases[name]
 
-	mo.On(methodNameGetUserByID, tc.userID).Return(tc.user, tc.err)
+	mock.On(methodNameGetUserByID, tc.userID).Return(tc.user, tc.err)
 
 	gotTC := tc
 	gotTC.user, gotTC.err = c.GetUser(tc.userID)
 	handleTestCase(name, tc, gotTC, t)
 
 	t.Logf("Asserted mocks expectations:")
-	mo.AssertExpectations(t)
+	mock.AssertExpectations(t)
 }
 
 func TestDeleteUser(t *testing.T) {
-	factory := myuuid.IDFactory{}
 	testCases := map[string]testCase{
 		"everything ok": {
-			userID: factory.NewString(),
+			userID: 1,
 		},
 	}
 
-	mo := mockedRepository{}
+	mock := mocks.MockedRepository{}
 	c := Controller{
-		Repository: &mo,
-		IDType:     myuuid.IDType{},
+		Repository: &mock,
 	}
 
 	name := "everything ok"
 	tc := testCases[name]
 
-	mo.On(methodNameDeleteUserByID, tc.userID).Return(tc.err)
+	mock.On(methodNameDeleteUserByID, tc.userID).Return(tc.err)
 
 	gotTC := tc
 	gotTC.err = c.DeleteUser(tc.userID)
 	handleTestCase(name, tc, gotTC, t)
 
 	t.Logf("Asserted mocks expectations:")
-	mo.AssertExpectations(t)
+	mock.AssertExpectations(t)
 }
 
 func TestFundUser(t *testing.T) {
-	factory := myuuid.IDFactory{}
 	testCases := map[string]testCase{
 		"everything ok": {
-			userID:        factory.NewString(),
+			userID:        1,
 			requestPoints: 10,
 			user: domain.User{
-				ID:      factory.NewString(),
+				ID:      1,
 				Balance: 10,
 			},
 		},
 		"get user error": {
 			mockingStop:   1,
-			userID:        factory.NewString(),
+			userID:        2,
 			requestPoints: 10,
 			user: domain.User{
-				ID:      factory.NewString(),
+				ID:      2,
 				Balance: 10,
 			},
 			err: errors.New("get user error"),
 		},
 	}
 
-	mo := mockedRepository{}
+	mock := mocks.MockedRepository{}
 	c := Controller{
-		Repository: &mo,
-		IDType:     myuuid.IDType{},
+		Repository: &mock,
 	}
 
 	for _, tc := range testCases {
 		if tc.mockingStop == 1 {
-			mo.On(methodNameGetUserByID, tc.userID).Return(tc.user, tc.err)
+			mock.On(methodNameGetUserByID, tc.userID).Return(tc.user, tc.err)
 			continue
 		} 
 
-		mo.On(methodNameGetUserByID, tc.userID).Return(tc.user, nil)
+		mock.On(methodNameGetUserByID, tc.userID).Return(tc.user, nil)
 
 		if tc.mockingStop == 2 {
-			mo.On(methodNameUpdateUserBalanceByID, tc.user.ID, tc.user.Balance+tc.requestPoints).Return(tc.err)
+			mock.On(methodNameUpdateUserBalanceByID, tc.user.ID, tc.user.Balance+tc.requestPoints).Return(tc.err)
 			continue
 		} 
 
-		mo.On(methodNameUpdateUserBalanceByID, tc.user.ID, tc.user.Balance+tc.requestPoints).Return(nil)
+		mock.On(methodNameUpdateUserBalanceByID, tc.user.ID, tc.user.Balance+tc.requestPoints).Return(nil)
 	}
 
 	for name, tc := range testCases {
@@ -150,5 +142,5 @@ func TestFundUser(t *testing.T) {
 	}
 
 	t.Logf("Asserted mocks expectations:")
-	mo.AssertExpectations(t)
+	mock.AssertExpectations(t)
 }

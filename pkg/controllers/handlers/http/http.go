@@ -1,6 +1,8 @@
 package http
 
 import (
+	"net/http"
+	"strconv"
 	"tournament/pkg/domain"
 )
 
@@ -14,17 +16,28 @@ const (
 )
 
 type Usecases interface {
-	CreateUser(string) (string, error)
-	GetUser(string) (domain.User, error)
-	DeleteUser(string) error
-	FundUser(string, int) error
-	CreateTournament(string, int) (string, error)
-	GetTournament(string) (domain.Tournament, error)
-	DeleteTournament(string) error
-	JoinTournament(string, string) error
-	FinishTournament(string) error
+	CreateUser(string) (uint64, error)
+	GetUser(uint64) (domain.User, error)
+	DeleteUser(uint64) error
+	FundUser(uint64, int) error
+	CreateTournament(string, int) (uint64, error)
+	GetTournament(uint64) (domain.Tournament, error)
+	DeleteTournament(uint64) error
+	JoinTournament(uint64, uint64) error
+	FinishTournament(uint64) error
 }
 
 type Controller struct {
 	Usecases
+}
+
+func scanID(path string, r *http.Request) (uint64, error) {
+	var i int
+	s := ""
+	for i = len(path + "/"); (s != "/") || len(r.URL.Path) < i; i++ {
+		s = r.URL.Path[i:i+1]
+	}
+
+	id, err := strconv.ParseUint(r.URL.Path[len(path+"/"):i-1], 10, 64)
+	return id, err
 }

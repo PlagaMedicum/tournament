@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 	"tournament/pkg/domain"
-	"tournament/pkg/infrastructure/myuuid"
+	"tournament/pkg/usecases/mocks"
 )
 
 const (
@@ -16,152 +16,145 @@ const (
 )
 
 func TestCreateTournament(t *testing.T) {
-	factory := myuuid.IDFactory{}
 	testCases := map[string]testCase{
 		"everything ok": {
 			requestName:    "Tournament",
 			requestDeposit: 500,
-			resultID:       factory.NewString(),
+			resultID:       1,
 		},
 	}
 
-	mo := mockedRepository{}
+	mock := mocks.MockedRepository{}
 	c := Controller{
-		Repository: &mo,
-		IDType:     myuuid.IDType{},
+		Repository: &mock,
 	}
 
 	name := "everything ok"
 	tc := testCases[name]
 
-	mo.On(methodNameInsertTournament, tc.requestName, tc.requestDeposit, defaultPrize).Return(tc.resultID, tc.err)
+	mock.On(methodNameInsertTournament, tc.requestName, tc.requestDeposit, defaultPrize).Return(tc.resultID, tc.err)
 
 	gotTC := tc
 	gotTC.resultID, gotTC.err = c.CreateTournament(tc.requestName, tc.requestDeposit)
 	handleTestCase(name, tc, gotTC, t)
 
 	t.Logf("Asserted mocks expectations:")
-	mo.AssertExpectations(t)
+	mock.AssertExpectations(t)
 }
 
 func TestGetTournament(t *testing.T) {
-	factory := myuuid.IDFactory{}
 	testCases := map[string]testCase{
 		"everything ok": {
-			tournamentID: factory.NewString(),
-			tournament:   domain.Tournament{ID: factory.NewString()},
+			tournamentID: 1,
+			tournament:   domain.Tournament{ID: 1},
 		},
 	}
 
-	mo := mockedRepository{}
+	mock := mocks.MockedRepository{}
 	c := Controller{
-		Repository: &mo,
-		IDType:     myuuid.IDType{},
+		Repository: &mock,
 	}
 
 	name := "everything ok"
 	tc := testCases[name]
 
-	mo.On(methodNameGetTournamentByID, tc.tournamentID).Return(tc.tournament, tc.err)
+	mock.On(methodNameGetTournamentByID, tc.tournamentID).Return(tc.tournament, tc.err)
 
 	gotTC := tc
 	gotTC.tournament, gotTC.err = c.GetTournament(tc.tournamentID)
 	handleTestCase(name, tc, gotTC, t)
 
 	t.Logf("Asserted mocks expectations:")
-	mo.AssertExpectations(t)
+	mock.AssertExpectations(t)
 }
 
 func TestDeleteTournament(t *testing.T) {
-	factory := myuuid.IDFactory{}
 	testCases := map[string]testCase{
 		"everything ok": {
-			tournamentID: factory.NewString(),
+			tournamentID: 1,
 		},
 	}
 
-	mo := mockedRepository{}
+	mock := mocks.MockedRepository{}
 	c := Controller{
-		Repository: &mo,
-		IDType:     myuuid.IDType{},
+		Repository: &mock,
 	}
 
 	name := "everything ok"
 	tc := testCases[name]
 
-	mo.On(methodNameDeleteTournamentByID, tc.tournamentID).Return(tc.err)
+	mock.On(methodNameDeleteTournamentByID, tc.tournamentID).Return(tc.err)
 
 	gotTC := tc
 	gotTC.err = c.DeleteTournament(tc.tournamentID)
 	handleTestCase(name, tc, gotTC, t)
 
 	t.Logf("Asserted mocks expectations:")
-	mo.AssertExpectations(t)
+	mock.AssertExpectations(t)
 }
 
 func TestJoinTournament(t *testing.T) {
-	factory := myuuid.IDFactory{}
-	dublicateUserID := factory.NewString()
+	var dublicateUserID uint64 = 33
 	testCases := map[string]testCase{
 		"everything ok": {
-			tournamentID: factory.NewString(),
-			userID:       factory.NewString(),
+			tournamentID: 1,
+			userID:       2,
 			tournament: domain.Tournament{
-				ID:      factory.NewString(),
+				ID:      1,
 				Deposit: 100,
 			},
 			user: domain.User{
-				ID:      factory.NewString(),
+				ID:      2,
 				Balance: 120,
 			},
 		},
 		"error getting tournament": {
 			mockingStop:  1,
-			tournamentID: factory.NewString(),
-			userID:       factory.NewString(),
+			tournamentID: 3,
+			userID:       4,
 			tournament:   domain.Tournament{},
 			err:          errors.New("error"),
 		},
 		"error getting user": {
 			mockingStop:  2,
-			tournamentID: factory.NewString(),
-			userID:       factory.NewString(),
+			tournamentID: 5,
+			userID:       6,
 			tournament:   domain.Tournament{},
 			user:         domain.User{},
 			err:          errors.New("error"),
 		},
 		"error adding user in tournament": {
 			mockingStop:  3,
-			tournamentID: factory.NewString(),
-			userID:       factory.NewString(),
+			tournamentID: 7,
+			userID:       8,
 			tournament: domain.Tournament{
-				ID: factory.NewString(),
+				ID: 7,
 			},
 			user: domain.User{
-				ID: factory.NewString(),
+				ID: 8,
 			},
 			err: errors.New("error"),
 		},
 		"error updating user balance": {
 			mockingStop:  4,
-			tournamentID: factory.NewString(),
-			userID:       factory.NewString(),
+			tournamentID: 9,
+			userID:       10,
 			tournament: domain.Tournament{
-				ID:      factory.NewString(),
+				ID:      9,
 				Deposit: 1,
 			},
 			user: domain.User{
-				ID:      factory.NewString(),
+				ID:      10,
 				Balance: 2,
 			},
 			err: errors.New("error"),
 		},
 		"error user is participant": {
-			tournamentID: factory.NewString(),
-			userID:       factory.NewString(),
+			tournamentID: 11,
+			userID:       12,
 			tournament: domain.Tournament{
-				ID: factory.NewString(),
-				Participants: []string{
+				ID: 11,
+				Participants: []uint64{
 					dublicateUserID,
 				},
 			},
@@ -171,61 +164,60 @@ func TestJoinTournament(t *testing.T) {
 			err: ErrParticipantExists,
 		},
 		"not enough points": {
-			tournamentID: factory.NewString(),
-			userID:       factory.NewString(),
+			tournamentID: 13,
+			userID:       14,
 			tournament: domain.Tournament{
-				ID:      factory.NewString(),
+				ID:      13,
 				Deposit: 2,
 			},
 			user: domain.User{
-				ID:      factory.NewString(),
+				ID:      14,
 				Balance: 1,
 			},
 			err: ErrNotEnoughPoints,
 		},
 	}
 
-	mo := mockedRepository{}
+	mock := mocks.MockedRepository{}
 	c := Controller{
-		Repository: &mo,
-		IDType:     myuuid.IDType{},
+		Repository: &mock,
 	}
 
 	for name, tc := range testCases {
 		if name == "error user is participant" {
-			mo.On(methodNameGetTournamentByID, tc.tournamentID).Return(tc.tournament, nil)
-			mo.On(methodNameGetUserByID, tc.userID).Return(tc.user, nil)
+			mock.On(methodNameGetTournamentByID, tc.tournamentID).Return(tc.tournament, nil)
+			mock.On(methodNameGetUserByID, tc.userID).Return(tc.user, nil)
 			continue
 		}
 
 		if name == "not enough points" {
-			mo.On(methodNameGetTournamentByID, tc.tournamentID).Return(tc.tournament, nil)
-			mo.On(methodNameGetUserByID, tc.userID).Return(tc.user, nil)
+			mock.On(methodNameGetTournamentByID, tc.tournamentID).Return(tc.tournament, nil)
+			mock.On(methodNameGetUserByID, tc.userID).Return(tc.user, nil)
 			continue
 		}
 
 		if tc.mockingStop == 1 {
-			mo.On(methodNameGetTournamentByID, tc.tournamentID).Return(tc.tournament, tc.err)
+			mock.On(methodNameGetTournamentByID, tc.tournamentID).Return(tc.tournament, tc.err)
 			continue
 		}
 		
-		mo.On(methodNameGetTournamentByID, tc.tournamentID).Return(tc.tournament, nil)
+		mock.On(methodNameGetTournamentByID, tc.tournamentID).Return(tc.tournament, nil)
 
 		if tc.mockingStop == 2 {
-			mo.On(methodNameGetUserByID, tc.userID).Return(tc.user, tc.err)
+			mock.On(methodNameGetUserByID, tc.userID).Return(tc.user, tc.err)
 			continue
 		} 
 
-		mo.On(methodNameGetUserByID, tc.userID).Return(tc.user, nil)
+		mock.On(methodNameGetUserByID, tc.userID).Return(tc.user, nil)
 
 		if tc.mockingStop == 3 {
-			mo.On(methodNameAddUserInTournament, tc.user.ID, tc.tournament.ID).Return(tc.err)
+			mock.On(methodNameAddUserInTournament, tc.user.ID, tc.tournament.ID).Return(tc.err)
 			continue
 		} 
 
-		mo.On(methodNameAddUserInTournament, tc.user.ID, tc.tournament.ID).Return(nil)
+		mock.On(methodNameAddUserInTournament, tc.user.ID, tc.tournament.ID).Return(nil)
 
-		mo.On(methodNameUpdateUserBalanceByID, tc.user.ID, tc.user.Balance-tc.tournament.Deposit).Return(tc.err)
+		mock.On(methodNameUpdateUserBalanceByID, tc.user.ID, tc.user.Balance-tc.tournament.Deposit).Return(tc.err)
 	}
 
 	for name, tc := range testCases {
@@ -235,65 +227,63 @@ func TestJoinTournament(t *testing.T) {
 	}
 
 	t.Logf("Asserted mocks expectations:")
-	mo.AssertExpectations(t)
+	mock.AssertExpectations(t)
 }
 
-func mockForTestFinishTournament(tc testCase, name string) (*mockedRepository, *Controller){
-	mo := mockedRepository{}
+func mockForTestFinishTournament(tc testCase, name string) (*mocks.MockedRepository, *Controller){
+	mock := mocks.MockedRepository{}
 	c := Controller{
-		Repository: &mo,
-		IDType:     myuuid.IDType{},
-	}
-
-	if name == "error finished tournament" {
-		mo.On(methodNameGetTournamentByID, tc.tournamentID).Return(tc.tournament, nil)
-		return &mo, &c
+		Repository: &mock,
 	}
 
 	if name == "error no participants"{
-		mo.On(methodNameGetTournamentByID, tc.tournamentID).Return(tc.tournament, nil)
-		mo.On(methodNameGetUsers).Return([]domain.User{tc.user}, nil)
-		return &mo, &c
+		mock.On(methodNameGetTournamentByID, tc.tournamentID).Return(tc.tournament, nil)
+		mock.On(methodNameGetUsers).Return([]domain.User{tc.user}, nil)
+		return &mock, &c
+	}
+
+	if name == "error finished tournament" {
+		mock.On(methodNameGetTournamentByID, tc.tournamentID).Return(tc.tournament, nil)
+		return &mock, &c
 	}
 
 	if tc.mockingStop == 1 {
-		mo.On(methodNameGetTournamentByID, tc.tournamentID).Return(tc.tournament, tc.err)
-		return &mo, &c
+		mock.On(methodNameGetTournamentByID, tc.tournamentID).Return(tc.tournament, tc.err)
+		return &mock, &c
 	}
 	
-	mo.On(methodNameGetTournamentByID, tc.tournamentID).Return(tc.tournament, nil)
+	mock.On(methodNameGetTournamentByID, tc.tournamentID).Return(tc.tournament, nil)
 
 	if tc.mockingStop == 2 {
-		mo.On(methodNameGetUsers).Return([]domain.User{}, tc.err)
-		return &mo, &c
+		mock.On(methodNameGetUsers).Return([]domain.User{}, tc.err)
+		return &mock, &c
 	}
 	
-	mo.On(methodNameGetUsers).Return([]domain.User{{ID: "1", Balance: 1}, tc.user}, nil)
+	mock.On(methodNameGetUsers).Return([]domain.User{{ID: 99, Balance: 1}, tc.user}, nil)
 
 	if tc.mockingStop == 3 {
-		mo.On(methodNameSetWinner, tc.user.ID, tc.tournament.ID).Return(tc.err)
-		return &mo, &c
+		mock.On(methodNameSetWinner, tc.user.ID, tc.tournament.ID).Return(tc.err)
+		return &mock, &c
 	}
 	
-	mo.On(methodNameSetWinner, tc.user.ID, tc.tournament.ID).Return(nil)
+	mock.On(methodNameSetWinner, tc.user.ID, tc.tournament.ID).Return(nil)
 
-	mo.On(methodNameUpdateUserBalanceByID, tc.user.ID, tc.user.Balance+tc.tournament.Prize).Return(tc.err)
-	return &mo, &c
+	mock.On(methodNameUpdateUserBalanceByID, tc.user.ID, tc.user.Balance+tc.tournament.Prize).Return(tc.err)
+	return &mock, &c
 }
 
 func TestFinishTournament(t *testing.T) {
-	factory := myuuid.IDFactory{}
-	winnerID := factory.NewString()
+	var winnerID uint64 = 33
 	testCases := map[string]testCase{
 		"everything ok": {
-			tournamentID: factory.NewString(),
+			tournamentID: 1,
 			tournament: domain.Tournament{
-				ID:    factory.NewString(),
+				ID:    1,
 				Prize: 100,
-				Participants: []string{
+				Participants: []uint64{
 					winnerID,
 				},
-				WinnerID: myuuid.IDType{}.Null(),
+				WinnerID: 0,
 			},
 			user: domain.User{
 				ID:      winnerID,
@@ -302,27 +292,27 @@ func TestFinishTournament(t *testing.T) {
 		},
 		"error getting tournament": {
 			mockingStop:  1,
-			tournamentID: factory.NewString(),
+			tournamentID: 2,
 			err:          errors.New("error"),
 		},
 		"error getting users": {
 			mockingStop: 2,
-			tournamentID: factory.NewString(),
+			tournamentID: 3,
 			tournament: domain.Tournament{
-				ID:       factory.NewString(),
-				WinnerID: myuuid.IDType{}.Null(),
+				ID:       3,
+				WinnerID: 0,
 			},
 			err:  errors.New("error"),
 		},
 		"error setting winner": {
 			mockingStop:  3,
-			tournamentID: factory.NewString(),
+			tournamentID: 4,
 			tournament: domain.Tournament{
-				ID: factory.NewString(),
-				Participants: []string{
+				ID: 4,
+				Participants: []uint64{
 					winnerID,
 				},
-				WinnerID: myuuid.IDType{}.Null(),
+				WinnerID: 0,
 			},
 			user: domain.User{
 				ID:      winnerID,
@@ -331,24 +321,27 @@ func TestFinishTournament(t *testing.T) {
 			err: errors.New("error"),
 		},
 		"error no participants": {
-			tournamentID: factory.NewString(),
+			tournamentID: 5,
 			tournament: domain.Tournament{
-				ID:       factory.NewString(),
-				WinnerID: myuuid.IDType{}.Null(),
+				ID:       5,
+				WinnerID: 0,
 			},
 			err:  ErrNoParticipants,
 		},
 		"error finished tournament": {
-			tournamentID: factory.NewString(),
+			tournamentID: 6,
+			tournament: domain.Tournament{
+				WinnerID: 7,
+			},
 			err:          ErrFinishedTournament,
 		},
 	}
 
-	var mocks []*mockedRepository
+	var mockList []*mocks.MockedRepository
 
 	for name, tc := range testCases {
-		mo, c := mockForTestFinishTournament(tc, name)
-		mocks = append(mocks, mo)
+		mock, c := mockForTestFinishTournament(tc, name)
+		mockList = append(mockList, mock)
 
 		gotTC := tc
 		gotTC.err = c.FinishTournament(tc.tournamentID)
@@ -356,7 +349,7 @@ func TestFinishTournament(t *testing.T) {
 	}
 
 	t.Logf("Asserted mocks expectations:")
-	for _, mo := range mocks{
-		mo.AssertExpectations(t)
+	for _, mock := range mockList{
+		mock.AssertExpectations(t)
 	}
 }

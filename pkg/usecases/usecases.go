@@ -15,23 +15,18 @@ var (
 )
 
 type Repository interface {
-	InsertUser(string, int) (string, error)
+	InsertUser(string, int) (uint64, error)
 	GetUsers() ([]domain.User, error)
-	GetUserByID(string) (domain.User, error)
-	DeleteUserByID(string) error
-	UpdateUserBalanceByID(string, int) error
-	InsertTournament(string, int, int) (string, error)
-	GetTournamentByID(string) (domain.Tournament, error)
-	DeleteTournamentByID(string) error
-	AddUserInTournament(string, string) error
-	SetWinner(string, string) error
-}
-
-type idType interface {
-	Null() string
+	GetUserByID(uint64) (domain.User, error)
+	DeleteUserByID(uint64) error
+	UpdateUserBalanceByID(uint64, int) error
+	InsertTournament(string, int, int) (uint64, error)
+	GetTournamentByID(uint64) (domain.Tournament, error)
+	DeleteTournamentByID(uint64) error
+	AddUserInTournament(uint64, uint64) error
+	SetWinner(uint64, uint64) error
 }
 
 type Controller struct {
 	Repository Repository
-	IDType idType
 }

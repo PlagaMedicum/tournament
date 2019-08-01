@@ -3,6 +3,7 @@ package http
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"tournament/pkg/domain"
 	"tournament/pkg/infrastructure/errHandler"
 )
@@ -38,7 +39,11 @@ func (c Controller) CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 // information about user with specified id.
 // Writes user's name and balance in response body.
 func (c Controller) GetUserHandler(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Path[len(UserPath+"/"):]
+	id, err := strconv.ParseUint(r.URL.Path[len(UserPath+"/"):], 10, 64)
+	if err != nil {
+		errHandler.HandleErr(err, w)
+		return
+	}
 
 	u, err := c.GetUser(id)
 	if err != nil {
@@ -57,9 +62,13 @@ func (c Controller) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 
 // DeleteUserHandler is the http handler for deleting users by id.
 func (c Controller) DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Path[len(UserPath+"/"):]
+	id, err := strconv.ParseUint(r.URL.Path[len(UserPath+"/"):], 10, 64)
+	if err != nil {
+		errHandler.HandleErr(err, w)
+		return
+	}
 
-	err := c.DeleteUser(id)
+	err = c.DeleteUser(id)
 	if err != nil {
 		errHandler.HandleErr(err, w)
 		return
@@ -71,11 +80,15 @@ func (c Controller) DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 // TakePointsHandler is the http handler for taking points
 // from user with specified id
 func (c Controller) TakePointsHandler(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Path[len(UserPath+"/") : len(UserPath+"/")+36]
+	id, err := scanID(UserPath, r)
+	if err != nil {
+		errHandler.HandleErr(err, w)
+		return
+	}
 
 	var st struct{ Points int `json:"points"` }
 
-	err := json.NewDecoder(r.Body).Decode(&st)
+	err = json.NewDecoder(r.Body).Decode(&st)
 	if err != nil {
 		errHandler.HandleJSONErr(err, w)
 		return
@@ -94,11 +107,15 @@ func (c Controller) TakePointsHandler(w http.ResponseWriter, r *http.Request) {
 // GivePointsHandler is the http handler for giving points
 // to users with specified id.
 func (c Controller) GivePointsHandler(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Path[len(UserPath+"/") : len(UserPath+"/")+36]
+	id, err := scanID(UserPath, r)
+	if err != nil {
+		errHandler.HandleErr(err, w)
+		return
+	}
 
 	var st struct{ Points int `json:"points"` }
 
-	err := json.NewDecoder(r.Body).Decode(&st)
+	err = json.NewDecoder(r.Body).Decode(&st)
 	if err != nil {
 		errHandler.HandleJSONErr(err, w)
 		return

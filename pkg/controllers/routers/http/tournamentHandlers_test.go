@@ -3,14 +3,15 @@ package http
 import (
 	"errors"
 	"net/http"
+	"strconv"
 	"testing"
 	httpHandler "tournament/pkg/controllers/handlers/http"
+	"tournament/pkg/controllers/routers/http/mocks"
 	"tournament/pkg/domain"
 	"tournament/pkg/infrastructure/myhandler"
-	"tournament/pkg/infrastructure/myuuid"
 )
 
-const(
+const (
 	methodNameCreateTournament = "CreateTournament"
 	methodNameGetTournament    = "GetTournament"
 	methodNameDeleteTournament = "DeleteTournament"
@@ -20,11 +21,10 @@ const(
 
 // TestCreateTournamentHandler tests creation of tournament.
 func TestCreateTournamentHandler(t *testing.T) {
-	idFactory := myuuid.IDFactory{}
 	testCases := []testCase{
 		{
-			caseName:  "everything ok",
-			resultID:  idFactory.NewString(),
+			caseName: "everything ok",
+			resultID: 1,
 			requestTournament: domain.Tournament{
 				Name:    "Unreal Tournament",
 				Deposit: 10000,
@@ -42,7 +42,7 @@ func TestCreateTournamentHandler(t *testing.T) {
 		{
 			caseName:  "wrong tournament error",
 			resultErr: errors.New("i'm the bad err"),
-			resultID:  idFactory.NewString(),
+			resultID:  2,
 			requestTournament: domain.Tournament{
 				Name:    "test tour",
 				Deposit: 1,
@@ -52,189 +52,176 @@ func TestCreateTournamentHandler(t *testing.T) {
 		},
 	}
 
-	idType := myuuid.IDType{}
-	mo := mockedUsecases{}
+	mock := mocks.MockedUsecases{}
 	h := myhandler.Handler{}
-	r := Router{IDType: idType}
-	r.Route(&h, httpHandler.Controller{Usecases: &mo})
+	Route(&h, httpHandler.Controller{Usecases: &mock})
 
 	for _, tc := range testCases {
 		tc.path = httpHandler.TournamentPath
 		tc.method = http.MethodPost
 
 		if !tc.noMock {
-			mo.On(methodNameCreateTournament, tc.requestTournament.Name, tc.requestTournament.Deposit).Return(tc.resultID, tc.resultErr)
+			mock.On(methodNameCreateTournament, tc.requestTournament.Name, tc.requestTournament.Deposit).Return(tc.resultID, tc.resultErr)
 		}
 
 		handleTestCase(t, &h, tc)
 	}
 
 	t.Logf("Asserted mocks expectations:")
-	mo.AssertExpectations(t)
+	mock.AssertExpectations(t)
 }
 
 // TestGetTournamentHandler tests getting of tournament's information.
 func TestGetTournamentHandler(t *testing.T) {
-	idFactory := myuuid.IDFactory{}
 	testCases := []testCase{
 		{
-			caseName:  "everything ok",
+			caseName: "everything ok",
 			resultTournament: domain.Tournament{
 				Name: "test tour",
 			},
-			requestID:      idFactory.NewString(),
+			requestID:      1,
 			expectedStatus: http.StatusOK,
 		},
 		{
 			caseName:         "wrong tournament error",
 			resultErr:        errors.New("i'm the bad err"),
 			resultTournament: domain.Tournament{},
-			requestID:        idFactory.NewString(),
+			requestID:        2,
 			expectedStatus:   http.StatusBadRequest,
 		},
 	}
 
-	idType := myuuid.IDType{}
-	mo := mockedUsecases{}
+	mock := mocks.MockedUsecases{}
 	h := myhandler.Handler{}
-	r := Router{IDType: idType}
-	r.Route(&h, httpHandler.Controller{Usecases: &mo})
+	Route(&h, httpHandler.Controller{Usecases: &mock})
 
 	for _, tc := range testCases {
-		tc.path = httpHandler.TournamentPath + "/" + tc.requestID
+		tc.path = httpHandler.TournamentPath + "/" + strconv.FormatUint(tc.requestID, 10)
 		tc.method = http.MethodGet
 
 		if !tc.noMock {
-			mo.On(methodNameGetTournament, tc.requestID).Return(tc.resultTournament, tc.resultErr)
+			mock.On(methodNameGetTournament, tc.requestID).Return(tc.resultTournament, tc.resultErr)
 		}
 
 		handleTestCase(t, &h, tc)
 	}
 
 	t.Logf("Asserted mocks expectations:")
-	mo.AssertExpectations(t)
+	mock.AssertExpectations(t)
 }
 
 // TestGetTournamentHandler tests deleting of tournament.
 func TestDeleteTournamentHandler(t *testing.T) {
-	idFactory := myuuid.IDFactory{}
 	testCases := []testCase{
 		{
 			caseName:       "everything ok",
-			requestID:      idFactory.NewString(),
+			requestID:      1,
 			expectedStatus: http.StatusOK,
 		},
 		{
 			caseName:       "wrong tournament error",
 			resultErr:      errors.New("i'm the bad err"),
-			requestID:      idFactory.NewString(),
+			requestID:      2,
 			expectedStatus: http.StatusBadRequest,
 		},
 	}
 
-	idType := myuuid.IDType{}
-	mo := mockedUsecases{}
+	mock := mocks.MockedUsecases{}
 	h := myhandler.Handler{}
-	r := Router{IDType: idType}
-	r.Route(&h, httpHandler.Controller{Usecases: &mo})
+	Route(&h, httpHandler.Controller{Usecases: &mock})
 
 	for _, tc := range testCases {
-		tc.path = httpHandler.TournamentPath + "/" + tc.requestID
+		tc.path = httpHandler.TournamentPath + "/" + strconv.FormatUint(tc.requestID, 10)
 		tc.method = http.MethodDelete
 
 		if !tc.noMock {
-			mo.On(methodNameDeleteTournament, tc.requestID).Return(tc.resultErr)
+			mock.On(methodNameDeleteTournament, tc.requestID).Return(tc.resultErr)
 		}
 
 		handleTestCase(t, &h, tc)
 	}
 
 	t.Logf("Asserted mocks expectations:")
-	mo.AssertExpectations(t)
+	mock.AssertExpectations(t)
 }
 
 // TestJoinTournamentHandler tests joining tournament.
 func TestJoinTournamentHandler(t *testing.T) {
-	idFactory := myuuid.IDFactory{}
-	requestUserID := idFactory.NewString()
+	var requestUserID uint64 = 33
 	testCases := []testCase{
 		{
 			caseName:       "everything ok",
-			requestID:      idFactory.NewString(),
-			requestBody:    `{"userId": "` + requestUserID + `"}`,
+			requestID:      1,
+			requestBody:    `{"userId": ` + strconv.FormatUint(requestUserID, 10) + `}`,
 			expectedStatus: http.StatusOK,
 		},
 		{
 			caseName:       "wrong body",
 			noMock:         true,
 			requestBody:    `i'm the wrong body"`,
-			requestID:      idFactory.NewString(),
+			requestID:      2,
 			expectedStatus: http.StatusBadRequest,
 		},
 		{
 			caseName:       "wrong tournament error",
 			resultErr:      errors.New("i'm the bad err"),
-			requestID:      idFactory.NewString(),
-			requestBody:    `{"userId": "` + requestUserID + `"}`,
+			requestID:      3,
+			requestBody:    `{"userId": ` + strconv.FormatUint(requestUserID, 10) + `}`,
 			expectedStatus: http.StatusBadRequest,
 		},
 	}
 
-	idType := myuuid.IDType{}
-	mo := mockedUsecases{}
+	mock := mocks.MockedUsecases{}
 	h := myhandler.Handler{}
-	r := Router{IDType: idType}
-	r.Route(&h, httpHandler.Controller{Usecases: &mo})
+	Route(&h, httpHandler.Controller{Usecases: &mock})
 
 	for _, tc := range testCases {
-		tc.path = httpHandler.TournamentPath + "/" + tc.requestID + httpHandler.JoinTournamentPath
+		tc.path = httpHandler.TournamentPath + "/" + strconv.FormatUint(tc.requestID, 10) + httpHandler.JoinTournamentPath
 		tc.method = http.MethodPost
 
 		if !tc.noMock {
-			mo.On(methodNameJoinTournament, tc.requestID, requestUserID).Return(tc.resultErr)
+			mock.On(methodNameJoinTournament, tc.requestID, requestUserID).Return(tc.resultErr)
 		}
 
 		handleTestCase(t, &h, tc)
 	}
 
 	t.Logf("Asserted mocks expectations:")
-	mo.AssertExpectations(t)
+	mock.AssertExpectations(t)
 }
 
 // TestFinishTournamentHandler tests joining tournament.
 func TestFinishTournamentHandler(t *testing.T) {
-	idFactory := myuuid.IDFactory{}
+
 	testCases := []testCase{
 		{
 			caseName:       "everything ok",
-			requestID:      idFactory.NewString(),
+			requestID:      1,
 			expectedStatus: http.StatusOK,
 		},
 		{
 			caseName:       "wrong tournament error",
 			resultErr:      errors.New("i'm the bad err"),
-			requestID:      idFactory.NewString(),
+			requestID:      2,
 			expectedStatus: http.StatusBadRequest,
 		},
 	}
 
-	idType := myuuid.IDType{}
-	mo := mockedUsecases{}
+	mock := mocks.MockedUsecases{}
 	h := myhandler.Handler{}
-	r := Router{IDType: idType}
-	r.Route(&h, httpHandler.Controller{Usecases: &mo})
+	Route(&h, httpHandler.Controller{Usecases: &mock})
 
 	for _, tc := range testCases {
-		tc.path = httpHandler.TournamentPath + "/" + tc.requestID + httpHandler.FinishTournamentPath
+		tc.path = httpHandler.TournamentPath + "/" + strconv.FormatUint(tc.requestID, 10) + httpHandler.FinishTournamentPath
 		tc.method = http.MethodPost
 
 		if !tc.noMock {
-			mo.On(methodNameFinishTournament, tc.requestID).Return(tc.resultErr)
+			mock.On(methodNameFinishTournament, tc.requestID).Return(tc.resultErr)
 		}
 
 		handleTestCase(t, &h, tc)
 	}
 
 	t.Logf("Asserted mocks expectations:")
-	mo.AssertExpectations(t)
+	mock.AssertExpectations(t)
 }
