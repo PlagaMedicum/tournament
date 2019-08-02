@@ -8,6 +8,10 @@ import (
 	errors "tournament/pkg/infrastructure/err"
 )
 
+type Controller struct {
+	Usecases
+}
+
 // CreateTournamentHandler is the http http_handlers for creating tournaments
 // with specified name and deposit. Default prize is 4000.
 // Writes tournament's id in response body.

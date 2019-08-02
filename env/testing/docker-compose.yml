@@ -9,13 +9,11 @@ services:
     depends_on:
       - database
     volumes:
-      - ./pkg:/go/src/tournament/pkg
+      - ../../pkg:/go/src/tournament/pkg
     command: ./run.sh
   database:
     image: postgres
     container_name: "tournament_db"
-    volumes:
-      - ./databases/postgresql/db-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     environment:

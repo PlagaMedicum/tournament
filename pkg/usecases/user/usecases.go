@@ -6,6 +6,10 @@ import (
 
 const defaultBalance = 700
 
+type Controller struct {
+	Repository
+}
+
 // CreateUser inserts new user instance in Repository.
 func (c *Controller) CreateUser(name string) (uint64, error) {
 	id, err := c.InsertUser(name, defaultBalance)

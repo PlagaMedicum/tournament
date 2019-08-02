@@ -5,6 +5,10 @@ import (
 	"tournament/pkg/domain/user"
 )
 
+type Controller struct {
+	postgresql.Database
+}
+
 // InsertUser in DB creates a new user with the name and balance.
 func (c *Controller) InsertUser(name string, balance int) (uint64, error) {
 	var id uint64

@@ -8,7 +8,3 @@ type Repository interface {
 	DeleteUserByID(uint64) error
 	UpdateUserBalanceByID(uint64, int) error
 }
-
-type Controller struct {
-	Repository
-}

@@ -8,7 +8,3 @@ type Usecases interface {
 	DeleteUser(uint64) error
 	FundUser(uint64, int) error
 }
-
-type Controller struct {
-	Usecases
-}

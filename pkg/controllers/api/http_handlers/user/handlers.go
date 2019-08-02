@@ -8,6 +8,10 @@ import (
 	errors "tournament/pkg/infrastructure/err"
 )
 
+type Controller struct {
+	Usecases
+}
+
 // CreateUserHandler is the http handler for creating users with
 // specified name. Default balance is 700.
 // Writes the user id in response body.

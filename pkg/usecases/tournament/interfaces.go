@@ -15,7 +15,3 @@ type Repository interface {
 	AddUserInTournament(uint64, uint64) error
 	SetWinner(uint64, uint64) error
 }
-
-type Controller struct {
-	Repository
-}

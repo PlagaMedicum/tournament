@@ -9,7 +9,3 @@ type Usecases interface {
 	JoinTournament(uint64, uint64) error
 	FinishTournament(uint64) error
 }
-
-type Controller struct {
-	Usecases
-}

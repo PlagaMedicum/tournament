@@ -6,6 +6,10 @@ import (
 	"tournament/pkg/domain/user"
 )
 
+type Controller struct {
+	postgresql.Database
+}
+
 func (c *Controller) scanUserRow(row postgresql.Rows) (user.User, error) {
 	u := user.User{}
 

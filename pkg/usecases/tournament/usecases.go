@@ -8,6 +8,10 @@ import (
 
 const defaultPrize = 4000
 
+type Controller struct {
+	Repository
+}
+
 // CreateTournament inserts new tournament instance in Repository.
 func (c *Controller) CreateTournament(name string, deposit int) (uint64, error) {
 	id, err := c.InsertTournament(name, deposit, defaultPrize)
