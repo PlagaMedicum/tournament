@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"tournament/pkg/controllers/api/http_handlers"
 	"tournament/pkg/domain/tournament"
-	"tournament/pkg/infrastructure/err"
+	errors "tournament/pkg/infrastructure/err"
 )
 
 // CreateTournamentHandler is the http http_handlers for creating tournaments
@@ -16,13 +16,13 @@ func (c Controller) CreateTournamentHandler(w http.ResponseWriter, r *http.Reque
 
 	err := json.NewDecoder(r.Body).Decode(&t)
 	if err != nil {
-		err.HandleJSONErr(err, w)
+		errors.HandleJSONErr(err, w)
 		return
 	}
 
 	t.ID, err = c.CreateTournament(t.Name, t.Deposit)
 	if err != nil {
-		err.HandleErr(err, w)
+		errors.HandleErr(err, w)
 		return
 	}
 
@@ -30,7 +30,7 @@ func (c Controller) CreateTournamentHandler(w http.ResponseWriter, r *http.Reque
 
 	err = json.NewEncoder(w).Encode(t.ID)
 	if err != nil {
-		err.HandleJSONErr(err, w)
+		errors.HandleJSONErr(err, w)
 		return
 	}
 }
@@ -42,13 +42,13 @@ func (c Controller) CreateTournamentHandler(w http.ResponseWriter, r *http.Reque
 func (c Controller) GetTournamentHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := http_handlers.ScanID(http_handlers.TournamentPath, r)
 	if err != nil {
-		err.HandleErr(err, w)
+		errors.HandleErr(err, w)
 		return
 	}
 
 	t, err := c.GetTournament(id)
 	if err != nil {
-		err.HandleErr(err, w)
+		errors.HandleErr(err, w)
 		return
 	}
 
@@ -56,7 +56,7 @@ func (c Controller) GetTournamentHandler(w http.ResponseWriter, r *http.Request)
 
 	err = json.NewEncoder(w).Encode(t)
 	if err != nil {
-		err.HandleJSONErr(err, w)
+		errors.HandleJSONErr(err, w)
 		return
 	}
 }
@@ -65,13 +65,13 @@ func (c Controller) GetTournamentHandler(w http.ResponseWriter, r *http.Request)
 func (c Controller) DeleteTournamentHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := http_handlers.ScanID(http_handlers.TournamentPath, r)
 	if err != nil {
-		err.HandleErr(err, w)
+		errors.HandleErr(err, w)
 		return
 	}
 
 	err = c.DeleteTournament(id)
 	if err != nil {
-		err.HandleErr(err, w)
+		errors.HandleErr(err, w)
 		return
 	}
 
@@ -83,7 +83,7 @@ func (c Controller) DeleteTournamentHandler(w http.ResponseWriter, r *http.Reque
 func (c Controller) JoinTournamentHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := http_handlers.ScanID(http_handlers.TournamentPath, r)
 	if err != nil {
-		err.HandleErr(err, w)
+		errors.HandleErr(err, w)
 		return
 	}
 
@@ -91,13 +91,13 @@ func (c Controller) JoinTournamentHandler(w http.ResponseWriter, r *http.Request
 
 	err = json.NewDecoder(r.Body).Decode(&st)
 	if err != nil {
-		err.HandleJSONErr(err, w)
+		errors.HandleJSONErr(err, w)
 		return
 	}
 
 	err = c.JoinTournament(id, st.ID)
 	if err != nil {
-		err.HandleErr(err, w)
+		errors.HandleErr(err, w)
 		return
 	}
 
@@ -109,13 +109,13 @@ func (c Controller) JoinTournamentHandler(w http.ResponseWriter, r *http.Request
 func (c Controller) FinishTournamentHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := http_handlers.ScanID(http_handlers.TournamentPath, r)
 	if err != nil {
-		err.HandleErr(err, w)
+		errors.HandleErr(err, w)
 		return
 	}
 
 	err = c.FinishTournament(id)
 	if err != nil {
-		err.HandleErr(err, w)
+		errors.HandleErr(err, w)
 		return
 	}
 

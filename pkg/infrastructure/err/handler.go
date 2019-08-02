@@ -27,7 +27,7 @@ func encodeErrInJSON(err error, w http.ResponseWriter) {
 }
 
 func writeStatus(err error, w http.ResponseWriter) {
-	if (err == pgx.ErrNoRows) || (err == usecases.ErrNoUserWithID) || (err == usecases.ErrNoTournamentWithID){
+	if err == pgx.ErrNoRows {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}

@@ -15,7 +15,7 @@ services:
     image: postgres
     container_name: "tournament_db"
     volumes:
-      - ./db-data:/var/lib/postgresql/data
+      - ./database/postgresql/db-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     environment:

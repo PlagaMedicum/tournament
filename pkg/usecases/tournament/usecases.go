@@ -44,6 +44,10 @@ func (c *Controller) JoinTournament(tournamentID uint64, userID uint64) error {
 		return err
 	}
 
+	if t.WinnerID != 0 {
+		return usecases.ErrFinishedTournament
+	}
+
 	u, err := c.GetUserByID(userID)
 	if err != nil {
 		return err

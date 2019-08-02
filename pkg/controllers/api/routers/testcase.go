@@ -7,6 +7,7 @@ import (
 	"testing"
 	"tournament/pkg/domain/tournament"
 	"tournament/pkg/domain/user"
+	"tournament/pkg/infrastructure/handler"
 )
 
 type TestCase struct {
@@ -25,7 +26,7 @@ type TestCase struct {
 	ExpectedStatus    int
 }
 
-func HandleTestCase(t *testing.T, h *Handler.Handler, tc TestCase) {
+func HandleTestCase(t *testing.T, h *handler.Handler, tc TestCase) {
 	r, err := http.NewRequest(
 		tc.Method, tc.Path, bytes.NewBuffer([]byte(tc.RequestBody)))
 	if err != nil {

@@ -1,7 +1,6 @@
 package tournament
 
 import (
-	"database/sql"
 	"tournament/pkg/controllers/repositories/postgresql"
 	"tournament/pkg/domain/tournament"
 	"tournament/pkg/domain/user"
@@ -70,9 +69,12 @@ func (c *Controller) InsertTournament(name string, deposit int, prize int) (uint
 	return id, err
 }
 
-func (c *Controller) getTournamentParticipantList(pid uint64) ([]uint64, error) {
-	r, err := c.Query(`select userid from participants where id = $1;`,
-		pid)
+func (c *Controller) getTournamentParticipantList(tid uint64) ([]uint64, error) {
+	r, err := c.Query(`select userid from participants where tournamentid = $1;`,
+		tid)
+	if err == c.ErrNoRows() {
+		return nil, nil
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -92,34 +94,51 @@ func (c *Controller) getTournamentParticipantList(pid uint64) ([]uint64, error) 
 	return plist, nil
 }
 
+func (c *Controller) getTournamentWinner(tid uint64) (uint64, error) {
+	var wid uint64
+
+	err := c.QueryRow(`select userid from winners where tournamentid = $1;`,
+		tid).Scan(&wid)
+	if err == c.ErrNoRows() {
+		return 0, nil
+	}
+	if err != nil {
+		return 0, err
+	}
+
+	return wid, nil
+}
+
 // GetTournamentByID returns from DB the tournament with tid.
 func (c *Controller) GetTournamentByID(tid uint64) (tournament.Tournament, error) {
 	t := tournament.Tournament{}
-	pid := sql.NullInt64{}
-	wid := sql.NullInt64{}
 
 	err := c.QueryRow(`select * from tournaments where id = $1;`,
-		tid).Scan(&t.ID, &t.Name, &t.Deposit, &t.Prize, &pid, &wid)
+		tid).Scan(&t.ID, &t.Name, &t.Deposit, &t.Prize)
 	if err != nil {
 		return tournament.Tournament{}, err
 	}
 
-	if pid.Valid {
-		t.Participants, err = c.getTournamentParticipantList(uint64(pid.Int64))
+	t.Participants, err = c.getTournamentParticipantList(tid)
+	if err != nil {
+		return t, err
 	}
 
-	if wid.Valid {
-		t.WinnerID = uint64(wid.Int64)
-	}
-
+	t.WinnerID, err = c.getTournamentWinner(tid)
 	return t, err
 }
 
 // DeleteTournamentByID deletes from DB the tournament with tid.
 func (c *Controller) DeleteTournamentByID(tid uint64) error {
 	_, err := c.Exec(`
-			delete from participants using tournaments 
-				where tournaments.id = $1 and participants.id = tournaments.users;
+			delete from participants where participants.tournamentid = $1;
+		`, tid)
+	if err != nil {
+		return err
+	}
+
+	_, err = c.Exec(`
+			delete from winners where winners.tournamentid = $1;
 		`, tid)
 	if err != nil {
 		return err
@@ -130,52 +149,17 @@ func (c *Controller) DeleteTournamentByID(tid uint64) error {
 	return err
 }
 
-func (c *Controller) getTournamentParticipants(tid uint64) (uint64, error) {
-	var pid sql.NullInt64
-
-	err := c.QueryRow(`select users from tournaments where id = $1;`,
-		tid).Scan(&pid)
-	return uint64(pid.Int64), err
-}
-
-func (c *Controller) insertParticipant(pid, uid uint64) (error, uint64) {
-	if pid != 0 {
-		_, err := c.Exec(`insert into participants (id, userid) values ($1, $2);`,
-			pid, uid)
-		return err, pid
-	}
-
-	err := c.QueryRow(`insert into participants (userid) values ($1) returning id;`,
-		uid).Scan(&pid)
-	return err, pid
-}
-
-func (c *Controller) updateTournamentParticipants(pid, tid uint64) error {
-	_, err := c.Exec(`update tournaments set users = $1 where id = $2;`,
-		pid, tid)
-	return err
-}
-
 // AddUserInTournament adds the user with uid in participant of
 // tournament with tid.
 func (c *Controller) AddUserInTournament(uid, tid uint64) error {
-	pid, err := c.getTournamentParticipants(tid)
-	if err != nil {
-		return err
-	}
-
-	err, pid = c.insertParticipant(pid, uid)
-	if err != nil {
-		return err
-	}
-
-	err = c.updateTournamentParticipants(pid, tid)
+	_, err := c.Exec(`insert into participants (tournamentid, userid) values ($1, $2);`,
+		tid, uid)
 	return err
 }
 
 // SetWinner sets the user with wid a winner of tournament with tid.
 func (c *Controller) SetWinner(wid, tid uint64) error {
-	_, err := c.Exec(`update tournaments set winner = $1 where id = $2;`,
-		wid, tid)
+	_, err := c.Exec(`insert into winners (tournamentid, userid) values ($1, $2);`,
+		tid, wid)
 	return err
 }

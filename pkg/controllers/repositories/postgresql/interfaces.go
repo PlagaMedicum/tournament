@@ -14,4 +14,5 @@ type Database interface{
 	QueryRow(string, ...interface{}) Row
 	Query(string, ...interface{}) (Rows, error)
 	Exec(string, ...interface{}) (interface{}, error)
+	ErrNoRows() error
 }

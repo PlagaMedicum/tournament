@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"tournament/pkg/controllers/api/http_handlers"
 	"tournament/pkg/domain/user"
-	"tournament/pkg/infrastructure/err"
+	errors "tournament/pkg/infrastructure/err"
 )
 
 // CreateUserHandler is the http handler for creating users with
@@ -16,13 +16,13 @@ func (c Controller) CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&u)
 	if err != nil {
-		err.HandleJSONErr(err, w)
+		errors.HandleJSONErr(err, w)
 		return
 	}
 
 	u.ID, err = c.CreateUser(u.Name)
 	if err != nil {
-		err.HandleErr(err, w)
+		errors.HandleErr(err, w)
 		return
 	}
 
@@ -30,7 +30,7 @@ func (c Controller) CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = json.NewEncoder(w).Encode(u.ID)
 	if err != nil {
-		err.HandleJSONErr(err, w)
+		errors.HandleJSONErr(err, w)
 		return
 	}
 }
@@ -41,13 +41,13 @@ func (c Controller) CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 func (c Controller) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := http_handlers.ScanID(http_handlers.UserPath, r)
 	if err != nil {
-		err.HandleErr(err, w)
+		errors.HandleErr(err, w)
 		return
 	}
 
 	u, err := c.GetUser(id)
 	if err != nil {
-		err.HandleErr(err, w)
+		errors.HandleErr(err, w)
 		return
 	}
 
@@ -55,7 +55,7 @@ func (c Controller) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = json.NewEncoder(w).Encode(u)
 	if err != nil {
-		err.HandleJSONErr(err, w)
+		errors.HandleJSONErr(err, w)
 		return
 	}
 }
@@ -64,13 +64,13 @@ func (c Controller) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 func (c Controller) DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := http_handlers.ScanID(http_handlers.UserPath, r)
 	if err != nil {
-		err.HandleErr(err, w)
+		errors.HandleErr(err, w)
 		return
 	}
 
 	err = c.DeleteUser(id)
 	if err != nil {
-		err.HandleErr(err, w)
+		errors.HandleErr(err, w)
 		return
 	}
 
@@ -82,7 +82,7 @@ func (c Controller) DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 func (c Controller) TakePointsHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := http_handlers.ScanID(http_handlers.UserPath, r)
 	if err != nil {
-		err.HandleErr(err, w)
+		errors.HandleErr(err, w)
 		return
 	}
 
@@ -90,13 +90,13 @@ func (c Controller) TakePointsHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = json.NewDecoder(r.Body).Decode(&st)
 	if err != nil {
-		err.HandleJSONErr(err, w)
+		errors.HandleJSONErr(err, w)
 		return
 	}
 
 	err = c.FundUser(id, -st.Points)
 	if err != nil {
-		err.HandleErr(err, w)
+		errors.HandleErr(err, w)
 		return
 	}
 
@@ -109,7 +109,7 @@ func (c Controller) TakePointsHandler(w http.ResponseWriter, r *http.Request) {
 func (c Controller) GivePointsHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := http_handlers.ScanID(http_handlers.UserPath, r)
 	if err != nil {
-		err.HandleErr(err, w)
+		errors.HandleErr(err, w)
 		return
 	}
 
@@ -117,13 +117,13 @@ func (c Controller) GivePointsHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = json.NewDecoder(r.Body).Decode(&st)
 	if err != nil {
-		err.HandleJSONErr(err, w)
+		errors.HandleJSONErr(err, w)
 		return
 	}
 
 	err = c.FundUser(id, st.Points)
 	if err != nil {
-		err.HandleErr(err, w)
+		errors.HandleErr(err, w)
 		return
 	}
 

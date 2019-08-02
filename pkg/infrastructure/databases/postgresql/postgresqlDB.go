@@ -17,24 +17,28 @@ import (
 )
 
 const (
-	migrationsPath     = "file://databases/postgresql/migrations"
+	migrationsPath        = "file://databases/postgresql/migrations"
 	configurationFilePath = "./databases/postgresql/config.yaml"
 )
 
-type conn struct{
+type conn struct {
 	conn *pgx.Conn
 }
 
-func (c conn) QueryRow(sql string, args ...interface{}) postgresql.Row{
+func (c conn) QueryRow(sql string, args ...interface{}) postgresql.Row {
 	return c.conn.QueryRow(sql, args...)
 }
 
-func (c conn) Query(sql string, args ...interface{}) (postgresql.Rows, error){
+func (c conn) Query(sql string, args ...interface{}) (postgresql.Rows, error) {
 	return c.conn.Query(sql, args...)
 }
 
-func (c conn) Exec(sql string, args ...interface{}) (interface{}, error){
+func (c conn) Exec(sql string, args ...interface{}) (interface{}, error) {
 	return c.conn.Exec(sql, args...)
+}
+
+func (c conn) ErrNoRows() error {
+	return pgx.ErrNoRows
 }
 
 type DB struct {
@@ -139,13 +143,5 @@ func (db *DB) MigrateTablesDown() {
 func (db *DB) InitNewPostgresDB() {
 	sqldb := db.Connect()
 	db.createNewMigration(sqldb, migrationsPath)
-	db.migrateTablesUp()
-}
-
-// InitNewTestPostgresDB initialises new DB connection
-// for tests and calls it's migrations.
-func (db *DB) InitNewTestPostgresDB() {
-	sqldb := db.ConnectForTests()
-	db.createNewMigration(sqldb, testMigrationsPath)
 	db.migrateTablesUp()
 }

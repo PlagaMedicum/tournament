@@ -8,17 +8,17 @@ create table if not exists tournaments(
     id serial constraint tournament_pk primary key,
     name text not null,
     deposit int not null,
-    prize int not null,
-    users int,
-    winner int
+    prize int not null
 );
 
 create table if not exists participants(
-    id serial,
+    id serial constraint participants_pk primary key,
+    tournamentid serial,
     userid serial
 );
 
-insert into users (name, balance) values
-('Samuel Plaunik', 1200);
-insert into tournaments (name, deposit, prize) values
-('tour_1', 1000, 4000);
+create table if not exists winners(
+   id serial constraint winners_pk primary key,
+   tournamentid serial,
+   userid serial
+);

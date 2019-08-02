@@ -8,7 +8,7 @@ import (
 	httpHandlers "tournament/pkg/controllers/api/http_handlers"
 	"tournament/pkg/controllers/api/http_handlers/user"
 	"tournament/pkg/controllers/api/routers"
-	"tournament/pkg/controllers/api/routers/mocks"
+	"tournament/pkg/controllers/api/routers/user/mocks"
 	userDomain "tournament/pkg/domain/user"
 	httpHandler "tournament/pkg/infrastructure/handler"
 )

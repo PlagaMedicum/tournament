@@ -62,7 +62,21 @@ func (c *Controller) GetUserByID(uid uint64) (user.User, error){
 
 // DeleteUserByID deletes from DB the user with uid.
 func (c *Controller) DeleteUserByID(uid uint64) error {
-	_, err := c.Exec(`delete from users where id = $1;`,
+	_, err := c.Exec(`
+			delete from participants where participants.userid = $1;
+		`, uid)
+	if err != nil {
+		return err
+	}
+
+	_, err = c.Exec(`
+			delete from winners where winners.userid = $1;
+		`, uid)
+	if err != nil {
+		return err
+	}
+
+	_, err = c.Exec(`delete from users where id = $1;`,
 		uid)
 	return err
 }
