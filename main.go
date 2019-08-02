@@ -3,24 +3,35 @@ package main
 import (
 	"log"
 	"net/http"
-	httpHandlers "tournament/pkg/controllers/handlers/http"
-	"tournament/pkg/controllers/repositories/postgresql"
-	httpRouter "tournament/pkg/controllers/routers/http"
-	"tournament/pkg/infrastructure/myhandler"
-	"tournament/pkg/infrastructure/myuuid"
-	"tournament/pkg/infrastructure/postgresqlDB"
-	"tournament/pkg/usecases"
+	tournamentHandlers "tournament/pkg/controllers/api/http_handlers/tournament"
+	userHandlers "tournament/pkg/controllers/api/http_handlers/user"
+	tournamentRouter "tournament/pkg/controllers/api/routers/tournament"
+	userRouter "tournament/pkg/controllers/api/routers/user"
+	tournamentRepository "tournament/pkg/controllers/repositories/postgresql/tournament"
+	userRepository "tournament/pkg/controllers/repositories/postgresql/user"
+	"tournament/pkg/infrastructure/databases/postgresql"
+	"tournament/pkg/infrastructure/handler"
+	tournamentUsecases "tournament/pkg/usecases/tournament"
+	userUsecases "tournament/pkg/usecases/user"
 )
 
 func main() {
-	db := postgresqlDB.DB{}
+	db := postgresql.DB{}
 	db.InitNewPostgresDB()
 
-	handler := myhandler.Handler{}
+	handler := handler.Handler{}
 
-	httpRouter.Route(&handler, &httpHandlers.Controller{
-		Usecases: &usecases.Controller{
-			Repository: &postgresql.PSQLController{
+	userRouter.RouteUser(&handler, &userHandlers.Controller{
+		Usecases: &userUsecases.Controller{
+			Repository: &userRepository.Controller{
+				Database: db.Conn,
+			},
+		},
+	})
+
+	tournamentRouter.RouteTournament(&handler, &tournamentHandlers.Controller{
+		Usecases: &tournamentUsecases.Controller{
+			Repository: &tournamentRepository.Controller{
 				Database: db.Conn,
 			},
 		},
