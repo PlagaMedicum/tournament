@@ -20,9 +20,9 @@ func main() {
 	db.InitNewPostgresDB()
 	db.MigrateTablesUp()
 
-	handler := handler.Handler{}
+	h := handler.Handler{}
 
-	userRouter.RouteUser(&handler, &userHandlers.Controller{
+	userRouter.RouteUser(&h, &userHandlers.Controller{
 		Usecases: &userUsecases.Controller{
 			Repository: &userRepository.Controller{
 				Database: db.Conn,
@@ -30,7 +30,7 @@ func main() {
 		},
 	})
 
-	tournamentRouter.RouteTournament(&handler, &tournamentHandlers.Controller{
+	tournamentRouter.RouteTournament(&h, &tournamentHandlers.Controller{
 		Usecases: &tournamentUsecases.Controller{
 			Repository: &tournamentRepository.Controller{
 				Database: db.Conn,
@@ -40,7 +40,7 @@ func main() {
 
 	s := http.Server{
 		Addr:    ":8080",
-		Handler: &handler,
+		Handler: &h,
 	}
 
 	err := s.ListenAndServe()
