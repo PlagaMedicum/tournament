@@ -18,6 +18,7 @@ import (
 func main() {
 	db := postgresql.DB{}
 	db.InitNewPostgresDB()
+	db.MigrateTablesUp()
 
 	handler := handler.Handler{}
 

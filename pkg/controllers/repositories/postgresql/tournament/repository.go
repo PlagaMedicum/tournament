@@ -42,7 +42,7 @@ func (c *Controller) GetUsers() ([]user.User, error) {
 }
 
 // GetUserByID returns from DB the user with uid.
-func (c *Controller) GetUserByID(uid uint64) (user.User, error){
+func (c *Controller) GetUserByID(uid uint64) (user.User, error) {
 	u := user.User{}
 
 	err := c.QueryRow(`select * from users where id = $1;`,
@@ -65,7 +65,7 @@ func (c *Controller) UpdateUserBalanceByID(uid uint64, balance int) error {
 // deposit and prize.
 func (c *Controller) InsertTournament(name string, deposit int, prize int) (uint64, error) {
 	var id uint64
-	
+
 	err := c.QueryRow(`
 			insert into tournaments (name, deposit, prize) values
 				($1, $2, $3) returning id;

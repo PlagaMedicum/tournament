@@ -3,7 +3,7 @@ package tournament
 import (
 	"errors"
 	"testing"
-	tournamentDomain"tournament/pkg/domain/tournament"
+	tournamentDomain "tournament/pkg/domain/tournament"
 	userDomain "tournament/pkg/domain/user"
 	"tournament/pkg/usecases"
 	"tournament/pkg/usecases/tournament/mocks"
@@ -11,21 +11,21 @@ import (
 
 const (
 	methodNameGetUserByID           = "GetUserByID"
-	methodNameGetUsers				= "GetUsers"
+	methodNameGetUsers              = "GetUsers"
 	methodNameUpdateUserBalanceByID = "UpdateUserBalanceByID"
-	methodNameInsertTournament     = "InsertTournament"
-	methodNameGetTournamentByID    = "GetTournamentByID"
-	methodNameDeleteTournamentByID = "DeleteTournamentByID"
-	methodNameAddUserInTournament  = "AddUserInTournament"
-	methodNameSetWinner            = "SetWinner"
+	methodNameInsertTournament      = "InsertTournament"
+	methodNameGetTournamentByID     = "GetTournamentByID"
+	methodNameDeleteTournamentByID  = "DeleteTournamentByID"
+	methodNameAddUserInTournament   = "AddUserInTournament"
+	methodNameSetWinner             = "SetWinner"
 )
 
 func TestCreateTournament(t *testing.T) {
 	testCases := map[string]usecases.TestCase{
 		"everything ok": {
-			RequestName:    "Tournament",
-			RequestDeposit: 500,
-			ResultID:       1,
+			ReqName:    "Tournament",
+			ReqDeposit: 500,
+			ResID:      1,
 		},
 	}
 
@@ -37,11 +37,11 @@ func TestCreateTournament(t *testing.T) {
 	name := "everything ok"
 	tc := testCases[name]
 
-	mock.On(methodNameInsertTournament, tc.RequestName, tc.RequestDeposit, defaultPrize).Return(tc.ResultID, tc.Err)
+	mock.On(methodNameInsertTournament, tc.ReqName, tc.ReqDeposit, defaultPrize).Return(tc.ResID, tc.Err)
 
-	gotTC := tc
-	gotTC.ResultID, gotTC.Err = c.CreateTournament(tc.RequestName, tc.RequestDeposit)
-	usecases.HandleTestCase(name, tc, gotTC, t)
+	got := tc
+	got.ResID, got.Err = c.CreateTournament(tc.ReqName, tc.ReqDeposit)
+	tc.Handle(name, got, t)
 
 	t.Logf("Asserted mocks expectations:")
 	mock.AssertExpectations(t)
@@ -65,9 +65,9 @@ func TestGetTournament(t *testing.T) {
 
 	mock.On(methodNameGetTournamentByID, tc.TournamentID).Return(tc.Tournament, tc.Err)
 
-	gotTC := tc
-	gotTC.Tournament, gotTC.Err = c.GetTournament(tc.TournamentID)
-	usecases.HandleTestCase(name, tc, gotTC, t)
+	got := tc
+	got.Tournament, got.Err = c.GetTournament(tc.TournamentID)
+	tc.Handle(name, got, t)
 
 	t.Logf("Asserted mocks expectations:")
 	mock.AssertExpectations(t)
@@ -90,9 +90,9 @@ func TestDeleteTournament(t *testing.T) {
 
 	mock.On(methodNameDeleteTournamentByID, tc.TournamentID).Return(tc.Err)
 
-	gotTC := tc
-	gotTC.Err = c.DeleteTournament(tc.TournamentID)
-	usecases.HandleTestCase(name, tc, gotTC, t)
+	got := tc
+	got.Err = c.DeleteTournament(tc.TournamentID)
+	tc.Handle(name, got, t)
 
 	t.Logf("Asserted mocks expectations:")
 	mock.AssertExpectations(t)
@@ -205,20 +205,20 @@ func TestJoinTournament(t *testing.T) {
 			mock.On(methodNameGetTournamentByID, tc.TournamentID).Return(tc.Tournament, tc.Err)
 			continue
 		}
-		
+
 		mock.On(methodNameGetTournamentByID, tc.TournamentID).Return(tc.Tournament, nil)
 
 		if tc.MockingStop == 2 {
 			mock.On(methodNameGetUserByID, tc.UserID).Return(tc.User, tc.Err)
 			continue
-		} 
+		}
 
 		mock.On(methodNameGetUserByID, tc.UserID).Return(tc.User, nil)
 
 		if tc.MockingStop == 3 {
 			mock.On(methodNameAddUserInTournament, tc.User.ID, tc.Tournament.ID).Return(tc.Err)
 			continue
-		} 
+		}
 
 		mock.On(methodNameAddUserInTournament, tc.User.ID, tc.Tournament.ID).Return(nil)
 
@@ -226,22 +226,22 @@ func TestJoinTournament(t *testing.T) {
 	}
 
 	for name, tc := range testCases {
-		gotTC := tc
-		gotTC.Err = c.JoinTournament(tc.TournamentID, tc.UserID)
-		usecases.HandleTestCase(name, tc, gotTC, t)
+		got := tc
+		got.Err = c.JoinTournament(tc.TournamentID, tc.UserID)
+		tc.Handle(name, got, t)
 	}
 
 	t.Logf("Asserted mocks expectations:")
 	mock.AssertExpectations(t)
 }
 
-func mockForTestFinishTournament(tc usecases.TestCase, name string) (*mocks.MockedRepository, *Controller){
+func mockForTestFinishTournament(tc usecases.TestCase, name string) (*mocks.MockedRepository, *Controller) {
 	mock := mocks.MockedRepository{}
 	c := Controller{
 		Repository: &mock,
 	}
 
-	if name == "error no participants"{
+	if name == "error no participants" {
 		mock.On(methodNameGetTournamentByID, tc.TournamentID).Return(tc.Tournament, nil)
 		mock.On(methodNameGetUsers).Return([]userDomain.User{tc.User}, nil)
 		return &mock, &c
@@ -256,21 +256,21 @@ func mockForTestFinishTournament(tc usecases.TestCase, name string) (*mocks.Mock
 		mock.On(methodNameGetTournamentByID, tc.TournamentID).Return(tc.Tournament, tc.Err)
 		return &mock, &c
 	}
-	
+
 	mock.On(methodNameGetTournamentByID, tc.TournamentID).Return(tc.Tournament, nil)
 
 	if tc.MockingStop == 2 {
 		mock.On(methodNameGetUsers).Return([]userDomain.User{}, tc.Err)
 		return &mock, &c
 	}
-	
+
 	mock.On(methodNameGetUsers).Return([]userDomain.User{{ID: 99, Balance: 1}, tc.User}, nil)
 
 	if tc.MockingStop == 3 {
 		mock.On(methodNameSetWinner, tc.User.ID, tc.Tournament.ID).Return(tc.Err)
 		return &mock, &c
 	}
-	
+
 	mock.On(methodNameSetWinner, tc.User.ID, tc.Tournament.ID).Return(nil)
 
 	mock.On(methodNameUpdateUserBalanceByID, tc.User.ID, tc.User.Balance+tc.Tournament.Prize).Return(tc.Err)
@@ -348,13 +348,13 @@ func TestFinishTournament(t *testing.T) {
 		mock, c := mockForTestFinishTournament(tc, name)
 		mockList = append(mockList, mock)
 
-		gotTC := tc
-		gotTC.Err = c.FinishTournament(tc.TournamentID)
-		usecases.HandleTestCase(name, tc, gotTC, t)
+		got := tc
+		got.Err = c.FinishTournament(tc.TournamentID)
+		tc.Handle(name, got, t)
 	}
 
 	t.Logf("Asserted mocks expectations:")
-	for _, mock := range mockList{
+	for _, mock := range mockList {
 		mock.AssertExpectations(t)
 	}
 }

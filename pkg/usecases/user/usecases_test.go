@@ -18,8 +18,8 @@ const (
 func TestCreateUser(t *testing.T) {
 	testCases := map[string]usecases.TestCase{
 		"everything ok": {
-			RequestName: "Josip",
-			ResultID:    1,
+			ReqName: "Josip",
+			ResID:   1,
 		},
 	}
 
@@ -31,11 +31,11 @@ func TestCreateUser(t *testing.T) {
 	name := "everything ok"
 	tc := testCases[name]
 
-	mock.On(methodNameInsertUser, tc.RequestName, defaultBalance).Return(tc.ResultID, tc.Err)
+	mock.On(methodNameInsertUser, tc.ReqName, defaultBalance).Return(tc.ResID, tc.Err)
 
-	gotTC := tc
-	gotTC.ResultID, gotTC.Err = c.CreateUser(tc.RequestName)
-	usecases.HandleTestCase(name, tc, gotTC, t)
+	got := tc
+	got.ResID, got.Err = c.CreateUser(tc.ReqName)
+	tc.Handle(name, got, t)
 
 	t.Logf("Asserted mocks expectations:")
 	mock.AssertExpectations(t)
@@ -59,9 +59,9 @@ func TestGetUser(t *testing.T) {
 
 	mock.On(methodNameGetUserByID, tc.UserID).Return(tc.User, tc.Err)
 
-	gotTC := tc
-	gotTC.User, gotTC.Err = c.GetUser(tc.UserID)
-	usecases.HandleTestCase(name, tc, gotTC, t)
+	got := tc
+	got.User, got.Err = c.GetUser(tc.UserID)
+	tc.Handle(name, got, t)
 
 	t.Logf("Asserted mocks expectations:")
 	mock.AssertExpectations(t)
@@ -84,9 +84,9 @@ func TestDeleteUser(t *testing.T) {
 
 	mock.On(methodNameDeleteUserByID, tc.UserID).Return(tc.Err)
 
-	gotTC := tc
-	gotTC.Err = c.DeleteUser(tc.UserID)
-	usecases.HandleTestCase(name, tc, gotTC, t)
+	got := tc
+	got.Err = c.DeleteUser(tc.UserID)
+	tc.Handle(name, got, t)
 
 	t.Logf("Asserted mocks expectations:")
 	mock.AssertExpectations(t)
@@ -95,17 +95,17 @@ func TestDeleteUser(t *testing.T) {
 func TestFundUser(t *testing.T) {
 	testCases := map[string]usecases.TestCase{
 		"everything ok": {
-			UserID:        1,
-			RequestPoints: 10,
+			UserID:    1,
+			ReqPoints: 10,
 			User: userDomain.User{
 				ID:      1,
 				Balance: 10,
 			},
 		},
 		"get user error": {
-			MockingStop:   1,
-			UserID:        2,
-			RequestPoints: 10,
+			MockingStop: 1,
+			UserID:      2,
+			ReqPoints:   10,
 			User: userDomain.User{
 				ID:      2,
 				Balance: 10,
@@ -123,22 +123,22 @@ func TestFundUser(t *testing.T) {
 		if tc.MockingStop == 1 {
 			mock.On(methodNameGetUserByID, tc.UserID).Return(tc.User, tc.Err)
 			continue
-		} 
+		}
 
 		mock.On(methodNameGetUserByID, tc.UserID).Return(tc.User, nil)
 
 		if tc.MockingStop == 2 {
-			mock.On(methodNameUpdateUserBalanceByID, tc.User.ID, tc.User.Balance+tc.RequestPoints).Return(tc.Err)
+			mock.On(methodNameUpdateUserBalanceByID, tc.User.ID, tc.User.Balance+tc.ReqPoints).Return(tc.Err)
 			continue
-		} 
+		}
 
-		mock.On(methodNameUpdateUserBalanceByID, tc.User.ID, tc.User.Balance+tc.RequestPoints).Return(nil)
+		mock.On(methodNameUpdateUserBalanceByID, tc.User.ID, tc.User.Balance+tc.ReqPoints).Return(nil)
 	}
 
 	for name, tc := range testCases {
-		gotTC := tc
-		gotTC.Err = c.FundUser(tc.UserID, tc.RequestPoints)
-		usecases.HandleTestCase(name, tc, gotTC, t)
+		got := tc
+		got.Err = c.FundUser(tc.UserID, tc.ReqPoints)
+		tc.Handle(name, got, t)
 	}
 
 	t.Logf("Asserted mocks expectations:")

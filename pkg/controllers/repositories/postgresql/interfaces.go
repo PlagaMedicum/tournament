@@ -9,7 +9,7 @@ type Rows interface {
 	Scan(...interface{}) error
 }
 
-type Database interface{
+type Database interface {
 	// TODO: Get rid of QueryRow?
 	QueryRow(string, ...interface{}) Row
 	Query(string, ...interface{}) (Rows, error)

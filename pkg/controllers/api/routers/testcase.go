@@ -11,24 +11,24 @@ import (
 )
 
 type TestCase struct {
-	CaseName          string
-	Path              string
-	Method            string
-	NoMock            bool
-	ResultErr         error
-	ResultID          uint64
-	ResultTournament  tournament.Tournament
-	RequestTournament tournament.Tournament
-	ResultUser        user.User
-	RequestUser       user.User
-	RequestID         uint64
-	RequestBody       string
-	ExpectedStatus    int
+	CaseName      string
+	Path          string
+	Method        string
+	NoMock        bool
+	ReqBody       string
+	ReqTournament tournament.Tournament
+	ResTournament tournament.Tournament
+	ReqUser       user.User
+	ResUser       user.User
+	ReqID         uint64
+	ResID         uint64
+	ResErr        error
+	ResStatus     int
 }
 
-func HandleTestCase(t *testing.T, h *handler.Handler, tc TestCase) {
+func (tc *TestCase) Handle(t *testing.T, h *handler.Handler) {
 	r, err := http.NewRequest(
-		tc.Method, tc.Path, bytes.NewBuffer([]byte(tc.RequestBody)))
+		tc.Method, tc.Path, bytes.NewBuffer([]byte(tc.ReqBody)))
 	if err != nil {
 		t.Errorf("Cannot encode request: '%v'", err)
 	}
@@ -37,9 +37,9 @@ func HandleTestCase(t *testing.T, h *handler.Handler, tc TestCase) {
 
 	h.ServeHTTP(w, r)
 
-	if w.Code != tc.ExpectedStatus {
+	if w.Code != tc.ResStatus {
 		t.Errorf("FAIL! Test case: %s. Wrong status code.\nURL-Path: %v\nExpected: %v\nGot: %v\nResponse body is: \n'''\n%s\n'''\nTester info: %+v",
-			tc.CaseName, r.URL.Path, tc.ExpectedStatus, w.Code, w.Body, tc)
+			tc.CaseName, r.URL.Path, tc.ResStatus, w.Code, w.Body, tc)
 		return
 	}
 

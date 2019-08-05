@@ -2,6 +2,8 @@ package postgresql
 
 import (
 	"database/sql"
+	"flag"
+	"fmt"
 	"github.com/go-yaml/yaml"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
@@ -12,6 +14,7 @@ import (
 	_ "github.com/lib/pq"
 	"io/ioutil"
 	"log"
+	"os"
 	"strconv"
 	"tournament/pkg/controllers/repositories/postgresql"
 )
@@ -20,6 +23,22 @@ const (
 	migrationsPath        = "file://databases/postgresql/migrations"
 	configurationFilePath = "./databases/postgresql/config.yaml"
 )
+
+var (
+	cwd_arg = flag.String("cwd", "", "set cwd")
+)
+
+// init changes current working directory with provided by
+// "-cwd" flag.
+func init() {
+	flag.Parse()
+	if *cwd_arg != "" {
+		err := os.Chdir(*cwd_arg)
+		if err != nil {
+			fmt.Println("Chdir error:", err)
+		}
+	}
+}
 
 type conn struct {
 	conn *pgx.Conn
@@ -48,7 +67,6 @@ type DB struct {
 	Host         string `yaml:"Host"`
 	Port         uint64 `yaml:"Port"`
 	Database     string `yaml:"Database"`
-	TestDatabase string `yaml:"TestDatabase"`
 	m            *migrate.Migrate
 }
 
@@ -101,14 +119,6 @@ func (db *DB) Connect() *sql.DB {
 	return sqldb
 }
 
-// ConnectForTests initialises Postgresql connection with test DB.
-func (db *DB) ConnectForTests() *sql.DB {
-	db.readConfigFile()
-
-	sqldb := db.connect(db.TestDatabase)
-	return sqldb
-}
-
 func (db *DB) createNewMigration(sqldb *sql.DB, path string) {
 	driver, err := postgres.WithInstance(sqldb, &postgres.Config{DatabaseName: db.Database})
 	if err != nil {
@@ -123,7 +133,7 @@ func (db *DB) createNewMigration(sqldb *sql.DB, path string) {
 	}
 }
 
-func (db *DB) migrateTablesUp() {
+func (db *DB) MigrateTablesUp() {
 	err := db.m.Up()
 	if err != nil && err != migrate.ErrNoChange {
 		log.Printf("Unexpected error trying to migrate up: " + err.Error())
@@ -139,9 +149,8 @@ func (db *DB) MigrateTablesDown() {
 }
 
 // InitNewPostgresDB initialises new DB connection
-// and calls it's migrations.
+// and initializes it's migrations.
 func (db *DB) InitNewPostgresDB() {
 	sqldb := db.Connect()
 	db.createNewMigration(sqldb, migrationsPath)
-	db.migrateTablesUp()
 }

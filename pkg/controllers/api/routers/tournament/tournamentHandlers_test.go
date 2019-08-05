@@ -26,31 +26,31 @@ func TestCreateTournamentHandler(t *testing.T) {
 	testCases := []routers.TestCase{
 		{
 			CaseName: "everything ok",
-			ResultID: 1,
-			RequestTournament: tournamentDomain.Tournament{
+			ResID:    1,
+			ReqTournament: tournamentDomain.Tournament{
 				Name:    "Unreal Tournament",
 				Deposit: 10000,
 			},
-			RequestBody:    `{"name": "Unreal Tournament", "deposit": 10000}`,
-			ExpectedStatus: http.StatusCreated,
+			ReqBody:   `{"name": "Unreal Tournament", "deposit": 10000}`,
+			ResStatus: http.StatusCreated,
 		},
 		{
-			CaseName:          "wrong body",
-			NoMock:            true,
-			RequestBody:       `i'm the wrong body"`,
-			RequestTournament: tournamentDomain.Tournament{},
-			ExpectedStatus:    http.StatusBadRequest,
+			CaseName:      "wrong body",
+			NoMock:        true,
+			ReqBody:       `i'm the wrong body"`,
+			ReqTournament: tournamentDomain.Tournament{},
+			ResStatus:     http.StatusBadRequest,
 		},
 		{
-			CaseName:  "wrong tournament error",
-			ResultErr: errors.New("i'm the bad err"),
-			ResultID:  2,
-			RequestTournament: tournamentDomain.Tournament{
+			CaseName: "wrong tournament error",
+			ResErr:   errors.New("i'm the bad err"),
+			ResID:    2,
+			ReqTournament: tournamentDomain.Tournament{
 				Name:    "test tour",
 				Deposit: 1,
 			},
-			RequestBody:    `{"name": "test tour", "deposit": 1}`,
-			ExpectedStatus: http.StatusBadRequest,
+			ReqBody:   `{"name": "test tour", "deposit": 1}`,
+			ResStatus: http.StatusBadRequest,
 		},
 	}
 
@@ -63,10 +63,10 @@ func TestCreateTournamentHandler(t *testing.T) {
 		tc.Method = http.MethodPost
 
 		if !tc.NoMock {
-			mock.On(methodNameCreateTournament, tc.RequestTournament.Name, tc.RequestTournament.Deposit).Return(tc.ResultID, tc.ResultErr)
+			mock.On(methodNameCreateTournament, tc.ReqTournament.Name, tc.ReqTournament.Deposit).Return(tc.ResID, tc.ResErr)
 		}
 
-		routers.HandleTestCase(t, &h, tc)
+		tc.Handle(t, &h)
 	}
 
 	t.Logf("Asserted mocks expectations:")
@@ -78,18 +78,18 @@ func TestGetTournamentHandler(t *testing.T) {
 	testCases := []routers.TestCase{
 		{
 			CaseName: "everything ok",
-			ResultTournament: tournamentDomain.Tournament{
+			ResTournament: tournamentDomain.Tournament{
 				Name: "test tour",
 			},
-			RequestID:      1,
-			ExpectedStatus: http.StatusOK,
+			ReqID:     1,
+			ResStatus: http.StatusOK,
 		},
 		{
-			CaseName:         "wrong tournament error",
-			ResultErr:        errors.New("i'm the bad err"),
-			ResultTournament: tournamentDomain.Tournament{},
-			RequestID:        2,
-			ExpectedStatus:   http.StatusBadRequest,
+			CaseName:      "wrong tournament error",
+			ResErr:        errors.New("i'm the bad err"),
+			ResTournament: tournamentDomain.Tournament{},
+			ReqID:         2,
+			ResStatus:     http.StatusBadRequest,
 		},
 	}
 
@@ -98,14 +98,14 @@ func TestGetTournamentHandler(t *testing.T) {
 	RouteTournament(&h, tournament.Controller{Usecases: &mock})
 
 	for _, tc := range testCases {
-		tc.Path = httpHandlers.TournamentPath + "/" + strconv.FormatUint(tc.RequestID, 10)
+		tc.Path = httpHandlers.TournamentPath + "/" + strconv.FormatUint(tc.ReqID, 10)
 		tc.Method = http.MethodGet
 
 		if !tc.NoMock {
-			mock.On(methodNameGetTournament, tc.RequestID).Return(tc.ResultTournament, tc.ResultErr)
+			mock.On(methodNameGetTournament, tc.ReqID).Return(tc.ResTournament, tc.ResErr)
 		}
 
-		routers.HandleTestCase(t, &h, tc)
+		tc.Handle(t, &h)
 	}
 
 	t.Logf("Asserted mocks expectations:")
@@ -116,15 +116,15 @@ func TestGetTournamentHandler(t *testing.T) {
 func TestDeleteTournamentHandler(t *testing.T) {
 	testCases := []routers.TestCase{
 		{
-			CaseName:       "everything ok",
-			RequestID:      1,
-			ExpectedStatus: http.StatusOK,
+			CaseName:  "everything ok",
+			ReqID:     1,
+			ResStatus: http.StatusOK,
 		},
 		{
-			CaseName:       "wrong tournament error",
-			ResultErr:      errors.New("i'm the bad err"),
-			RequestID:      2,
-			ExpectedStatus: http.StatusBadRequest,
+			CaseName:  "wrong tournament error",
+			ResErr:    errors.New("i'm the bad err"),
+			ReqID:     2,
+			ResStatus: http.StatusBadRequest,
 		},
 	}
 
@@ -133,14 +133,14 @@ func TestDeleteTournamentHandler(t *testing.T) {
 	RouteTournament(&h, tournament.Controller{Usecases: &mock})
 
 	for _, tc := range testCases {
-		tc.Path = httpHandlers.TournamentPath + "/" + strconv.FormatUint(tc.RequestID, 10)
+		tc.Path = httpHandlers.TournamentPath + "/" + strconv.FormatUint(tc.ReqID, 10)
 		tc.Method = http.MethodDelete
 
 		if !tc.NoMock {
-			mock.On(methodNameDeleteTournament, tc.RequestID).Return(tc.ResultErr)
+			mock.On(methodNameDeleteTournament, tc.ReqID).Return(tc.ResErr)
 		}
 
-		routers.HandleTestCase(t, &h, tc)
+		tc.Handle(t, &h)
 	}
 
 	t.Logf("Asserted mocks expectations:")
@@ -152,24 +152,24 @@ func TestJoinTournamentHandler(t *testing.T) {
 	var requestUserID uint64 = 33
 	testCases := []routers.TestCase{
 		{
-			CaseName:       "everything ok",
-			RequestID:      1,
-			RequestBody:    `{"userId": ` + strconv.FormatUint(requestUserID, 10) + `}`,
-			ExpectedStatus: http.StatusOK,
+			CaseName:  "everything ok",
+			ReqID:     1,
+			ReqBody:   `{"userId": ` + strconv.FormatUint(requestUserID, 10) + `}`,
+			ResStatus: http.StatusOK,
 		},
 		{
-			CaseName:       "wrong body",
-			NoMock:         true,
-			RequestBody:    `i'm the wrong body"`,
-			RequestID:      2,
-			ExpectedStatus: http.StatusBadRequest,
+			CaseName:  "wrong body",
+			NoMock:    true,
+			ReqBody:   `i'm the wrong body"`,
+			ReqID:     2,
+			ResStatus: http.StatusBadRequest,
 		},
 		{
-			CaseName:       "wrong tournament error",
-			ResultErr:      errors.New("i'm the bad err"),
-			RequestID:      3,
-			RequestBody:    `{"userId": ` + strconv.FormatUint(requestUserID, 10) + `}`,
-			ExpectedStatus: http.StatusBadRequest,
+			CaseName:  "wrong tournament error",
+			ResErr:    errors.New("i'm the bad err"),
+			ReqID:     3,
+			ReqBody:   `{"userId": ` + strconv.FormatUint(requestUserID, 10) + `}`,
+			ResStatus: http.StatusBadRequest,
 		},
 	}
 
@@ -178,14 +178,14 @@ func TestJoinTournamentHandler(t *testing.T) {
 	RouteTournament(&h, tournament.Controller{Usecases: &mock})
 
 	for _, tc := range testCases {
-		tc.Path = httpHandlers.TournamentPath + "/" + strconv.FormatUint(tc.RequestID, 10) + httpHandlers.JoinTournamentPath
+		tc.Path = httpHandlers.TournamentPath + "/" + strconv.FormatUint(tc.ReqID, 10) + httpHandlers.JoinTournamentPath
 		tc.Method = http.MethodPost
 
 		if !tc.NoMock {
-			mock.On(methodNameJoinTournament, tc.RequestID, requestUserID).Return(tc.ResultErr)
+			mock.On(methodNameJoinTournament, tc.ReqID, requestUserID).Return(tc.ResErr)
 		}
 
-		routers.HandleTestCase(t, &h, tc)
+		tc.Handle(t, &h)
 	}
 
 	t.Logf("Asserted mocks expectations:")
@@ -197,15 +197,15 @@ func TestFinishTournamentHandler(t *testing.T) {
 
 	testCases := []routers.TestCase{
 		{
-			CaseName:       "everything ok",
-			RequestID:      1,
-			ExpectedStatus: http.StatusOK,
+			CaseName:  "everything ok",
+			ReqID:     1,
+			ResStatus: http.StatusOK,
 		},
 		{
-			CaseName:       "wrong tournament error",
-			ResultErr:      errors.New("i'm the bad err"),
-			RequestID:      2,
-			ExpectedStatus: http.StatusBadRequest,
+			CaseName:  "wrong tournament error",
+			ResErr:    errors.New("i'm the bad err"),
+			ReqID:     2,
+			ResStatus: http.StatusBadRequest,
 		},
 	}
 
@@ -214,14 +214,14 @@ func TestFinishTournamentHandler(t *testing.T) {
 	RouteTournament(&h, tournament.Controller{Usecases: &mock})
 
 	for _, tc := range testCases {
-		tc.Path = httpHandlers.TournamentPath + "/" + strconv.FormatUint(tc.RequestID, 10) + httpHandlers.FinishTournamentPath
+		tc.Path = httpHandlers.TournamentPath + "/" + strconv.FormatUint(tc.ReqID, 10) + httpHandlers.FinishTournamentPath
 		tc.Method = http.MethodPost
 
 		if !tc.NoMock {
-			mock.On(methodNameFinishTournament, tc.RequestID).Return(tc.ResultErr)
+			mock.On(methodNameFinishTournament, tc.ReqID).Return(tc.ResErr)
 		}
 
-		routers.HandleTestCase(t, &h, tc)
+		tc.Handle(t, &h)
 	}
 
 	t.Logf("Asserted mocks expectations:")

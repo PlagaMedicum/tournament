@@ -1,4 +1,4 @@
-package usecases
+package postgresql
 
 import (
 	"testing"
@@ -7,32 +7,32 @@ import (
 )
 
 type TestCase struct {
-	MockingStop  int
-	ReqName      string
-	ReqDeposit   int
-	ReqPoints    int
-	ResID        uint64
-	UserID       uint64
-	TournamentID uint64
-	User         user.User
-	Tournament   tournament.Tournament
-	Err          error
+	Stop          int
+	Points        int
+	UserID        uint64
+	TournamentID  uint64
+	User          user.User
+	UpdUser       user.User
+	Tournament    tournament.Tournament
+	UpdTournament tournament.Tournament
+	NilErr        error
+	Err           error
 }
 
 func (tc *TestCase) Handle(caseName string, got TestCase, t *testing.T) {
+	if tc.NilErr != got.NilErr {
+		t.Errorf("FAIL! Test case: %s.\n"+
+			"unexpectd error: \"%v\"\n",
+			caseName,
+			got.NilErr)
+		return
+	}
+
 	if tc.Err != got.Err {
 		t.Errorf("FAIL! Test case: %s.\n"+
 			"err:\n\texpected: \"%v\"\n\tgot: \"%v\"\n",
 			caseName,
 			tc.Err, got.Err)
-		return
-	}
-
-	if tc.ResID != got.ResID {
-		t.Errorf("FAIL! Test case: %s.\n"+
-			"resultID:\n\texpected: \"%d\"\n\tgot: \"%d\"\n",
-			caseName,
-			tc.ResID, got.ResID)
 		return
 	}
 

@@ -49,4 +49,3 @@ func (m *MockedRepository) SetWinner(winnerID, tournamentID uint64) error {
 	args := m.Called(winnerID, tournamentID)
 	return args.Error(0)
 }
-

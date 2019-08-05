@@ -24,7 +24,7 @@ func (m *MockedRepository) GetUsers() ([]user.User, error) {
 	return args.Get(0).([]user.User), args.Error(1)
 }
 
-func (m *MockedRepository)DeleteUserByID(uid uint64) error {
+func (m *MockedRepository) DeleteUserByID(uid uint64) error {
 	args := m.Called(uid)
 	return args.Error(0)
 }
