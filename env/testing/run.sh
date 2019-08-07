@@ -1,17 +1,14 @@
 #!/bin/sh
 
 echo Installing packages...
-
-go get ./...
-# go get golang.org/x/tools/cmd/cover
+go install tournament
 
 echo Testing application...
-
-go test ./pkg/controllers/api/routers/tournament
-go test ./pkg/controllers/api/routers/user
-# go test ./pkg/controllers/repositories/postgresql/tournament -cwd="/go/src/tournament"
-go test ./pkg/controllers/repositories/postgresql/user -cwd="/go/src/tournament"
-go test ./pkg/usecases/tournament
-go test ./pkg/usecases/user
+go test -v -race ./pkg/controllers/api/routers/tournament
+go test -v -race ./pkg/controllers/api/routers/user
+go test -v -race ./pkg/controllers/repositories/postgresql/tournament -cwd="/go/src/tournament"
+go test -v -race ./pkg/controllers/repositories/postgresql/user -cwd="/go/src/tournament"
+go test -v -race ./pkg/usecases/tournament
+go test -v -race ./pkg/usecases/user
 
 echo 0

@@ -1,9 +1,0 @@
-#!/bin/sh
-
-echo Installing packages...
-go get ./...
-
-echo Running application...
-go run ./main.go
-
-echo 0

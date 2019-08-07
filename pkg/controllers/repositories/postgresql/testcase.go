@@ -53,5 +53,4 @@ func (tc *TestCase) Handle(caseName string, got TestCase, t *testing.T) {
 	}
 
 	t.Logf("PASSED. Test case: %s", caseName)
-	return
 }

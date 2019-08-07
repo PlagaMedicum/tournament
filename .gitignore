@@ -6,5 +6,6 @@ go_build_main_go
 *.iml
 .go/
 bin
-db-data
+env/staging/databases/postgresql/data
+databases/postgresql/data
 vendor
