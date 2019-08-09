@@ -1,8 +1,8 @@
-version: "3.3"
+version: "3"
 services:
   database:
     image: postgres
-    container_name: "tournament_dev_db"
+    container_name: "tournament-dev-db"
     volumes:
       - ./databases/postgresql/data:/var/lib/postgresql/data
     ports:

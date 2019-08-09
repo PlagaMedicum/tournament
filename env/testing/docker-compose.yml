@@ -1,21 +1,8 @@
-version: "3.3"
+version: "3"
 services:
-  server:
-    container_name: "tournament_test_server"
-    network_mode: "host"
-    build:
-      context: ../../
-      dockerfile: ./env/testing/Dockerfile
-    ports:
-      - "8080:8080"
-    depends_on:
-      - database
-    volumes:
-      - ../../pkg:/go/src/tournament/pkg
-    command: ./run.sh
   database:
     image: postgres
-    container_name: "tournament_test_db"
+    container_name: "tournament-test-db"
     ports:
       - "5432:5432"
     environment:
@@ -23,3 +10,17 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: tournament_test
     restart: unless-stopped
+  server:
+    container_name: "tournament-test-server"
+    network_mode: "host"
+    volumes:
+      - ../../pkg:/go/src/tournament/pkg
+    build:
+      context: ../../
+      dockerfile: ./env/testing/Dockerfile
+    image: plagamedicum/tournament_test_server:tag
+    ports:
+      - "8080:8080"
+    depends_on:
+      - "database"
+    restart: on-failure

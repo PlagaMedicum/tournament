@@ -1,8 +1,8 @@
-version: "3.3"
+version: "3"
 services:
   database:
-    image: postgres
-    container_name: "tournament_db"
+    image: postgres:9.6
+    container_name: "tournament-db"
     volumes:
       - ./databases/postgresql/data:/var/lib/postgresql/data
     ports:
@@ -11,15 +11,19 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: tournament
+      PGDATA: /var/lib/postgresql/data/pgdata
     restart: unless-stopped
+    labels:
+      kompose.service.type: nodeport
   server:
-    container_name: "tournament_server"
+    container_name: "tournament-server"
     network_mode: "host"
     build:
       context: ../../
       dockerfile: ./env/staging/Dockerfile
+    image: plagamedicum/tournament_server:tag
     ports:
       - "8080:8080"
-    depends_on:
-      - database
     restart: on-failure
+    #labels:
+    #  kompose.service.expose: "tournament.app.com"

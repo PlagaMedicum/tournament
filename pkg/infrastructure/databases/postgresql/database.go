@@ -67,6 +67,7 @@ type DB struct {
 	Host         string `yaml:"Host"`
 	Port         uint64 `yaml:"Port"`
 	Database     string `yaml:"Database"`
+	SSLMode		 string `yaml:"SSLMode"`
 	m            *migrate.Migrate
 }
 
@@ -88,10 +89,10 @@ func (db *DB) connect(dbName string) *sql.DB {
 	sqldb, err := sql.Open("pgx",
 		"user="+db.User+
 			" password="+db.Password+
-			" host="+db.Host+
+			""+db.Host+
 			" port="+strconv.FormatUint(db.Port, 10)+
 			" database="+dbName+
-			" sslmode=disable")
+			" sslmode="+db.SSLMode)
 	if err != nil {
 		log.Printf("Unable to open connection: " + err.Error())
 	}

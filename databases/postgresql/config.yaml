@@ -1,5 +1,6 @@
 User: "postgres"
 Password: "postgres"
-Host: "localhost"
+Host: " host=localhost"
 Port: 5432
 Database: "tournament_dev"
+SSLMode: "disable"

@@ -9,3 +9,4 @@ bin
 env/staging/databases/postgresql/data
 databases/postgresql/data
 vendor
+google_credentials.json
