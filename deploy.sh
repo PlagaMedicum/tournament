@@ -98,9 +98,9 @@ case "$1" in
   --help | -h)
     echo -e "A tool for deploying the application with kubernetes in gcloud.
 
-      \r  reset, -r     Take these steps: deleting deployment; building and docker images; creating deployment.
+      \r  reset, -r     Take these steps: delete deployment; build and pushing docker images; create deployment.
       \r  down, -d      Delete deployment only.
-      \r  up, -u        Take these steps: building and docker images; creating deployment.
+      \r  up, -u        Take these steps: build and docker images; create deployment.
       \r  build, -b     Build deployment only.
       \r  start, -s     Create deployment only.
       \r  info, -i      Get info about deployment(Deployment, SVC, PVC, Pods, Services).
