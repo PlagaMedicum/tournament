@@ -50,50 +50,78 @@ else
   CONFIG_PATH=$DEFAULT_CONFIG_PATH
 fi
 
-case "$1" in
-  reset | -r | down | -d)
-    echo -e "\e[1;32mINFO\e[0m Deleting deployment..."
-    kubectl delete -f $CONFIG_PATH
-    [ $? -eq 0 ] && echo -e "\e[1;32mINFO\e[0m Deployment deleted!" || echo -e "\e[1;33mWARN\e[0m Error from server! Maybe deployment already deleted."
-  ;;&
-  down | -d)
-  ;;
-  reset | -r | up | -u | build | -b)
-    echo -e "\e[1;32mINFO\e[0m Building container for \e[1m$SERVER_NAME\e[0m service..."
-    sudo rm -rf env/staging/databases/postgresql/data
-    docker-compose -f ./env/staging/docker-compose.yml down
-    docker-compose -f ./env/staging/docker-compose.yml build $SERVER_NAME
-    [ $? -eq 0 ] && echo -e "\e[1;32mINFO\e[0m Image building completed!" || echo -e "\e[1;33mWARN\e[0m Cannot build docker image, wrong exit code."
+down()
+{
+  echo -e "\e[1;32mINFO\e[0m Deleting deployment..."
+  kubectl delete -f $CONFIG_PATH
+  [ $? -eq 0 ] && echo -e "\e[1;32mINFO\e[0m Deployment deleted!" || echo -e "\e[1;33mWARN\e[0m Error from server! Maybe deployment already deleted."
+}
 
-    echo -e "\e[1;32mINFO\e[0m Pushing \e[1m$SERVER_IMAGE\e[0m image to \e[1mdocker.io\e[0m..."
-    docker push $SERVER_IMAGE
-    [ $? -eq 0 ] && echo -e "\e[1;32mINFO\e[0m Image pushing completed!" || echo -e "\e[1;33mWARN\e[0m Cannot push docker image, wrong exit code."
-  ;;&
-  build | -b)
-  ;;
-  reset | -r | up | -u | start | -s)
-    echo -e "\e[1;32mINFO\e[0m Deploying..."
-    kubectl create -f $CONFIG_PATH
-    if [ $? -eq 0 ]
-    then
+build()
+{
+  echo -e "\e[1;32mINFO\e[0m Building container for \e[1m$SERVER_NAME\e[0m service..."
+  sudo rm -rf env/staging/databases/postgresql/data
+  docker-compose -f ./env/staging/docker-compose.yml down
+  docker-compose -f ./env/staging/docker-compose.yml build $SERVER_NAME
+  [ $? -eq 0 ] && echo -e "\e[1;32mINFO\e[0m Image building completed!" || echo -e "\e[1;33mWARN\e[0m Cannot build docker image, wrong exit code."
+  
+  echo -e "\e[1;32mINFO\e[0m Pushing \e[1m$SERVER_IMAGE\e[0m image to \e[1mdocker.io\e[0m..."
+  docker push $SERVER_IMAGE
+  [ $? -eq 0 ] && echo -e "\e[1;32mINFO\e[0m Image pushing completed!" || echo -e "\e[1;33mWARN\e[0m Cannot push docker image, wrong exit code."
+}
+
+deploy()
+{
+  echo -e "\e[1;32mINFO\e[0m Deploying..."
+  kubectl create -f $CONFIG_PATH
+  if [ $? -eq 0 ]
+  then
       echo -e "\e[1;32mINFO\e[0m Deployed!"
-    else
+  else
       echo -e "\e[1;31mFATA\e[0m Deployment failed, wrong exit code!"
       exit 1
-    fi
-  ;;&
-  reset | -r | up | -u | start | -s | info | -i)
-    echo -e "\n\e[1;36mDeployment:\e[0m"
-    kubectl get deployment
-    echo -e "\e[1;36mSVC:\e[0m"
-    kubectl get svc
-    echo -e "\e[1;36mPVC:\e[0m"
-    kubectl get pvc
+  fi
+}
 
-    echo -e "\n\e[1;36mPODS:\e[0m"
-    kubectl get pods
-    echo -e "\n\e[1;36mServices:\e[0m"
-    kubectl get services
+info()
+{
+  echo -e "\n\e[1;36mDeployment:\e[0m"
+  kubectl get deployment
+  echo -e "\e[1;36mSVC:\e[0m"
+  kubectl get svc
+  echo -e "\e[1;36mPVC:\e[0m"
+  kubectl get pvc
+  
+  echo -e "\n\e[1;36mPODS:\e[0m"
+  kubectl get pods
+  echo -e "\n\e[1;36mServices:\e[0m"
+  kubectl get services
+}
+
+case "$1" in
+  down | -d)
+    down
+  ;;
+  build | -b)
+    build
+  ;;
+  info | -i)
+    info
+  ;;
+  reset | -r)
+    down
+    build
+    deploy
+    info
+  ;;
+  up | -u)
+    build
+    deploy
+    info
+  ;;
+  start | -s)
+    deploy
+    info
   ;;
   --help | -h)
     echo -e "A tool for deploying the application with kubernetes in gcloud.
