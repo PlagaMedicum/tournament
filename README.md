@@ -5,7 +5,7 @@ This is a RESTful web server with a
 implementation.  
 Created within the _ITechArt Golang Students Lab_.
 
-###Deployment
+### Deployment
 If you want to deploy this application both locally or in GCloud,
 you need to run the **_./deploy.sh_** script with flags.  
 See **_./deploy.sh --help_** for more information.
