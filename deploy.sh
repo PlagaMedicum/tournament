@@ -133,6 +133,7 @@ case "$1" in
       \r  start, -s     Create deployment only.
       \r  info, -i      Get info about deployment(Deployment, SVC, PVC, Pods, Services).
 
+      \rOptional:
       \r  -f [PATH]     Specify configuration path. \e[1m$DEFAULT_CONFIG_PATH\e[0m by default.
 
       \r  local, -l     Deploy containers locally.
