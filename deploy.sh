@@ -126,10 +126,10 @@ case "$1" in
   --help | -h)
     echo -e "A tool for deploying the application with kubernetes in gcloud.
 
-      \r  reset, -r     Take these steps: delete deployment; build and pushing docker images; create deployment.
+      \r  reset, -r     Take these steps: delete deployment; build and push server image; create deployment.
       \r  down, -d      Delete deployment only.
-      \r  up, -u        Take these steps: build and docker images; create deployment.
-      \r  build, -b     Build deployment only.
+      \r  up, -u        Take these steps: build and push server image; create deployment.
+      \r  build, -b     Build and push images for deployment only.
       \r  start, -s     Create deployment only.
       \r  info, -i      Get info about deployment(Deployment, SVC, PVC, Pods, Services).
 
@@ -139,7 +139,8 @@ case "$1" in
 
       \r  --help, -h    Get help and exit.
 
-      \rUsage: \e[1m./deploy.sh reset -f [PATH]\e[0m"
+      \rUsage: \e[1m./deploy.sh reset -f [PATH]\e[0m
+      \r       \e[1m./deploy.sh start\e[0m"
   ;;
 esac
 
