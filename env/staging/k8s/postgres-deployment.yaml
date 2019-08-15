@@ -1,0 +1,31 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: postgres-dep
+spec:
+  replicas: 2
+  template:
+    metadata:
+      name: postgres-pod
+      labels:
+        app: tournament
+        tier: postgres
+    spec:
+      containers:
+        - image: postgres:9.6
+          name: postgres-container
+          env:
+            - name: POSTGRES_DB
+              value: tournament
+            - name: POSTGRES_PASSWORD
+              value: postgres
+            - name: POSTGRES_USER
+              value: postgres
+          ports:
+            - containerPort: 5432
+      restartPolicy: Always
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1

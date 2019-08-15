@@ -7,5 +7,9 @@ Created within the _ITechArt Golang Students Lab_.
 
 ### Deployment
 If you want to deploy this application both locally or in GCloud,
-you need to run the **_./deploy.sh_** script with flags.  
-See **_./deploy.sh --help_** for more information.
+you need to run the `./deploy.sh` script with flags.  
+Following command will build docker-images and create a cluster with deployment:  
+```bash
+./deploy.sh up
+```
+See `./deploy.sh --help` for more information.

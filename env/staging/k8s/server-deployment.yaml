@@ -1,0 +1,26 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: server-dep
+spec:
+  replicas: 2
+  template:
+    metadata:
+      name: server-pod
+      labels:
+        app: tournament
+        tier: server
+    spec:
+      containers:
+        - image: plagamedicum/tournament_server:tag
+          name: server-container
+          imagePullPolicy: Always
+          ports:
+            - name: http-server
+              containerPort: 8080
+      restartPolicy: Always
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1

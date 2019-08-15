@@ -89,7 +89,7 @@ func (db *DB) connect(dbName string) *sql.DB {
 	sqldb, err := sql.Open("pgx",
 		"user="+db.User+
 			" password="+db.Password+
-			""+db.Host+
+			" host="+db.Host+
 			" port="+strconv.FormatUint(db.Port, 10)+
 			" database="+dbName+
 			" sslmode="+db.SSLMode)

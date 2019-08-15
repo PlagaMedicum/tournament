@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 if [ "$1" == "local" ] || [ "$1" == "-l" ]
 then
@@ -63,17 +63,38 @@ build()
   sudo rm -rf env/staging/databases/postgresql/data
   docker-compose -f ./env/staging/docker-compose.yml down
   docker-compose -f ./env/staging/docker-compose.yml build $SERVER_NAME
-  [ $? -eq 0 ] && echo -e "\e[1;32mINFO\e[0m Image building completed!" || echo -e "\e[1;33mWARN\e[0m Cannot build docker image, wrong exit code."
+  [ $? -eq 0 ] && echo -e "\n\e[1;32mINFO\e[0m Image building completed!" || echo -e "\n\e[1;33mWARN\e[0m Cannot build docker image, wrong exit code."
   
   echo -e "\e[1;32mINFO\e[0m Pushing \e[1m$SERVER_IMAGE\e[0m image to \e[1mdocker.io\e[0m..."
   docker push $SERVER_IMAGE
   [ $? -eq 0 ] && echo -e "\e[1;32mINFO\e[0m Image pushing completed!" || echo -e "\e[1;33mWARN\e[0m Cannot push docker image, wrong exit code."
 }
 
+CLUSTER_NAME=tournament-cluster
+SCOPE="cloud-platform"
+NUMBER_OF_NODES=2
+TIME_ZONE=europe-west3-b
 deploy()
 {
+  echo -e "\e[1;32mINFO\e[0m Creating cluster..."
+  gcloud container clusters create $CLUSTER_NAME \
+    --scopes $SCOPE \
+    --num-nodes $NUMBER_OF_NODES \
+    --enable-basic-auth \
+    --issue-client-certificate \
+    --enable-ip-alias \
+    --zone $TIME_ZONE
+  if [ $? -eq 0 ]
+  then
+    echo -e "\n\e[1;32mINFO\e[0m Cluster created!"
+    echo -e "\n\e[1;36mCluster list:\e[0m"
+    gcloud container clusters list
+  else
+    echo -e "\n\e[1;33mWARN\e[0m Cannot create cluster, wrong exit code. Maybe it already exists."
+  fi
+
   echo -e "\e[1;32mINFO\e[0m Deploying..."
-  kubectl create -f $CONFIG_PATH
+  kubectl create -f $CONFIG_PATH --record=true
   if [ $? -eq 0 ]
   then
       echo -e "\e[1;32mINFO\e[0m Deployed!"
@@ -93,7 +114,7 @@ info()
   kubectl get pvc
   
   echo -e "\n\e[1;36mPODS:\e[0m"
-  kubectl get pods
+  kubectl get pods --show-labels
   echo -e "\n\e[1;36mServices:\e[0m"
   kubectl get services
 }
