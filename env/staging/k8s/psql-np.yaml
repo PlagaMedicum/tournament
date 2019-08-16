@@ -1,7 +1,8 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: postgres-np
+  name: psql-np
+  namespace: production-cloud
 spec:
   type: NodePort
   ports:
@@ -11,4 +12,4 @@ spec:
       protocol: TCP
   selector:
     app: tournament
-    tier: postgres
+    tier: psql

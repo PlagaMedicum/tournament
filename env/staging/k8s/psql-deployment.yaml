@@ -1,19 +1,22 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: postgres-dep
+  name: psql-dep
+  labels:
+    service: psql-np
+  namespace: production-cloud
 spec:
   replicas: 2
   template:
     metadata:
-      name: postgres-pod
+      name: psql-pod
       labels:
         app: tournament
-        tier: postgres
+        tier: psql
     spec:
       containers:
-        - image: postgres:9.6
-          name: postgres-container
+        - name: psql-container
+          image: postgres:9.6
           env:
             - name: POSTGRES_DB
               value: tournament

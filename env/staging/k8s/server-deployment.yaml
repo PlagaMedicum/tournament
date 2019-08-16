@@ -2,6 +2,7 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: server-dep
+  namespace: production-cloud
 spec:
   replicas: 2
   template:
@@ -12,12 +13,12 @@ spec:
         tier: server
     spec:
       containers:
-        - image: plagamedicum/tournament_server:tag
-          name: server-container
-          imagePullPolicy: Always
+        - name: server-container
+          image: plagamedicum/tournament_server:tag
           ports:
             - name: http-server
               containerPort: 8080
+          imagePullPolicy: Always
       restartPolicy: Always
   strategy:
     type: RollingUpdate
