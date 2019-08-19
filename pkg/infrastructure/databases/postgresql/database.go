@@ -88,11 +88,11 @@ func (db *DB) readConfigFile() {
 func (db *DB) connect(dbName string) *sql.DB {
 	sqldb, err := sql.Open("pgx",
 		"user="+db.User+
-			" password="+db.Password+
-			" host="+db.Host+
-			" port="+strconv.FormatUint(db.Port, 10)+
-			" database="+dbName+
-			" sslmode="+db.SSLMode)
+		" password="+db.Password+
+		" host="+db.Host+
+		" port="+strconv.FormatUint(db.Port, 10)+
+		" database="+dbName+
+		" sslmode="+db.SSLMode)
 	if err != nil {
 		log.Printf("Unable to open connection: " + err.Error())
 	}

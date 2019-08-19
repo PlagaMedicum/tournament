@@ -26,9 +26,11 @@ spec:
               value: postgres
           ports:
             - containerPort: 5432
+          volumeMounts:
+            - name: psql-container-pvc
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: psql-container-pvc
+          persistentVolumeClaim:
+            claimName: psql-pvc
       restartPolicy: Always
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 1
-      maxSurge: 1

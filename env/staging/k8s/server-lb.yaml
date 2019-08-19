@@ -4,6 +4,7 @@ metadata:
   name: server-lb
 spec:
   type: LoadBalancer
+  loadBalancerIP: "35.246.171.29"
   ports:
     - port: 80
       targetPort: http-server

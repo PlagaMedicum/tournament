@@ -1,6 +1,6 @@
 User: "postgres"
 Password: "postgres"
-Host: "psql-np.production-cloud.svc.cluster.local"
+Host: "localhost"
 Port: 31727
 Database: "tournament"
 SSLMode: "disable"

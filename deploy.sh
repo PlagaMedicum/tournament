@@ -56,7 +56,7 @@ down()
   kubectl delete -f $CONFIG_PATH
   [ $? -eq 0 ] &&
   echo -e "\e[1;32mINFO\e[0m Deployment deleted!" ||
-  echo -e "\e[1;33mWARN\e[0m Error from server! Maybe deployment already deleted."
+  echo -e "\e[1;33mWARN\e[0m Error from server! Maybe some components already deleted."
 }
 
 build()
@@ -80,7 +80,6 @@ CLUSTER_NAME=tournament-cluster
 SCOPE="cloud-platform"
 NUMBER_OF_NODES=2
 TIME_ZONE=europe-west3-b
-NAMESPACE=production-cloud
 deploy()
 {
   echo -e "\e[1;32mINFO\e[0m Creating cluster..."
