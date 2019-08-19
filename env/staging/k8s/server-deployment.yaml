@@ -2,7 +2,6 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: server-dep
-  namespace: production-cloud
 spec:
   replicas: 2
   template:
