@@ -22,15 +22,12 @@ jobs:
   test:
     <<: *defaults
     steps:
-      - run: 
-          name: routers
-          command: go test -v -race pkg/controllers/api/routers/...
-      - run:
-          name: postgresql repository
-          command: go test -v -race pkg/controllers/repositories/postgresql/... -cwd="~/tournament"
-      - run:
-          name: usecases
-          command: go test -v -race pkg/usecases/...
+      - run: go test -v -race ./pkg/controllers/api/routers/tournament
+      - run: go test -v -race ./pkg/controllers/api/routers/user
+      - run: go test -v -race ./pkg/controllers/repositories/postgresql/tournament -cwd="~/tournament"
+      - run: go test -v -race ./pkg/controllers/repositories/postgresql/user -cwd="~/tournament"
+      - run: go test -v -race ./pkg/usecases/tournament
+      - run: go test -v -race ./pkg/usecases/user
 
 workflows:
   version: 2
