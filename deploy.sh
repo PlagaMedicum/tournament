@@ -113,10 +113,10 @@ deploy()
   kubectl create -f $CONFIG_PATH --record=true
   if [ $? -eq 0 ]
   then
-      echo -e "\n\e[1;32mINFO\e[0m Deployed!"
+    echo -e "\n\e[1;32mINFO\e[0m Deployed!"
   else
-      echo -e "\n\e[1;33mWARN\e[0m Deployment finished with wrong exit code! Some configurations was not applied."
-      exit 1
+    echo -e "\n\e[1;33mWARN\e[0m Deployment finished with wrong exit code! Some configurations was not applied."
+    exit 1
   fi
 
   mv env/staging/server-deployment.yaml ./env/staging/k8s/

@@ -13,9 +13,9 @@ you need to run the `./deploy.sh` script with flags.
 See `./deploy.sh --help` for more information.
 
 To deploy project in GCloud follow these steps:  
-First of all you will need to set the `PROJECT_ID` variable. See 
+First of all you will need to set the `PROJECT_ID` variable. Check 
 [this](https://cloud.google.com/resource-manager/docs/creating-managing-projects#identifying_projects)
-to get it.  
+for more information.  
 Then you need to run following command in your terminal:
 ```bash
 export PROJECT_ID=PASTE_YOUR_PROJECT_ID_HERE
