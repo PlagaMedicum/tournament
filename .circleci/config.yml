@@ -11,18 +11,32 @@ defaults: &defaults
         POSTGRES_DB: tournament_test
 
 jobs:
-  test:
+  build:
     <<: *defaults
     steps:
       - checkout
       - run: rm -rf ./databases
       - run: mv ./env/testing/databases ./databases
+      - run: go install tournament
+
+  test:
+    <<: *defaults
+    steps:
       - run: 
-          name: run
-          command: ./env/testing/run.sh
+          name: routers
+          command: go test -v -race ./pkg/controllers/api/routers/...
+      - run:
+          name: postgresql repository
+          command: go test -v -race ./pkg/controllers/repositories/postgresql/... -cwd="~/tournament"
+      - run:
+          name: usecases
+          command: go test -v -race ./pkg/usecases/...
 
 workflows:
   version: 2
   test:
     jobs:
-      - test
+      - build
+      - test:
+          requires:
+            - build
