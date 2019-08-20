@@ -109,8 +109,6 @@ func (db *DB) connect(dbName string) *sql.DB {
 
 	db.Conn.conn = conn
 
-	log.Printf("DB connected!")
-
 	return sqldb
 }
 
@@ -142,8 +140,6 @@ func (db *DB) MigrateTablesUp() {
 		log.Printf("Unexpected error trying to migrate up: " + err.Error())
 		return
 	}
-
-	log.Printf("PSQL tables migrated up.")
 }
 
 // MigrateTablesDown migrates DB's tables down.
@@ -153,8 +149,6 @@ func (db *DB) MigrateTablesDown() {
 		log.Printf("Unexpected error trying to migrate down: " + err.Error())
 		return
 	}
-
-	log.Printf("PSQL tables migrated down.")
 }
 
 // InitNewPostgresDB initialises new DB connection

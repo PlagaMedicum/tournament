@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/PlagaMedicum/tournament/tree/master.svg?style=svg)](https://circleci.com/gh/PlagaMedicum/tournament/tree/master)
+
 # Social tournament service
 
 This is a RESTful web server with a
@@ -34,22 +36,28 @@ and copy the value of `LoadBalancer Ingres: `.
 Then you can try to test some endpoints:
 * Create user:
 ```json
-//POST http://PASTE_SERVICE_IP_HERE/user
-//BODY:
+POST http://PASTE_SERVICE_IP_HERE/user
+BODY:
+
 {
     "name": "Daniil Dankovskij"
 }
-//Request BODY:
+
+Request BODY:
+
 {
     "id": 1
 }
 ```
 * Get User:
 ```json
-//GET http://PASTE_SERVICE_IP_HERE/user/1
-//BODY:
+GET http://PASTE_SERVICE_IP_HERE/user/1
+BODY:
+
 NONE
-//Request BODY:
+
+Request BODY:
+
 {
     "id": 1,
     "name": ​"Daniil Dankovskij",

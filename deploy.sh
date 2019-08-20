@@ -106,7 +106,8 @@ deploy()
     echo -e "\n\e[1;33mWARN\e[0m Cannot create cluster, wrong exit code. Maybe it already exists."
   fi
 
-  sed -e "s/PROJECT_ID_WILL_APEAR_HERE/$PROJECT_ID/g" -i env/staging/k8s/server-deployment.yaml
+  sed -e "s/ image: gcr.io\/[0-9a-zA-Z:_\/]\+/ image: $SERVER_IMAGE/g" env/staging/k8s/server-deployment.yaml > env/staging/k8s/server-deployment-sed.yaml
+  mv env/staging/k8s/server-deployment.yaml ./env/staging/
 
   echo -e "\e[1;32mINFO\e[0m Deploying...\n"
   kubectl create -f $CONFIG_PATH --record=true
@@ -117,6 +118,9 @@ deploy()
       echo -e "\n\e[1;33mWARN\e[0m Deployment finished with wrong exit code! Some configurations was not applied."
       exit 1
   fi
+
+  mv env/staging/server-deployment.yaml ./env/staging/k8s/
+  rm -rf env/staging/k8s/server-deployment-sed.yaml
 }
 
 info()

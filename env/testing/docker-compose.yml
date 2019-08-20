@@ -18,7 +18,7 @@ services:
     build:
       context: ../../
       dockerfile: ./env/testing/Dockerfile
-    image: plagamedicum/tournament_test_server:tag
+    image: plagamedicum/tournament_test_server:notag
     ports:
       - "8080:8080"
     depends_on:

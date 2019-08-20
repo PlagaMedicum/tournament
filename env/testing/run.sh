@@ -3,6 +3,8 @@
 echo Installing packages...
 go install tournament
 
+sleep 1
+
 echo Testing application...
 go test -v -race ./pkg/controllers/api/routers/tournament
 go test -v -race ./pkg/controllers/api/routers/user
