@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
         - name: server-container
-          image: plagamedicum/tournament_server:tag
+          image: gcr.io/PROJECT_ID_WILL_APEAR_HERE/tournament_server:notag
           imagePullPolicy: Always
           ports:
             - name: server-port

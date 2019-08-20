@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+PROJECT_DIR=$PWD
+
 if [ "$1" == "local" ] || [ "$1" == "-l" ]
 then
   case "$2" in
@@ -38,9 +40,6 @@ fi
 
 export GOOGLE_APPLICATION_CREDENTIALS=./google_credentials.json
 
-SERVER_NAME=server
-SERVER_IMAGE=plagamedicum/tournament_server:tag
-
 DEFAULT_CONFIG_PATH=./env/staging/k8s/
 if [ "$2" == "-f" ]
 then
@@ -59,10 +58,15 @@ down()
   echo -e "\n\e[1;33mWARN\e[0m Error from server! Maybe some components already deleted."
 }
 
+SERVER_NAME=server
+SERVER_IMAGE=gcr.io/$PROJECT_ID/tournament_server:notag
 build()
 {
-  echo -e "\e[1;32mINFO\e[0m Building container for \e[1m$SERVER_NAME\e[0m service...\n"
   sudo rm -rf env/staging/databases/postgresql/data
+  sudo rm -rf env/testing/databases/postgresql/data
+  sudo rm -rf databases/postgresql/data
+
+  echo -e "\e[1;32mINFO\e[0m Building container for \e[1m$SERVER_NAME\e[0m service...\n"
   docker-compose -f ./env/staging/docker-compose.yml down
   docker-compose -f ./env/staging/docker-compose.yml build $SERVER_NAME
   [ $? -eq 0 ] &&
@@ -82,6 +86,9 @@ NUMBER_OF_NODES=2
 TIME_ZONE=europe-west3-b
 deploy()
 {
+  gcloud config set project $PROJECT_ID
+  gcloud config set compute/zone $TIME_ZONE
+
   echo -e "\e[1;32mINFO\e[0m Creating cluster...\n"
   gcloud container clusters create $CLUSTER_NAME \
     --scopes $SCOPE \
@@ -98,6 +105,8 @@ deploy()
   else
     echo -e "\n\e[1;33mWARN\e[0m Cannot create cluster, wrong exit code. Maybe it already exists."
   fi
+
+  sed -e "s/PROJECT_ID_WILL_APEAR_HERE/$PROJECT_ID/g" -i env/staging/k8s/server-deployment.yaml
 
   echo -e "\e[1;32mINFO\e[0m Deploying...\n"
   kubectl create -f $CONFIG_PATH --record=true
@@ -132,6 +141,12 @@ start()
   info
 }
 
+annihilate()
+{
+    down
+    gcloud container clusters delete $CLUSTER_NAME
+}
+
 case "$1" in
   down | -d)
     down
@@ -154,22 +169,26 @@ case "$1" in
   start | -s)
     start
   ;;
+  annihilate | -a)
+    annihilate
+  ;;
   --help | -h)
     echo -e "A tool for deploying the application with kubernetes in gcloud.
 
-      \r  reset, -r     Take these steps: delete deployment; build and push server image; create cluster(if not created yet) with deployment.
-      \r  down, -d      Delete deployment only.
-      \r  up, -u        Take these steps: build and push server image; create cluster(if not created yet) with deployment.
-      \r  build, -b     Build and push images for deployment only.
-      \r  start, -s     Create cluster(if not created yet) with deployment.
-      \r  info, -i      Get info about deployment(Deployment, SVC, PVC, Pods, Services).
+      \r  reset, -r       Take these steps: delete deployment; build and push server image; create cluster(if not created yet) with deployment.
+      \r  down, -d        Delete deployment only.
+      \r  up, -u          Take these steps: build and push server image; create cluster(if not created yet) with deployment.
+      \r  build, -b       Build and push images for deployment only.
+      \r  start, -s       Create cluster(if not created yet) with deployment.
+      \r  info, -i        Get info about deployment(Deployment, SVC, PVC, Pods, Services).
+      \r  annihilate, -a  Delete deployment and cluster.
 
       \rOptional:
-      \r  -f [PATH]     Specify configuration path. \e[1m$DEFAULT_CONFIG_PATH\e[0m by default.
+      \r  -f [PATH]       Specify configuration path. \e[1m$DEFAULT_CONFIG_PATH\e[0m by default.
 
-      \r  local, -l     Deploy containers locally.
+      \r  local, -l       Deploy containers locally.
 
-      \r  --help, -h    Get help and exit.
+      \r  --help, -h      Get help and exit.
 
       \rUsage: \e[1m./deploy.sh reset -f [PATH]\e[0m
       \r       \e[1m./deploy.sh start\e[0m"

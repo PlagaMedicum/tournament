@@ -32,7 +32,9 @@ func (c Controller) CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 
-	err = json.NewEncoder(w).Encode(u.ID)
+	type resp struct{ ID uint64 `json:"id"` }
+
+	err = json.NewEncoder(w).Encode(resp{ID: u.ID})
 	if err != nil {
 		errors.HandleJSONErr(err, w)
 		return

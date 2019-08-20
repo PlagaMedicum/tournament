@@ -32,7 +32,9 @@ func (c Controller) CreateTournamentHandler(w http.ResponseWriter, r *http.Reque
 
 	w.WriteHeader(http.StatusCreated)
 
-	err = json.NewEncoder(w).Encode(t.ID)
+	type resp struct{ ID uint64 `json:"id"` }
+
+	err = json.NewEncoder(w).Encode(resp{ID: t.ID})
 	if err != nil {
 		errors.HandleJSONErr(err, w)
 		return

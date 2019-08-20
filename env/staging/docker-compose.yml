@@ -17,7 +17,7 @@ services:
     build:
       context: ../../
       dockerfile: ./env/staging/Dockerfile
-    image: plagamedicum/tournament_server:tag
+    image: gcr.io/${PROJECT_ID}/tournament_server:notag
     container_name: "tournament-server"
     network_mode: "host"
     ports:
