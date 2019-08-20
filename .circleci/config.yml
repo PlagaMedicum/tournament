@@ -40,7 +40,7 @@ jobs:
             - go-mod-{{ checksum "go.sum" }}
       - run: rm -rf ./databases
       - run: mv ./env/testing/databases ./databases
-      - run: go test -v -coverprofile=coverage.out -race ./...
+      - run: export CUR_DIR=$PWD && go test -v -coverprofile=coverage.out -race ./... -cwd="$CUR_DIR"
       - codecov/upload:
           file: 'coverage.out'
 
