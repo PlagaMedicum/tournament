@@ -1,5 +1,26 @@
 version: 2.1
 
-jobs:
+defaults: &defaults
+  working_directory: /go/src/tournament
   docker:
+    - image: circleci/golang:1.12
+    - image: circleci/postgres:9.6
+    environment:
+        POSTGRES_USER: postgres
+        POSTGRES_DB: tournament_test
 
+jobs:
+  test:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: /
+      - run:
+          name: test all
+          command: ./deploy.sh -l -t
+
+workflows:
+  version: 2
+  test:
+    jobs:
+      - test
