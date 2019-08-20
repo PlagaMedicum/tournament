@@ -14,8 +14,11 @@ jobs:
     <<: *defaults
     steps:
       - run:
-          name: test all
-          command: ls -a
+          name: echo
+          command: echo $PWD
+      - run:
+          name: ls
+          command: ls -a /
 
 workflows:
   version: 2
