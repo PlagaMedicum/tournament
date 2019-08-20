@@ -18,7 +18,10 @@ jobs:
           command: echo $PWD
       - run:
           name: ls
-          command: ls -a /
+          command: ls -a /home/circleci
+      - run:
+          name: lss
+          command: ls -a /home/circleci/tournament
       - run:
           name: deploy
           command: ./deploy.sh -l -t
