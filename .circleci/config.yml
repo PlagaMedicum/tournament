@@ -15,13 +15,29 @@ jobs:
     <<: *defaults
     steps:
       - checkout
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - tournament
+      - restore_cache:
+          keys:
+            - go-mod-{{ checksum "go.sum" }}
       - run: rm -rf ./databases
       - run: mv ./env/testing/databases ./databases
       - run: go install tournament
+      - save_cache:
+          key: go-mod-{{ checksum "go.sum" }}
+          paths:
+            - '/go/pkg/mod'
 
   test:
     <<: *defaults
     steps:
+      - attach_workspace:
+            at: ~/
+      - restore_cache:
+          keys:
+            - go-mod-{{ checksum "go.sum" }}
       - run: go test -v -race ./pkg/controllers/api/routers/tournament
       - run: go test -v -race ./pkg/controllers/api/routers/user
       - run: go test -v -race ./pkg/controllers/repositories/postgresql/tournament -cwd="~/tournament"
