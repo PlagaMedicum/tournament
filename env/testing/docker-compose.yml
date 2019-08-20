@@ -1,7 +1,7 @@
 version: "3"
 services:
   database:
-    image: postgres
+    image: postgres:9.6
     container_name: "tournament-test-db"
     ports:
       - "5432:5432"
