@@ -13,10 +13,9 @@ jobs:
   test:
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: /
       - run:
           name: test all
+          command: ls -a
           command: ./deploy.sh -l -t
 
 workflows:
