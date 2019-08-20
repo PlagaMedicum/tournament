@@ -41,7 +41,7 @@ jobs:
       - run: rm -rf ./databases
       - run: mv ./env/testing/databases ./databases
       - run: echo $PWD
-      - run: go test -v -coverprofile=coverage.out -race ./... -cwd="$PWD"
+      - run: go test -v -coverprofile=coverage.out -race ./... -cwd="~/tournament"
       - codecov/upload:
           file: 'coverage.out'
 
