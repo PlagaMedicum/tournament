@@ -1,4 +1,6 @@
 version: 2
+orbs:
+  codecov: codecov/codecov@1.0.4
 
 defaults: &defaults
   working_directory: ~/tournament
@@ -38,12 +40,9 @@ jobs:
             - go-mod-{{ checksum "go.sum" }}
       - run: rm -rf ./databases
       - run: mv ./env/testing/databases ./databases
-      - run: go test -v -race ./pkg/controllers/api/routers/tournament
-      - run: go test -v -race ./pkg/controllers/api/routers/user
-      - run: go test -v -race ./pkg/controllers/repositories/postgresql/tournament -cwd="../../../../.."
-      - run: go test -v -race ./pkg/controllers/repositories/postgresql/user -cwd="../../../../.."
-      - run: go test -v -race ./pkg/usecases/tournament
-      - run: go test -v -race ./pkg/usecases/user
+      - run: go test -v -coverprofile=coverage.out -race ./...
+      - codecov/upload:
+          file: 'coverage.out'
 
 workflows:
   version: 2
