@@ -24,13 +24,13 @@ jobs:
     steps:
       - run: 
           name: routers
-          command: go test -v -race ./pkg/controllers/api/routers/...
+          command: go test -v -race pkg/controllers/api/routers/...
       - run:
           name: postgresql repository
-          command: go test -v -race ./pkg/controllers/repositories/postgresql/... -cwd="~/tournament"
+          command: go test -v -race pkg/controllers/repositories/postgresql/... -cwd="~/tournament"
       - run:
           name: usecases
-          command: go test -v -race ./pkg/usecases/...
+          command: go test -v -race pkg/usecases/...
 
 workflows:
   version: 2
