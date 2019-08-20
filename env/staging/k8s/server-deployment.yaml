@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: server-dep
 spec:
-  replicas: 2
+  replicas: 1
   template:
     metadata:
       name: server-pod
@@ -14,8 +14,13 @@ spec:
       containers:
         - name: server-container
           image: plagamedicum/tournament_server:tag
-          ports:
-            - name: http-server
-              containerPort: 8080
           imagePullPolicy: Always
+          ports:
+            - name: server-port
+              containerPort: 8080
       restartPolicy: Always
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1

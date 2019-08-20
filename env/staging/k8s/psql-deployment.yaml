@@ -2,16 +2,14 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: psql-dep
-  labels:
-    service: psql-np
 spec:
-  replicas: 2
+  replicas: 1
   template:
     metadata:
       name: psql-pod
       labels:
         app: tournament
-        tier: psql
+        tier: psql-db
     spec:
       containers:
         - name: psql-container
@@ -23,6 +21,17 @@ spec:
               value: postgres
             - name: POSTGRES_USER
               value: postgres
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 5432
+            - name: psql-db-port
+              containerPort: 5432
+          volumeMounts:
+            - name: psql-vol
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: psql-vol
+          persistentVolumeClaim:
+            claimName: psql-pvc
       restartPolicy: Always

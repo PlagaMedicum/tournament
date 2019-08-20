@@ -1,6 +1,6 @@
 User: "postgres"
 Password: "postgres"
-Host: "localhost"
-Port: 31727
+Host: "10.48.9.227"
+Port: 5432
 Database: "tournament"
 SSLMode: "disable"
