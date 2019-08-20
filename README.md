@@ -1,4 +1,5 @@
 [![CircleCI](https://circleci.com/gh/PlagaMedicum/tournament/tree/master.svg?style=svg)](https://circleci.com/gh/PlagaMedicum/tournament/tree/master)
+[![codecov](https://codecov.io/gh/PlagaMedicum/tournament/branch/master/graph/badge.svg)](https://codecov.io/gh/PlagaMedicum/tournament)
 
 # Social tournament service
 
@@ -20,7 +21,11 @@ Then you need to run following command in your terminal:
 ```bash
 export PROJECT_ID=PASTE_YOUR_PROJECT_ID_HERE
 ```
-Following command will build all of project's images and create a cluster with deployment:  
+After this you'll need to create `google_credentials.json` file. Check
+[this](https://cloud.google.com/docs/authentication/production#obtaining_and_providing_service_account_credentials_manually)
+for more information.
+
+Finally, following command will build all of project's images and create a cluster with deployment:  
 ```bash
 ./deploy.sh up
 ```
