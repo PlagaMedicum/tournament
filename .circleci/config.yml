@@ -16,7 +16,6 @@ jobs:
       - run:
           name: test all
           command: ls -a
-          command: ./deploy.sh -l -t
 
 workflows:
   version: 2
