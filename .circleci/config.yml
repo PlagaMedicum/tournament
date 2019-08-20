@@ -4,15 +4,20 @@ defaults: &defaults
   working_directory: ~/tournament
   docker:
     - image: circleci/golang:1.12-stretch
+    - image: circleci/postges:9.6
+      environment:
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: postgres
+        POSTGRES_DB: tournament_test
 
 jobs:
   test:
     <<: *defaults
     steps:
       - checkout
-      - run:
-          name: deploy
-          command: ./deploy.sh -l -t
+      - run: 
+          name: run
+          command: ./env/testing/run.sh
 
 workflows:
   version: 2
