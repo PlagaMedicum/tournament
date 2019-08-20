@@ -40,8 +40,8 @@ jobs:
       - run: mv ./env/testing/databases ./databases
       - run: go test -v -race ./pkg/controllers/api/routers/tournament
       - run: go test -v -race ./pkg/controllers/api/routers/user
-      - run: go test -v -race ./pkg/controllers/repositories/postgresql/tournament -cwd="~/"
-      - run: go test -v -race ./pkg/controllers/repositories/postgresql/user -cwd="~/"
+      - run: go test -v -race ./pkg/controllers/repositories/postgresql/tournament -cwd="../../../../.."
+      - run: go test -v -race ./pkg/controllers/repositories/postgresql/user -cwd="../../../../.."
       - run: go test -v -race ./pkg/usecases/tournament
       - run: go test -v -race ./pkg/usecases/user
 
