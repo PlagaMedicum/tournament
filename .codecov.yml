@@ -1,0 +1,10 @@
+comment: off
+
+coverage:
+  status:
+    patch:
+      default:
+        enabled: no
+    project:
+      default:
+        enabled: no
