@@ -1,4 +1,4 @@
-FROM golang AS builder
+FROM golang:1.12 AS builder
 WORKDIR /go/src/tournament/
 COPY main.go .
 COPY vendor ./vendor
