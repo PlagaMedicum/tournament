@@ -2,6 +2,8 @@ version: 2
 
 defaults: &defaults
   working_directory: /tournament
+  docker:
+    - image: circleci/golang:1.12-stretch
 
 jobs:
   test:
