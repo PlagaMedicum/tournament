@@ -1,27 +1,13 @@
-version: 2.1
+version: 2
 
 defaults: &defaults
-  working_directory: ~/tournament
-  docker:
-    - image: circleci/golang:1.12
-    - image: circleci/postgres:9.6
-      environment:
-        POSTGRES_USER: postgres
-        POSTGRES_DB: tournament_test
+  working_directory: /tournament
 
 jobs:
   test:
     <<: *defaults
     steps:
-      - run:
-          name: echo
-          command: echo $PWD
-      - run:
-          name: ls
-          command: ls -a /home/circleci
-      - run:
-          name: lss
-          command: ls -a /home/circleci/tournament
+      - checkout
       - run:
           name: deploy
           command: ./deploy.sh -l -t
