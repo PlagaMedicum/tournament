@@ -59,7 +59,7 @@ down()
 }
 
 SERVER_NAME=server
-SERVER_IMAGE=gcr.io/$PROJECT_ID/tournament_server:notag
+export SERVER_IMAGE=gcr.io/$PROJECT_ID/tournament_server:notag
 build()
 {
   sudo rm -rf env/staging/databases/postgresql/data
@@ -106,7 +106,7 @@ deploy()
     echo -e "\n\e[1;33mWARN\e[0m Cannot create cluster, wrong exit code. Maybe it already exists."
   fi
 
-  sed -e "s/ image: gcr.io\/[0-9a-zA-Z:_\/]\+/ image: $SERVER_IMAGE/g" env/staging/k8s/server-deployment.yaml > env/staging/k8s/server-deployment-sed.yaml
+  sed -e "s#image: gcr.io\/[0-9a-zA-Z:_\/]\+#image: $SERVER_IMAGE#g" env/staging/k8s/server-deployment.yaml > env/staging/k8s/server-deployment-sed.yaml
   mv env/staging/k8s/server-deployment.yaml ./env/staging/
 
   echo -e "\e[1;32mINFO\e[0m Deploying...\n"

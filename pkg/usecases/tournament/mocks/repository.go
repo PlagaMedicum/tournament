@@ -6,6 +6,7 @@ import (
 	"tournament/pkg/domain/user"
 )
 
+// MockedRepository is mock for postgresql.tournament.Repository interface.
 type MockedRepository struct {
 	mock.Mock
 }

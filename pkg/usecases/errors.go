@@ -2,6 +2,7 @@ package usecases
 
 import "errors"
 
+// Specific errors for usecases
 var (
 	ErrNotEnoughPoints    = errors.New("user have not enough points to join the tournament")
 	ErrParticipantExists  = errors.New("this user already joined the tournament")

@@ -6,6 +6,7 @@ import (
 	"tournament/pkg/domain/user"
 )
 
+// Controller contains an implementation of postgresql.Database interface.
 type Controller struct {
 	postgresql.Database
 }

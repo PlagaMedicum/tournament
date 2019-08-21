@@ -5,6 +5,8 @@ import (
 	"tournament/pkg/domain/user"
 )
 
+// Repository is interface of database repository methods
+// used in tournament usecases.
 type Repository interface {
 	GetUsers() ([]user.User, error)
 	GetUserByID(uint64) (user.User, error)

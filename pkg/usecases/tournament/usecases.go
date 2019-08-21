@@ -8,6 +8,7 @@ import (
 
 const defaultPrize = 4000
 
+// Controller contains an implementation of postgres.tournament.Repository interface.
 type Controller struct {
 	Repository
 }

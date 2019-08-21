@@ -6,6 +6,7 @@ import (
 
 const defaultBalance = 700
 
+// Controller contains an implementation of postgres.user.Repository interface.
 type Controller struct {
 	Repository
 }

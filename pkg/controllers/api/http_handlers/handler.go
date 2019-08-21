@@ -5,6 +5,7 @@ import (
 	"strconv"
 )
 
+// A list of paths used in http endpoints.
 const (
 	UserPath             = "/user"
 	TakingPointsPath     = "/take"

@@ -5,6 +5,7 @@ import (
 	"tournament/pkg/domain/user"
 )
 
+// MockedUsecases is mock for user.Usecases interface.
 type MockedUsecases struct {
 	mock.Mock
 }

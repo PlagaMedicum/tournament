@@ -10,6 +10,7 @@ import (
 	"tournament/pkg/infrastructure/handler"
 )
 
+// TestCase contains all necessary information for test cases.
 type TestCase struct {
 	CaseName      string
 	Path          string
@@ -26,6 +27,7 @@ type TestCase struct {
 	ResStatus     int
 }
 
+// Handle analyses and prints results of running a test case.
 func (tc *TestCase) Handle(t *testing.T, h *handler.Handler) {
 	r, err := http.NewRequest(
 		tc.Method, tc.Path, bytes.NewBuffer([]byte(tc.ReqBody)))

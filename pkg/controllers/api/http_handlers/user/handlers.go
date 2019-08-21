@@ -8,6 +8,7 @@ import (
 	errors "tournament/pkg/infrastructure/err"
 )
 
+// Controller contains an implementation of user.Usecases interface.
 type Controller struct {
 	Usecases
 }

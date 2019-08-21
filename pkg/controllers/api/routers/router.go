@@ -1,4 +1,4 @@
 package routers
 
-// Regular expression for ID.
+// Regex is regular expression for ID.
 const Regex = "/[0-9]+"

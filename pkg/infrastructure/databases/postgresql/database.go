@@ -6,10 +6,12 @@ import (
 	"github.com/go-yaml/yaml"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
+	// needed for postgresql db migrations.
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jackc/pgx"
 	"github.com/jackc/pgx/stdlib"
+	// needed for postgresql db migrations.
 	_ "github.com/lib/pq"
 	"io/ioutil"
 	"log"
@@ -55,6 +57,10 @@ func (c conn) ErrNoRows() error {
 	return pgx.ErrNoRows
 }
 
+// DB composed of:
+// 1. Conn, that serves postgresql queries for db;
+// 2. Connection configuration;
+// 3. Migration reader.
 type DB struct {
 	Conn         conn
 	User         string `yaml:"User"`
@@ -129,6 +135,8 @@ func (db *DB) createNewMigration(sqldb *sql.DB, path string) {
 	}
 }
 
+// MigrateTablesUp reads 'up' migrations for db tables
+// and migrate if newer versions present.
 func (db *DB) MigrateTablesUp() {
 	err := db.m.Up()
 	if err != nil && err != migrate.ErrNoChange {
@@ -137,7 +145,8 @@ func (db *DB) MigrateTablesUp() {
 	}
 }
 
-// MigrateTablesDown migrates DB's tables down.
+// MigrateTablesDown reads 'down' migrations for db tables
+// and migrate if older versions present.
 func (db *DB) MigrateTablesDown() {
 	err := db.m.Down()
 	if err != nil && err != migrate.ErrNoChange {
