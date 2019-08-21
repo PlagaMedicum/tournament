@@ -106,7 +106,15 @@ deploy()
     echo -e "\n\e[1;33mWARN\e[0m Cannot create cluster, wrong exit code. Maybe it already exists."
   fi
 
+  echo -e "\e[1;32mINFO\e[0m Preparing configuration files...\n"
   sed -e "s#image: gcr.io\/[0-9a-zA-Z:_\/]\+#image: $SERVER_IMAGE#g" env/staging/k8s/server-deployment.yaml > env/staging/k8s/server-deployment-sed.yaml
+  if [ $? -eq 0 ]
+  then
+    echo -e "\n\e[1;32mINFO\e[0m Configuration files ready!"
+  else
+    echo -e "\n\e[1;31mFATA\e[0m Something wrong with sed. Cannot change update server image for kubernetes configurations."
+    exit 1
+  fi
   mv env/staging/k8s/server-deployment.yaml ./env/staging/
 
   echo -e "\e[1;32mINFO\e[0m Deploying...\n"
@@ -115,7 +123,7 @@ deploy()
   then
     echo -e "\n\e[1;32mINFO\e[0m Deployed!"
   else
-    echo -e "\n\e[1;33mWARN\e[0m Deployment finished with wrong exit code! Some configurations was not applied."
+    echo -e "\n\e[1;31mFATA\e[0m Deployment finished with wrong exit code! Some configurations was not applied."
     exit 1
   fi
 
