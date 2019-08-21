@@ -1,7 +1,3 @@
-drop table if exists users;
-drop table if exists tournaments;
-drop table if exists participants;
-
 create table if not exists users(
     id serial constraint user_pk primary key,
     name text not null,
