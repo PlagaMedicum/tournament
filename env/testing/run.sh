@@ -6,11 +6,7 @@ go install tournament
 sleep 1
 
 echo Testing application...
-go test -v -race ./pkg/controllers/api/routers/tournament
-go test -v -race ./pkg/controllers/api/routers/user
-go test -v -race ./pkg/controllers/repositories/postgresql/tournament -cwd="/go/src/tournament"
-go test -v -race ./pkg/controllers/repositories/postgresql/user -cwd="/go/src/tournament"
-go test -v -race ./pkg/usecases/tournament
-go test -v -race ./pkg/usecases/user
+export CWD=$PWD
+go test -v -race ./...
 
 echo 0

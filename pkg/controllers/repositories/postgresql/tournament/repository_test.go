@@ -6,6 +6,7 @@ import (
 	"tournament/pkg/controllers/repositories/postgresql/user"
 	"tournament/pkg/domain/tournament"
 	userDomain "tournament/pkg/domain/user"
+	_ "tournament/pkg/infrastructure/databases/postgresql"
 	database "tournament/pkg/infrastructure/databases/postgresql"
 )
 

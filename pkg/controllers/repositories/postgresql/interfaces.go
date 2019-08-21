@@ -10,7 +10,6 @@ type Rows interface {
 }
 
 type Database interface {
-	// TODO: Get rid of QueryRow?
 	QueryRow(string, ...interface{}) Row
 	Query(string, ...interface{}) (Rows, error)
 	Exec(string, ...interface{}) (interface{}, error)

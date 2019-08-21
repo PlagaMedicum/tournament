@@ -10,6 +10,7 @@ import (
 	tournamentRepository "tournament/pkg/controllers/repositories/postgresql/tournament"
 	userRepository "tournament/pkg/controllers/repositories/postgresql/user"
 	"tournament/pkg/infrastructure/databases/postgresql"
+	_ "tournament/pkg/infrastructure/databases/postgresql"
 	"tournament/pkg/infrastructure/handler"
 	tournamentUsecases "tournament/pkg/usecases/tournament"
 	userUsecases "tournament/pkg/usecases/user"

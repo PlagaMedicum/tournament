@@ -2,7 +2,6 @@ package postgresql
 
 import (
 	"database/sql"
-	"flag"
 	"fmt"
 	"github.com/go-yaml/yaml"
 	"github.com/golang-migrate/migrate/v4"
@@ -24,16 +23,12 @@ const (
 	configurationFilePath = "./databases/postgresql/config.yaml"
 )
 
-var (
-	cwd_arg = flag.String("cwd", "", "set cwd")
-)
 
 // init changes current working directory with provided by
-// "-cwd" flag.
+// $CWD environment variable.
 func init() {
-	flag.Parse()
-	if *cwd_arg != "" {
-		err := os.Chdir(*cwd_arg)
+	if os.Getenv("CWD") != "" {
+		err := os.Chdir(os.Getenv("CWD"))
 		if err != nil {
 			fmt.Println("Chdir error:", err)
 		}
