@@ -84,7 +84,7 @@ func (c *Controller) findWinner(participantIDs []uint64) (user.User, error) {
 		return user.User{}, err
 	}
 
-	winner := user.User{ID: 0}
+	winner := user.User{}
 	for _, pid := range participantIDs {
 		for _, u := range users {
 			if (u.ID != pid) || (u.Balance < winner.Balance) {
