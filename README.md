@@ -1,7 +1,9 @@
+# Social tournament service
+
 [![CircleCI](https://circleci.com/gh/PlagaMedicum/tournament/tree/master.svg?style=svg)](https://circleci.com/gh/PlagaMedicum/tournament/tree/master)
 [![codecov](https://codecov.io/gh/PlagaMedicum/tournament/branch/master/graph/badge.svg)](https://codecov.io/gh/PlagaMedicum/tournament)
-
-# Social tournament service
+[![Go Report Card](https://goreportcard.com/badge/github.com/PlagaMedicum/tournament)](https://goreportcard.com/report/github.com/PlagaMedicum/tournament)
+[![License](https://img.shields.io/github/license/PlagaMedicum/tournament.svg)](https://github.com/PlagaMedicum/tournament/blob/master/LICENSE)
 
 This is a RESTful web server with a
 [social tournament service](https://gist.github.com/sashayakovtseva/ed84bb13fbdfd8ef43bf0229108ace78)
